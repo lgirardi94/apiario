@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Il Mio Apiario</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   :root {
     --amber: #C8860A;
@@ -654,10 +655,20 @@
 
 <!-- BACKUP BAR -->
 <div id="backupBar" style="background:var(--dark);border-bottom:1px solid rgba(200,134,10,0.3);padding:0.55rem 1.2rem;display:flex;align-items:center;gap:0.8rem;flex-wrap:wrap;justify-content:space-between;position:relative;z-index:99">
-  <span style="color:rgba(251,245,230,0.55);font-size:0.82rem;font-style:italic;font-family:'Crimson Pro',serif">💾 Backup dati</span>
-  <div style="display:flex;gap:0.6rem;flex-wrap:wrap">
-    <button onclick="exportJSON()" style="background:transparent;border:1px solid rgba(200,134,10,0.5);color:var(--amber-glow);padding:0.3rem 0.9rem;border-radius:2px;cursor:pointer;font-family:'Crimson Pro',serif;font-size:0.85rem;transition:all 0.2s" onmouseover="this.style.background='rgba(200,134,10,0.2)'" onmouseout="this.style.background='transparent'">⬇ Esporta JSON</button>
-    <label style="background:transparent;border:1px solid rgba(200,134,10,0.5);color:var(--amber-glow);padding:0.3rem 0.9rem;border-radius:2px;cursor:pointer;font-family:'Crimson Pro',serif;font-size:0.85rem;transition:all 0.2s" onmouseover="this.style.background='rgba(200,134,10,0.2)'" onmouseout="this.style.background='transparent'">
+  <div style="display:flex;align-items:center;gap:0.8rem">
+    <span id="driveStatus" style="color:rgba(251,245,230,0.55);font-size:0.82rem;font-style:italic;font-family:'Crimson Pro',serif">☁️ Google Drive: non connesso</span>
+    <button id="btnDriveLogin" onclick="driveLogin()" style="background:white;border:none;color:#333;padding:0.25rem 0.8rem;border-radius:2px;cursor:pointer;font-family:'Crimson Pro',serif;font-size:0.82rem;display:flex;align-items:center;gap:0.4rem">
+      <svg width="14" height="14" viewBox="0 0 48 48"><path fill="#4285F4" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#34A853" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#EA4335" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      Accedi con Google
+    </button>
+    <button id="btnDriveLogout" onclick="driveLogout()" style="display:none;background:transparent;border:1px solid rgba(200,134,10,0.4);color:rgba(251,245,230,0.6);padding:0.25rem 0.7rem;border-radius:2px;cursor:pointer;font-family:'Crimson Pro',serif;font-size:0.78rem">Disconnetti</button>
+  </div>
+  <div style="display:flex;gap:0.6rem;flex-wrap:wrap;align-items:center">
+    <button id="btnDriveSave" onclick="driveSave()" style="display:none;background:transparent;border:1px solid rgba(200,134,10,0.5);color:var(--amber-glow);padding:0.3rem 0.9rem;border-radius:2px;cursor:pointer;font-family:'Crimson Pro',serif;font-size:0.85rem" onmouseover="this.style.background='rgba(200,134,10,0.2)'" onmouseout="this.style.background='transparent'">☁️ Salva su Drive</button>
+    <button id="btnDriveLoad" onclick="driveLoad()" style="display:none;background:transparent;border:1px solid rgba(200,134,10,0.5);color:var(--amber-glow);padding:0.3rem 0.9rem;border-radius:2px;cursor:pointer;font-family:'Crimson Pro',serif;font-size:0.85rem" onmouseover="this.style.background='rgba(200,134,10,0.2)'" onmouseout="this.style.background='transparent'">🔄 Carica da Drive</button>
+    <span style="color:rgba(251,245,230,0.2);font-size:0.7rem">|</span>
+    <button onclick="exportJSON()" style="background:transparent;border:1px solid rgba(200,134,10,0.3);color:rgba(245,200,66,0.6);padding:0.3rem 0.9rem;border-radius:2px;cursor:pointer;font-family:'Crimson Pro',serif;font-size:0.82rem" onmouseover="this.style.background='rgba(200,134,10,0.15)'" onmouseout="this.style.background='transparent'">⬇ Esporta JSON</button>
+    <label style="background:transparent;border:1px solid rgba(200,134,10,0.3);color:rgba(245,200,66,0.6);padding:0.3rem 0.9rem;border-radius:2px;cursor:pointer;font-family:'Crimson Pro',serif;font-size:0.82rem" onmouseover="this.style.background='rgba(200,134,10,0.15)'" onmouseout="this.style.background='transparent'">
       ⬆ Importa JSON
       <input type="file" accept=".json" onchange="importJSON(event)" style="display:none">
     </label>
@@ -1565,12 +1576,163 @@ function showImportToast(msg) {
   setTimeout(() => { toast.style.opacity = '0'; }, 3500);
 }
 
+// ======= GOOGLE DRIVE =======
+const CLIENT_ID = '256459531928-rg44b3eo4a3hatfmuf4jevck631uir6o.apps.googleusercontent.com';
+const SCOPES = 'https://www.googleapis.com/auth/drive.appdata';
+const FILENAME = 'apiario_db.json';
+
+let driveAccessToken = null;
+let driveFileId = localStorage.getItem('driveFileId') || null;
+let tokenClient = null;
+
+function initGoogleDrive() {
+  if(typeof google === 'undefined') return;
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID,
+    scope: SCOPES,
+    callback: (resp) => {
+      if(resp.error) { showImportToast('❌ Errore autenticazione: ' + resp.error); return; }
+      driveAccessToken = resp.access_token;
+      localStorage.setItem('driveAccessToken', driveAccessToken);
+      updateDriveUI(true);
+      showImportToast('✅ Connesso a Google Drive!');
+      driveLoad();
+    }
+  });
+  // Try restore token
+  const saved = localStorage.getItem('driveAccessToken');
+  if(saved) {
+    driveAccessToken = saved;
+    updateDriveUI(true);
+  }
+}
+
+function updateDriveUI(connected) {
+  document.getElementById('btnDriveLogin').style.display = connected ? 'none' : 'flex';
+  document.getElementById('btnDriveLogout').style.display = connected ? 'inline-block' : 'none';
+  document.getElementById('btnDriveSave').style.display = connected ? 'inline-block' : 'none';
+  document.getElementById('btnDriveLoad').style.display = connected ? 'inline-block' : 'none';
+  document.getElementById('driveStatus').textContent = connected
+    ? '☁️ Google Drive: connesso'
+    : '☁️ Google Drive: non connesso';
+  document.getElementById('driveStatus').style.color = connected
+    ? 'rgba(100,220,100,0.8)'
+    : 'rgba(251,245,230,0.55)';
+}
+
+function driveLogin() {
+  if(!tokenClient) { showImportToast('⏳ Google non ancora caricato, riprova tra un secondo'); return; }
+  tokenClient.requestAccessToken();
+}
+
+function driveLogout() {
+  if(driveAccessToken) google.accounts.oauth2.revoke(driveAccessToken);
+  driveAccessToken = null;
+  localStorage.removeItem('driveAccessToken');
+  updateDriveUI(false);
+  showImportToast('🔒 Disconnesso da Google Drive');
+}
+
+async function driveApiCall(url, options={}) {
+  const resp = await fetch(url, {
+    ...options,
+    headers: { 'Authorization': 'Bearer ' + driveAccessToken, ...(options.headers||{}) }
+  });
+  if(resp.status === 401) {
+    driveAccessToken = null;
+    localStorage.removeItem('driveAccessToken');
+    updateDriveUI(false);
+    showImportToast('⚠️ Sessione scaduta, effettua di nuovo il login');
+    throw new Error('Unauthorized');
+  }
+  return resp;
+}
+
+async function driveFindFile() {
+  const resp = await driveApiCall(
+    `https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name='${FILENAME}'&fields=files(id,name,modifiedTime)`
+  );
+  const data = await resp.json();
+  return data.files && data.files.length > 0 ? data.files[0] : null;
+}
+
+async function driveSave() {
+  if(!driveAccessToken) { showImportToast('⚠️ Prima connettiti a Google Drive'); return; }
+  setDriveLoading(true, '☁️ Salvataggio in corso...');
+  try {
+    const payload = JSON.stringify({ version:1, savedAt: new Date().toISOString(), arnie, logBook }, null, 2);
+    const file = await driveFindFile();
+    let url, method;
+    if(file) {
+      url = `https://www.googleapis.com/upload/drive/v3/files/${file.id}?uploadType=multipart`;
+      method = 'PATCH';
+      driveFileId = file.id;
+    } else {
+      url = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
+      method = 'POST';
+    }
+    const metadata = { name: FILENAME, ...(file ? {} : { parents: ['appDataFolder'] }) };
+    const form = new FormData();
+    form.append('metadata', new Blob([JSON.stringify(metadata)], {type:'application/json'}));
+    form.append('file', new Blob([payload], {type:'application/json'}));
+    const resp = await driveApiCall(url, { method, body: form });
+    const result = await resp.json();
+    driveFileId = result.id;
+    localStorage.setItem('driveFileId', driveFileId);
+    showImportToast('✅ Dati salvati su Google Drive!');
+  } catch(e) {
+    if(e.message !== 'Unauthorized') showImportToast('❌ Errore salvataggio: ' + e.message);
+  } finally {
+    setDriveLoading(false);
+  }
+}
+
+async function driveLoad() {
+  if(!driveAccessToken) { showImportToast('⚠️ Prima connettiti a Google Drive'); return; }
+  setDriveLoading(true, '🔄 Caricamento da Drive...');
+  try {
+    const file = await driveFindFile();
+    if(!file) { showImportToast('ℹ️ Nessun file trovato su Drive. Salva prima i dati.'); setDriveLoading(false); return; }
+    const resp = await driveApiCall(`https://www.googleapis.com/drive/v3/files/${file.id}?alt=media`);
+    const data = await resp.json();
+    if(!data.arnie || !data.logBook) throw new Error('Formato non valido');
+    arnie = data.arnie;
+    logBook = data.logBook;
+    localStorage.setItem('arnie', JSON.stringify(arnie));
+    localStorage.setItem('logBook', JSON.stringify(logBook));
+    renderArnie();
+    updateArniSelects();
+    renderLog();
+    renderStats();
+    const d = new Date(data.savedAt);
+    showImportToast(`✅ Dati caricati da Drive (${d.toLocaleDateString('it-IT')} ${d.toLocaleTimeString('it-IT', {hour:'2-digit',minute:'2-digit'})})`);
+  } catch(e) {
+    if(e.message !== 'Unauthorized') showImportToast('❌ Errore caricamento: ' + e.message);
+  } finally {
+    setDriveLoading(false);
+  }
+}
+
+function setDriveLoading(on, msg='') {
+  const status = document.getElementById('driveStatus');
+  if(on) { status.textContent = msg; status.style.color = 'rgba(245,200,66,0.8)'; }
+  else { updateDriveUI(!!driveAccessToken); }
+  ['btnDriveSave','btnDriveLoad'].forEach(id => {
+    document.getElementById(id).disabled = on;
+  });
+}
+
 // ======= INIT =======
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('logData').value = new Date().toISOString().slice(0,10);
   renderArnie();
   renderStats();
   updateArniSelects();
+});
+
+// Init Google after GSI loads
+window.addEventListener('load', () => {
+  setTimeout(initGoogleDrive, 500);
 });
 </script>
 </body>
