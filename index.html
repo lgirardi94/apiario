@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="it">
 <head>
 <meta charset="UTF-8">
@@ -28,739 +27,738 @@
     --shadow: rgba(26,18,8,0.15);
   }
 
-- { margin: 0; padding: 0; box-sizing: border-box; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-body {
-background: var(–cream);
-color: var(–text);
-font-family: ‘Crimson Pro’, Georgia, serif;
-font-size: 17px;
-line-height: 1.6;
-min-height: 100vh;
-}
+  body {
+    background: var(--cream);
+    color: var(--text);
+    font-family: 'Crimson Pro', Georgia, serif;
+    font-size: 17px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
 
-/* Honeycomb background pattern */
-body::before {
-content: ‘’;
-position: fixed;
-inset: 0;
-background-image: url(“data:image/svg+xml,%3Csvg xmlns=‘http://www.w3.org/2000/svg’ width=‘56’ height=‘100’%3E%3Cpath d=‘M28 66L0 50V16L28 0l28 16v34L28 66zM28 100L0 84V66l28 16 28-16v18L28 100z’ fill=‘none’ stroke=’%23C8860A’ stroke-opacity=‘0.06’ stroke-width=‘1’/%3E%3C/svg%3E”);
-pointer-events: none;
-z-index: 0;
-}
+  /* Honeycomb background pattern */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100'%3E%3Cpath d='M28 66L0 50V16L28 0l28 16v34L28 66zM28 100L0 84V66l28 16 28-16v18L28 100z' fill='none' stroke='%23C8860A' stroke-opacity='0.06' stroke-width='1'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
 
-/* HEADER */
-header {
-background: linear-gradient(135deg, var(–dark) 0%, var(–dark-mid) 60%, #3A2510 100%);
-padding: 2.5rem 2rem 2rem;
-text-align: center;
-position: relative;
-overflow: hidden;
-border-bottom: 3px solid var(–amber);
-box-shadow: 0 4px 30px rgba(200,134,10,0.3);
-}
-header::before {
-content: ‘’;
-position: absolute;
-inset: 0;
-background: radial-gradient(ellipse at 50% 0%, rgba(232,160,32,0.15) 0%, transparent 70%);
-}
-.header-bee {
-font-size: 3rem;
-display: block;
-margin-bottom: 0.5rem;
-animation: float 3s ease-in-out infinite;
-}
-@keyframes float {
-0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)}
-}
-header h1 {
-font-family: ‘Playfair Display’, Georgia, serif;
-font-size: clamp(2rem, 5vw, 3.2rem);
-color: var(–amber-glow);
-letter-spacing: 2px;
-text-shadow: 0 2px 20px rgba(245,200,66,0.4);
-position: relative;
-}
-header p {
-color: var(–cream-dark);
-font-style: italic;
-font-size: 1.1rem;
-margin-top: 0.3rem;
-opacity: 0.85;
-position: relative;
-}
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, var(--dark) 0%, var(--dark-mid) 60%, #3A2510 100%);
+    padding: 2.5rem 2rem 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 3px solid var(--amber);
+    box-shadow: 0 4px 30px rgba(200,134,10,0.3);
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(232,160,32,0.15) 0%, transparent 70%);
+  }
+  .header-bee {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 0.5rem;
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)}
+  }
+  header h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    color: var(--amber-glow);
+    letter-spacing: 2px;
+    text-shadow: 0 2px 20px rgba(245,200,66,0.4);
+    position: relative;
+  }
+  header p {
+    color: var(--cream-dark);
+    font-style: italic;
+    font-size: 1.1rem;
+    margin-top: 0.3rem;
+    opacity: 0.85;
+    position: relative;
+  }
 
-/* NAV */
-nav {
-display: flex;
-justify-content: center;
-gap: 0.5rem;
-padding: 1rem;
-background: var(–dark-mid);
-flex-wrap: wrap;
-position: sticky;
-top: 0;
-z-index: 100;
-border-bottom: 2px solid var(–amber);
-box-shadow: 0 2px 15px var(–shadow);
-}
-nav button {
-background: transparent;
-border: 1px solid rgba(200,134,10,0.4);
-color: var(–cream-dark);
-padding: 0.5rem 1.1rem;
-border-radius: 2px;
-cursor: pointer;
-font-family: ‘Crimson Pro’, serif;
-font-size: 0.95rem;
-letter-spacing: 0.5px;
-transition: all 0.2s;
-}
-nav button:hover, nav button.active {
-background: var(–amber);
-color: var(–dark);
-border-color: var(–amber);
-font-weight: 600;
-}
+  /* NAV */
+  nav {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: var(--dark-mid);
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 2px solid var(--amber);
+    box-shadow: 0 2px 15px var(--shadow);
+  }
+  nav button {
+    background: transparent;
+    border: 1px solid rgba(200,134,10,0.4);
+    color: var(--cream-dark);
+    padding: 0.5rem 1.1rem;
+    border-radius: 2px;
+    cursor: pointer;
+    font-family: 'Crimson Pro', serif;
+    font-size: 0.95rem;
+    letter-spacing: 0.5px;
+    transition: all 0.2s;
+  }
+  nav button:hover, nav button.active {
+    background: var(--amber);
+    color: var(--dark);
+    border-color: var(--amber);
+    font-weight: 600;
+  }
 
-/* MAIN */
-main {
-max-width: 1100px;
-margin: 0 auto;
-padding: 2rem 1.5rem 4rem;
-position: relative;
-z-index: 1;
-}
+  /* MAIN */
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+    position: relative;
+    z-index: 1;
+  }
 
-/* SECTIONS */
-.section { display: none; animation: fadeIn 0.4s ease; }
-.section.active { display: block; }
-@keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+  /* SECTIONS */
+  .section { display: none; animation: fadeIn 0.4s ease; }
+  .section.active { display: block; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
 
-/* SEASON HEADER */
-.season-header {
-display: flex;
-align-items: center;
-gap: 1rem;
-margin: 2.5rem 0 1.5rem;
-padding-bottom: 0.8rem;
-border-bottom: 2px solid var(–amber-light);
-}
-.season-header:first-child { margin-top: 0; }
-.season-icon { font-size: 2.2rem; }
-.season-header h2 {
-font-family: ‘Playfair Display’, serif;
-font-size: 1.8rem;
-color: var(–brown);
-}
-.season-badge {
-margin-left: auto;
-background: var(–amber-pale);
-border: 1px solid var(–amber-light);
-color: var(–brown);
-padding: 0.2rem 0.8rem;
-border-radius: 20px;
-font-size: 0.85rem;
-font-style: italic;
-}
+  /* SEASON HEADER */
+  .season-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 2.5rem 0 1.5rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 2px solid var(--amber-light);
+  }
+  .season-header:first-child { margin-top: 0; }
+  .season-icon { font-size: 2.2rem; }
+  .season-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    color: var(--brown);
+  }
+  .season-badge {
+    margin-left: auto;
+    background: var(--amber-pale);
+    border: 1px solid var(--amber-light);
+    color: var(--brown);
+    padding: 0.2rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-style: italic;
+  }
 
-/* MONTH CARD */
-.month-card {
-background: white;
-border: 1px solid var(–cream-dark);
-border-left: 4px solid var(–amber);
-border-radius: 4px;
-margin-bottom: 1.2rem;
-overflow: hidden;
-box-shadow: 0 2px 12px var(–shadow);
-transition: box-shadow 0.2s;
-}
-.month-card:hover { box-shadow: 0 4px 20px rgba(200,134,10,0.2); }
-.month-card-header {
-background: var(–amber-pale);
-padding: 0.8rem 1.2rem;
-display: flex;
-align-items: center;
-gap: 0.8rem;
-cursor: pointer;
-user-select: none;
-}
-.month-card-header h3 {
-font-family: ‘Playfair Display’, serif;
-font-size: 1.15rem;
-color: var(–brown);
-flex: 1;
-}
-.toggle-icon {
-color: var(–amber);
-font-size: 1.2rem;
-transition: transform 0.3s;
-}
-.month-card-header.open .toggle-icon { transform: rotate(180deg); }
-.month-card-body { display: none; padding: 1.2rem 1.5rem; }
-.month-card-body.open { display: block; }
+  /* MONTH CARD */
+  .month-card {
+    background: white;
+    border: 1px solid var(--cream-dark);
+    border-left: 4px solid var(--amber);
+    border-radius: 4px;
+    margin-bottom: 1.2rem;
+    overflow: hidden;
+    box-shadow: 0 2px 12px var(--shadow);
+    transition: box-shadow 0.2s;
+  }
+  .month-card:hover { box-shadow: 0 4px 20px rgba(200,134,10,0.2); }
+  .month-card-header {
+    background: var(--amber-pale);
+    padding: 0.8rem 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    cursor: pointer;
+    user-select: none;
+  }
+  .month-card-header h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem;
+    color: var(--brown);
+    flex: 1;
+  }
+  .toggle-icon {
+    color: var(--amber);
+    font-size: 1.2rem;
+    transition: transform 0.3s;
+  }
+  .month-card-header.open .toggle-icon { transform: rotate(180deg); }
+  .month-card-body { display: none; padding: 1.2rem 1.5rem; }
+  .month-card-body.open { display: block; }
 
-/* TASK LIST */
-.task-list { list-style: none; }
-.task-list li {
-padding: 0.5rem 0;
-border-bottom: 1px solid var(–cream-dark);
-display: flex;
-align-items: flex-start;
-gap: 0.7rem;
-font-size: 1rem;
-color: var(–text);
-line-height: 1.5;
-}
-.task-list li:last-child { border-bottom: none; }
-.task-list li::before {
-content: ‘🐝’;
-font-size: 0.85rem;
-margin-top: 2px;
-flex-shrink: 0;
-}
-.task-highlight {
-background: linear-gradient(90deg, rgba(200,134,10,0.1), transparent);
-padding: 0.5rem 0.8rem;
-border-radius: 3px;
-border-left: 3px solid var(–amber-light);
-font-weight: 600;
-}
+  /* TASK LIST */
+  .task-list { list-style: none; }
+  .task-list li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--cream-dark);
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+    font-size: 1rem;
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .task-list li:last-child { border-bottom: none; }
+  .task-list li::before {
+    content: '🐝';
+    font-size: 0.85rem;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+  .task-highlight {
+    background: linear-gradient(90deg, rgba(200,134,10,0.1), transparent);
+    padding: 0.5rem 0.8rem;
+    border-radius: 3px;
+    border-left: 3px solid var(--amber-light);
+    font-weight: 600;
+  }
 
-/* ============ REGISTRO ============ */
-.registro-top {
-display: grid;
-grid-template-columns: 1fr 1fr;
-gap: 1.5rem;
-margin-bottom: 2rem;
-}
-@media(max-width:640px){.registro-top{grid-template-columns:1fr}}
+  /* ============ REGISTRO ============ */
+  .registro-top {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  @media(max-width:640px){.registro-top{grid-template-columns:1fr}}
 
-.card {
-background: white;
-border: 1px solid var(–cream-dark);
-border-radius: 4px;
-padding: 1.5rem;
-box-shadow: 0 2px 12px var(–shadow);
-}
-.card h3 {
-font-family: ‘Playfair Display’, serif;
-font-size: 1.2rem;
-color: var(–brown);
-margin-bottom: 1rem;
-padding-bottom: 0.5rem;
-border-bottom: 2px solid var(–amber-pale);
-display: flex;
-align-items: center;
-gap: 0.5rem;
-}
+  .card {
+    background: white;
+    border: 1px solid var(--cream-dark);
+    border-radius: 4px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 12px var(--shadow);
+  }
+  .card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    color: var(--brown);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--amber-pale);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
 
-.form-row { margin-bottom: 1rem; }
-.form-row label {
-display: block;
-font-size: 0.85rem;
-font-weight: 600;
-color: var(–text-light);
-letter-spacing: 0.5px;
-text-transform: uppercase;
-margin-bottom: 0.3rem;
-}
-.form-row input, .form-row select, .form-row textarea {
-width: 100%;
-padding: 0.6rem 0.9rem;
-border: 1px solid var(–cream-dark);
-border-radius: 3px;
-font-family: ‘Crimson Pro’, serif;
-font-size: 1rem;
-color: var(–text);
-background: var(–cream);
-transition: border-color 0.2s;
-}
-.form-row input:focus, .form-row select:focus, .form-row textarea:focus {
-outline: none;
-border-color: var(–amber);
-background: white;
-}
-.form-row textarea { resize: vertical; min-height: 80px; }
+  .form-row { margin-bottom: 1rem; }
+  .form-row label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-light);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 0.3rem;
+  }
+  .form-row input, .form-row select, .form-row textarea {
+    width: 100%;
+    padding: 0.6rem 0.9rem;
+    border: 1px solid var(--cream-dark);
+    border-radius: 3px;
+    font-family: 'Crimson Pro', serif;
+    font-size: 1rem;
+    color: var(--text);
+    background: var(--cream);
+    transition: border-color 0.2s;
+  }
+  .form-row input:focus, .form-row select:focus, .form-row textarea:focus {
+    outline: none;
+    border-color: var(--amber);
+    background: white;
+  }
+  .form-row textarea { resize: vertical; min-height: 80px; }
 
-.btn {
-background: var(–amber);
-color: var(–dark);
-border: none;
-padding: 0.7rem 1.5rem;
-border-radius: 3px;
-font-family: ‘Playfair Display’, serif;
-font-size: 1rem;
-cursor: pointer;
-font-weight: 700;
-letter-spacing: 0.5px;
-transition: all 0.2s;
-box-shadow: 0 2px 8px rgba(200,134,10,0.3);
-}
-.btn:hover { background: var(–amber-light); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(200,134,10,0.4); }
-.btn-secondary {
-background: transparent;
-border: 1px solid var(–amber);
-color: var(–amber);
-}
-.btn-secondary:hover { background: var(–amber-pale); }
-.btn-danger { background: var(–red); color: white; }
-.btn-danger:hover { background: #A03535; }
+  .btn {
+    background: var(--amber);
+    color: var(--dark);
+    border: none;
+    padding: 0.7rem 1.5rem;
+    border-radius: 3px;
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    cursor: pointer;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(200,134,10,0.3);
+  }
+  .btn:hover { background: var(--amber-light); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(200,134,10,0.4); }
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid var(--amber);
+    color: var(--amber);
+  }
+  .btn-secondary:hover { background: var(--amber-pale); }
+  .btn-danger { background: var(--red); color: white; }
+  .btn-danger:hover { background: #A03535; }
 
-/* STATS */
-.stats-grid {
-display: grid;
-grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-gap: 1rem;
-margin-bottom: 2rem;
-}
-.stat-card {
-background: white;
-border: 1px solid var(–cream-dark);
-border-radius: 4px;
-padding: 1rem;
-text-align: center;
-box-shadow: 0 2px 8px var(–shadow);
-}
-.stat-number {
-font-family: ‘Playfair Display’, serif;
-font-size: 2.2rem;
-color: var(–amber);
-line-height: 1;
-}
-.stat-label {
-font-size: 0.8rem;
-color: var(–text-light);
-text-transform: uppercase;
-letter-spacing: 0.5px;
-margin-top: 0.3rem;
-}
+  /* STATS */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .stat-card {
+    background: white;
+    border: 1px solid var(--cream-dark);
+    border-radius: 4px;
+    padding: 1rem;
+    text-align: center;
+    box-shadow: 0 2px 8px var(--shadow);
+  }
+  .stat-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    color: var(--amber);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 0.3rem;
+  }
 
-/* LOG TABLE */
-.log-filters {
-display: flex;
-gap: 0.8rem;
-flex-wrap: wrap;
-margin-bottom: 1.2rem;
-align-items: center;
-}
-.log-filters input, .log-filters select {
-padding: 0.45rem 0.8rem;
-border: 1px solid var(–cream-dark);
-border-radius: 3px;
-font-family: ‘Crimson Pro’, serif;
-font-size: 0.95rem;
-background: white;
-color: var(–text);
-}
-.log-filters input:focus, .log-filters select:focus {
-outline: none;
-border-color: var(–amber);
-}
+  /* LOG TABLE */
+  .log-filters {
+    display: flex;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.2rem;
+    align-items: center;
+  }
+  .log-filters input, .log-filters select {
+    padding: 0.45rem 0.8rem;
+    border: 1px solid var(--cream-dark);
+    border-radius: 3px;
+    font-family: 'Crimson Pro', serif;
+    font-size: 0.95rem;
+    background: white;
+    color: var(--text);
+  }
+  .log-filters input:focus, .log-filters select:focus {
+    outline: none;
+    border-color: var(--amber);
+  }
 
-.log-entries { display: flex; flex-direction: column; gap: 0.8rem; }
-.log-entry {
-background: white;
-border: 1px solid var(–cream-dark);
-border-left: 4px solid var(–amber-light);
-border-radius: 3px;
-padding: 1rem 1.2rem;
-box-shadow: 0 1px 6px var(–shadow);
-animation: fadeIn 0.3s ease;
-}
-.log-entry.tipo-salute { border-left-color: var(–red); }
-.log-entry.tipo-produzione { border-left-color: var(–amber); }
-.log-entry.tipo-trattamento { border-left-color: var(–blue); }
-.log-entry.tipo-nutrizione { border-left-color: var(–green); }
-.log-entry.tipo-ispezione { border-left-color: var(–brown-light); }
+  .log-entries { display: flex; flex-direction: column; gap: 0.8rem; }
+  .log-entry {
+    background: white;
+    border: 1px solid var(--cream-dark);
+    border-left: 4px solid var(--amber-light);
+    border-radius: 3px;
+    padding: 1rem 1.2rem;
+    box-shadow: 0 1px 6px var(--shadow);
+    animation: fadeIn 0.3s ease;
+  }
+  .log-entry.tipo-salute { border-left-color: var(--red); }
+  .log-entry.tipo-produzione { border-left-color: var(--amber); }
+  .log-entry.tipo-trattamento { border-left-color: var(--blue); }
+  .log-entry.tipo-nutrizione { border-left-color: var(--green); }
+  .log-entry.tipo-ispezione { border-left-color: var(--brown-light); }
 
-.log-entry-header {
-display: flex;
-justify-content: space-between;
-align-items: flex-start;
-gap: 1rem;
-margin-bottom: 0.5rem;
-flex-wrap: wrap;
-}
-.log-entry-meta { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; }
-.log-date {
-font-family: ‘Playfair Display’, serif;
-font-size: 0.9rem;
-color: var(–brown-light);
-font-style: italic;
-}
-.tag {
-padding: 0.15rem 0.6rem;
-border-radius: 20px;
-font-size: 0.78rem;
-font-weight: 600;
-letter-spacing: 0.3px;
-}
-.tag-arnia {
-background: var(–amber-pale);
-color: var(–brown);
-border: 1px solid var(–amber-light);
-}
-.tag-tipo {
-color: white;
-background: var(–brown-light);
-}
-.tag-tipo.salute { background: var(–red); }
-.tag-tipo.produzione { background: var(–amber); color: var(–dark); }
-.tag-tipo.trattamento { background: var(–blue); }
-.tag-tipo.nutrizione { background: var(–green); }
-.tag-tipo.ispezione { background: var(–brown-light); }
+  .log-entry-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .log-entry-meta { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; }
+  .log-date {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.9rem;
+    color: var(--brown-light);
+    font-style: italic;
+  }
+  .tag {
+    padding: 0.15rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  .tag-arnia {
+    background: var(--amber-pale);
+    color: var(--brown);
+    border: 1px solid var(--amber-light);
+  }
+  .tag-tipo {
+    color: white;
+    background: var(--brown-light);
+  }
+  .tag-tipo.salute { background: var(--red); }
+  .tag-tipo.produzione { background: var(--amber); color: var(--dark); }
+  .tag-tipo.trattamento { background: var(--blue); }
+  .tag-tipo.nutrizione { background: var(--green); }
+  .tag-tipo.ispezione { background: var(--brown-light); }
 
-.log-entry-note { color: var(–text); font-size: 1rem; line-height: 1.5; }
-.log-entry-extra {
-display: flex;
-gap: 1.5rem;
-margin-top: 0.5rem;
-font-size: 0.88rem;
-color: var(–text-light);
-flex-wrap: wrap;
-}
-.log-entry-extra span { display: flex; align-items: center; gap: 0.3rem; }
+  .log-entry-note { color: var(--text); font-size: 1rem; line-height: 1.5; }
+  .log-entry-extra {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 0.5rem;
+    font-size: 0.88rem;
+    color: var(--text-light);
+    flex-wrap: wrap;
+  }
+  .log-entry-extra span { display: flex; align-items: center; gap: 0.3rem; }
 
-.log-actions { display: flex; gap: 0.4rem; }
-.btn-icon {
-background: none;
-border: 1px solid var(–cream-dark);
-border-radius: 3px;
-padding: 0.3rem 0.5rem;
-cursor: pointer;
-font-size: 0.9rem;
-transition: all 0.2s;
-color: var(–text-light);
-}
-.btn-icon:hover { background: var(–amber-pale); border-color: var(–amber); }
-.btn-icon.del:hover { background: #fce8e8; border-color: var(–red); color: var(–red); }
+  .log-actions { display: flex; gap: 0.4rem; }
+  .btn-icon {
+    background: none;
+    border: 1px solid var(--cream-dark);
+    border-radius: 3px;
+    padding: 0.3rem 0.5rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    color: var(--text-light);
+  }
+  .btn-icon:hover { background: var(--amber-pale); border-color: var(--amber); }
+  .btn-icon.del:hover { background: #fce8e8; border-color: var(--red); color: var(--red); }
 
-.empty-state {
-text-align: center;
-padding: 3rem;
-color: var(–text-light);
-font-style: italic;
-}
-.empty-state .big { font-size: 3rem; display: block; margin-bottom: 0.5rem; }
+  .empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-light);
+    font-style: italic;
+  }
+  .empty-state .big { font-size: 3rem; display: block; margin-bottom: 0.5rem; }
 
-/* ARNIE */
-.arnie-grid {
-display: grid;
-grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-gap: 1rem;
-margin-bottom: 2rem;
-}
-.arnia-card {
-background: white;
-border: 1px solid var(–cream-dark);
-border-radius: 6px;
-padding: 1.2rem;
-box-shadow: 0 2px 10px var(–shadow);
-position: relative;
-transition: box-shadow 0.2s;
-}
-.arnia-card:hover { box-shadow: 0 4px 18px rgba(200,134,10,0.2); }
-.arnia-num {
-font-family: ‘Playfair Display’, serif;
-font-size: 1.5rem;
-color: var(–amber);
-font-weight: 700;
-}
-.arnia-name { font-weight: 600; color: var(–brown); margin-bottom: 0.8rem; }
-.arnia-status {
-display: inline-block;
-padding: 0.2rem 0.7rem;
-border-radius: 20px;
-font-size: 0.78rem;
-font-weight: 600;
-margin-bottom: 0.8rem;
-}
-.status-attiva { background: #e8f5e9; color: var(–green); }
-.status-debole { background: #fff3e0; color: #e65100; }
-.status-problema { background: #fce8e8; color: var(–red); }
-.status-invernata { background: #e3f2fd; color: var(–blue); }
-.arnia-info { font-size: 0.9rem; color: var(–text-light); line-height: 1.7; }
-.arnia-actions { display: flex; gap: 0.4rem; margin-top: 0.8rem; }
+  /* ARNIE */
+  .arnie-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .arnia-card {
+    background: white;
+    border: 1px solid var(--cream-dark);
+    border-radius: 6px;
+    padding: 1.2rem;
+    box-shadow: 0 2px 10px var(--shadow);
+    position: relative;
+    transition: box-shadow 0.2s;
+  }
+  .arnia-card:hover { box-shadow: 0 4px 18px rgba(200,134,10,0.2); }
+  .arnia-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    color: var(--amber);
+    font-weight: 700;
+  }
+  .arnia-name { font-weight: 600; color: var(--brown); margin-bottom: 0.8rem; }
+  .arnia-status {
+    display: inline-block;
+    padding: 0.2rem 0.7rem;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin-bottom: 0.8rem;
+  }
+  .status-attiva { background: #e8f5e9; color: var(--green); }
+  .status-debole { background: #fff3e0; color: #e65100; }
+  .status-problema { background: #fce8e8; color: var(--red); }
+  .status-invernata { background: #e3f2fd; color: var(--blue); }
+  .arnia-info { font-size: 0.9rem; color: var(--text-light); line-height: 1.7; }
+  .arnia-actions { display: flex; gap: 0.4rem; margin-top: 0.8rem; }
 
-/* SECTION TITLE */
-.section-title {
-font-family: ‘Playfair Display’, serif;
-font-size: 2rem;
-color: var(–brown);
-margin-bottom: 0.3rem;
-}
-.section-subtitle {
-color: var(–text-light);
-font-style: italic;
-margin-bottom: 2rem;
-font-size: 1rem;
-}
+  /* SECTION TITLE */
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    color: var(--brown);
+    margin-bottom: 0.3rem;
+  }
+  .section-subtitle {
+    color: var(--text-light);
+    font-style: italic;
+    margin-bottom: 2rem;
+    font-size: 1rem;
+  }
 
-/* MODAL */
-.modal-overlay {
-display: none;
-position: fixed;
-inset: 0;
-background: rgba(26,18,8,0.6);
-z-index: 1000;
-align-items: center;
-justify-content: center;
-padding: 1rem;
-}
-.modal-overlay.open { display: flex; }
-.modal {
-background: white;
-border-radius: 6px;
-padding: 2rem;
-width: 100%;
-max-width: 520px;
-box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-max-height: 90vh;
-overflow-y: auto;
-animation: fadeIn 0.25s ease;
-}
-.modal h3 {
-font-family: ‘Playfair Display’, serif;
-font-size: 1.4rem;
-color: var(–brown);
-margin-bottom: 1.5rem;
-}
-.modal-footer { display: flex; justify-content: flex-end; gap: 0.8rem; margin-top: 1.5rem; }
+  /* MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26,18,8,0.6);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: white;
+    border-radius: 6px;
+    padding: 2rem;
+    width: 100%;
+    max-width: 520px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: fadeIn 0.25s ease;
+  }
+  .modal h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    color: var(--brown);
+    margin-bottom: 1.5rem;
+  }
+  .modal-footer { display: flex; justify-content: flex-end; gap: 0.8rem; margin-top: 1.5rem; }
 
-.divider {
-border: none;
-border-top: 1px solid var(–cream-dark);
-margin: 2rem 0;
-}
+  .divider {
+    border: none;
+    border-top: 1px solid var(--cream-dark);
+    margin: 2rem 0;
+  }
 
-/* MELARIO */
-.melario-list { display: flex; flex-direction: column; gap: 0.6rem; margin-top: 0.5rem; }
-.melario-item {
-background: var(–amber-pale);
-border: 1px solid var(–amber-light);
-border-radius: 4px;
-padding: 0.6rem 0.9rem;
-display: flex;
-align-items: center;
-gap: 0.8rem;
-font-size: 0.92rem;
-flex-wrap: wrap;
-}
-.melario-item .mel-info { flex: 1; color: var(–brown); }
-.melario-item .mel-date { color: var(–text-light); font-style: italic; font-size: 0.85rem; }
-.melario-item .mel-status {
-padding: 0.1rem 0.6rem;
-border-radius: 20px;
-font-size: 0.78rem;
-font-weight: 600;
-}
-.mel-posizionato { background: #e8f5e9; color: var(–green); }
-.mel-rimosso { background: #fce8e8; color: var(–red); }
-.mel-produzione { background: #fff3e0; color: #e65100; }
-.add-melario-row {
-display: grid;
-grid-template-columns: 1fr 1fr 1fr auto;
-gap: 0.5rem;
-align-items: end;
-margin-top: 0.8rem;
-}
-@media(max-width:500px){ .add-melario-row { grid-template-columns: 1fr 1fr; } }
+  /* MELARIO */
+  .melario-list { display: flex; flex-direction: column; gap: 0.6rem; margin-top: 0.5rem; }
+  .melario-item {
+    background: var(--amber-pale);
+    border: 1px solid var(--amber-light);
+    border-radius: 4px;
+    padding: 0.6rem 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-size: 0.92rem;
+    flex-wrap: wrap;
+  }
+  .melario-item .mel-info { flex: 1; color: var(--brown); }
+  .melario-item .mel-date { color: var(--text-light); font-style: italic; font-size: 0.85rem; }
+  .melario-item .mel-status {
+    padding: 0.1rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+  .mel-posizionato { background: #e8f5e9; color: var(--green); }
+  .mel-rimosso { background: #fce8e8; color: var(--red); }
+  .mel-produzione { background: #fff3e0; color: #e65100; }
+  .add-melario-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr auto;
+    gap: 0.5rem;
+    align-items: end;
+    margin-top: 0.8rem;
+  }
+  @media(max-width:500px){ .add-melario-row { grid-template-columns: 1fr 1fr; } }
 
-/* DETAIL PANEL */
-.detail-panel {
-display: none;
-position: fixed;
-top: 0; right: 0; bottom: 0;
-width: min(420px, 100vw);
-background: var(–cream);
-border-left: 3px solid var(–amber);
-box-shadow: -8px 0 30px rgba(26,18,8,0.2);
-z-index: 200;
-overflow-y: auto;
-animation: slideIn 0.3s ease;
-}
-.detail-panel.open { display: block; }
-@keyframes slideIn { from{transform:translateX(100%)} to{transform:translateX(0)} }
-.detail-panel-header {
-background: var(–dark-mid);
-padding: 1.2rem 1.5rem;
-display: flex;
-align-items: center;
-gap: 1rem;
-border-bottom: 2px solid var(–amber);
-position: sticky;
-top: 0;
-z-index: 10;
-}
-.detail-panel-header h3 {
-font-family: ‘Playfair Display’, serif;
-color: var(–amber-glow);
-font-size: 1.3rem;
-flex: 1;
-}
-.detail-panel-body { padding: 1.5rem; }
-.detail-section { margin-bottom: 1.8rem; }
-.detail-section h4 {
-font-family: ‘Playfair Display’, serif;
-font-size: 1rem;
-color: var(–brown);
-margin-bottom: 0.7rem;
-padding-bottom: 0.3rem;
-border-bottom: 1px solid var(–cream-dark);
-display: flex;
-align-items: center;
-gap: 0.4rem;
-}
-.detail-row {
-display: flex;
-justify-content: space-between;
-padding: 0.4rem 0;
-border-bottom: 1px dotted var(–cream-dark);
-font-size: 0.95rem;
-}
-.detail-row:last-child { border-bottom: none; }
-.detail-label { color: var(–text-light); }
-.detail-value { font-weight: 600; color: var(–text); text-align: right; }
-.razza-badge {
-display: inline-block;
-background: linear-gradient(135deg, var(–amber-pale), #fff);
-border: 1px solid var(–amber-light);
-color: var(–brown);
-padding: 0.3rem 0.9rem;
-border-radius: 20px;
-font-style: italic;
-font-size: 0.95rem;
-}
+  /* DETAIL PANEL */
+  .detail-panel {
+    display: none;
+    position: fixed;
+    top: 0; right: 0; bottom: 0;
+    width: min(420px, 100vw);
+    background: var(--cream);
+    border-left: 3px solid var(--amber);
+    box-shadow: -8px 0 30px rgba(26,18,8,0.2);
+    z-index: 200;
+    overflow-y: auto;
+    animation: slideIn 0.3s ease;
+  }
+  .detail-panel.open { display: block; }
+  @keyframes slideIn { from{transform:translateX(100%)} to{transform:translateX(0)} }
+  .detail-panel-header {
+    background: var(--dark-mid);
+    padding: 1.2rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-bottom: 2px solid var(--amber);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .detail-panel-header h3 {
+    font-family: 'Playfair Display', serif;
+    color: var(--amber-glow);
+    font-size: 1.3rem;
+    flex: 1;
+  }
+  .detail-panel-body { padding: 1.5rem; }
+  .detail-section { margin-bottom: 1.8rem; }
+  .detail-section h4 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    color: var(--brown);
+    margin-bottom: 0.7rem;
+    padding-bottom: 0.3rem;
+    border-bottom: 1px solid var(--cream-dark);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.4rem 0;
+    border-bottom: 1px dotted var(--cream-dark);
+    font-size: 0.95rem;
+  }
+  .detail-row:last-child { border-bottom: none; }
+  .detail-label { color: var(--text-light); }
+  .detail-value { font-weight: 600; color: var(--text); text-align: right; }
+  .razza-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--amber-pale), #fff);
+    border: 1px solid var(--amber-light);
+    color: var(--brown);
+    padding: 0.3rem 0.9rem;
+    border-radius: 20px;
+    font-style: italic;
+    font-size: 0.95rem;
+  }
 
-/* TIPO CHIP */
-.tipo-chip {
-display: flex;
-align-items: center;
-gap: 0.35rem;
-padding: 0.35rem 0.8rem;
-border: 1px solid var(–cream-dark);
-border-radius: 20px;
-cursor: pointer;
-font-size: 0.9rem;
-background: white;
-color: var(–text);
-transition: all 0.15s;
-user-select: none;
-}
-.tipo-chip:hover { border-color: var(–amber-light); background: var(–amber-pale); }
-.tipo-chip input[type=“checkbox”] { display: none; }
-.tipo-chip:has(input:checked) {
-background: var(–amber);
-border-color: var(–amber);
-color: var(–dark);
-font-weight: 600;
-}
+  /* TIPO CHIP */
+  .tipo-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.8rem;
+    border: 1px solid var(--cream-dark);
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    background: white;
+    color: var(--text);
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .tipo-chip:hover { border-color: var(--amber-light); background: var(--amber-pale); }
+  .tipo-chip input[type="checkbox"] { display: none; }
+  .tipo-chip:has(input:checked) {
+    background: var(--amber);
+    border-color: var(--amber);
+    color: var(--dark);
+    font-weight: 600;
+  }
 
-/* MAGAZZINO */
-.mag-tabs {
-display: flex;
-gap: 0.5rem;
-margin-bottom: 1.5rem;
-border-bottom: 2px solid var(–cream-dark);
-padding-bottom: 0;
-flex-wrap: wrap;
-}
-.mag-tab {
-background: none;
-border: none;
-padding: 0.6rem 1.2rem;
-cursor: pointer;
-font-family: ‘Crimson Pro’, serif;
-font-size: 1rem;
-color: var(–text-light);
-border-bottom: 3px solid transparent;
-margin-bottom: -2px;
-transition: all 0.2s;
-}
-.mag-tab.active { color: var(–amber); border-bottom-color: var(–amber); font-weight: 600; }
-.mag-tab:hover { color: var(–brown); }
+  /* MAGAZZINO */
+  .mag-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid var(--cream-dark);
+    padding-bottom: 0;
+    flex-wrap: wrap;
+  }
+  .mag-tab {
+    background: none;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    cursor: pointer;
+    font-family: 'Crimson Pro', serif;
+    font-size: 1rem;
+    color: var(--text-light);
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+  }
+  .mag-tab.active { color: var(--amber); border-bottom-color: var(--amber); font-weight: 600; }
+  .mag-tab:hover { color: var(--brown); }
 
-.mag-grid {
-display: grid;
-grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-gap: 1rem;
-margin-bottom: 2rem;
-}
-.mag-card {
-background: white;
-border: 1px solid var(–cream-dark);
-border-radius: 6px;
-padding: 1.2rem;
-box-shadow: 0 2px 10px var(–shadow);
-transition: box-shadow 0.2s;
-position: relative;
-}
-.mag-card:hover { box-shadow: 0 4px 18px rgba(200,134,10,0.15); }
-.mag-card-nome {
-font-family: ‘Playfair Display’, serif;
-font-size: 1.1rem;
-color: var(–brown);
-margin-bottom: 0.3rem;
-}
-.mag-card-cat {
-font-size: 0.78rem;
-font-weight: 600;
-text-transform: uppercase;
-letter-spacing: 0.5px;
-margin-bottom: 0.8rem;
-color: var(–text-light);
-}
-.mag-giacenza {
-font-family: ‘Playfair Display’, serif;
-font-size: 2rem;
-color: var(–amber);
-line-height: 1;
-}
-.mag-giacenza.bassa { color: var(–red); }
-.mag-giacenza.zero { color: #aaa; }
-.mag-unita { font-size: 0.85rem; color: var(–text-light); margin-left: 0.3rem; }
-.mag-scadenza { font-size: 0.82rem; color: var(–text-light); font-style: italic; margin-top: 0.3rem; }
-.mag-scadenza.vicina { color: #e65100; font-weight: 600; }
-.mag-actions { display: flex; gap: 0.4rem; margin-top: 0.9rem; flex-wrap: wrap; }
+  .mag-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .mag-card {
+    background: white;
+    border: 1px solid var(--cream-dark);
+    border-radius: 6px;
+    padding: 1.2rem;
+    box-shadow: 0 2px 10px var(--shadow);
+    transition: box-shadow 0.2s;
+    position: relative;
+  }
+  .mag-card:hover { box-shadow: 0 4px 18px rgba(200,134,10,0.15); }
+  .mag-card-nome {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    color: var(--brown);
+    margin-bottom: 0.3rem;
+  }
+  .mag-card-cat {
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.8rem;
+    color: var(--text-light);
+  }
+  .mag-giacenza {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    color: var(--amber);
+    line-height: 1;
+  }
+  .mag-giacenza.bassa { color: var(--red); }
+  .mag-giacenza.zero { color: #aaa; }
+  .mag-unita { font-size: 0.85rem; color: var(--text-light); margin-left: 0.3rem; }
+  .mag-scadenza { font-size: 0.82rem; color: var(--text-light); font-style: italic; margin-top: 0.3rem; }
+  .mag-scadenza.vicina { color: #e65100; font-weight: 600; }
+  .mag-actions { display: flex; gap: 0.4rem; margin-top: 0.9rem; flex-wrap: wrap; }
 
-.mov-list { display: flex; flex-direction: column; gap: 0.6rem; }
-.mov-item {
-background: white;
-border: 1px solid var(–cream-dark);
-border-left: 4px solid var(–cream-dark);
-border-radius: 3px;
-padding: 0.7rem 1rem;
-display: flex;
-align-items: center;
-gap: 0.8rem;
-font-size: 0.95rem;
-flex-wrap: wrap;
-}
-.mov-item.entrata { border-left-color: var(–green); }
-.mov-item.uscita { border-left-color: var(–red); }
-.mov-item.rettifica { border-left-color: var(–blue); }
-.mov-qta {
-font-family: ‘Playfair Display’, serif;
-font-size: 1.2rem;
-min-width: 60px;
-text-align: right;
-}
-.mov-qta.entrata { color: var(–green); }
-.mov-qta.uscita { color: var(–red); }
-.mov-qta.rettifica { color: var(–blue); }
-.mov-info { flex: 1; }
-.mov-nome { font-weight: 600; color: var(–brown); }
-.mov-note { color: var(–text-light); font-size: 0.88rem; }
-.mov-date { font-style: italic; color: var(–text-light); font-size: 0.85rem; white-space: nowrap; }
+  .mov-list { display: flex; flex-direction: column; gap: 0.6rem; }
+  .mov-item {
+    background: white;
+    border: 1px solid var(--cream-dark);
+    border-left: 4px solid var(--cream-dark);
+    border-radius: 3px;
+    padding: 0.7rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-size: 0.95rem;
+    flex-wrap: wrap;
+  }
+  .mov-item.entrata { border-left-color: var(--green); }
+  .mov-item.uscita { border-left-color: var(--red); }
+  .mov-item.rettifica { border-left-color: var(--blue); }
+  .mov-qta {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    min-width: 60px;
+    text-align: right;
+  }
+  .mov-qta.entrata { color: var(--green); }
+  .mov-qta.uscita { color: var(--red); }
+  .mov-qta.rettifica { color: var(--blue); }
+  .mov-info { flex: 1; }
+  .mov-nome { font-weight: 600; color: var(--brown); }
+  .mov-note { color: var(--text-light); font-size: 0.88rem; }
+  .mov-date { font-style: italic; color: var(--text-light); font-size: 0.85rem; white-space: nowrap; }
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(–cream); }
-::-webkit-scrollbar-thumb { background: var(–amber-light); border-radius: 3px; }
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--cream); }
+  ::-webkit-scrollbar-thumb { background: var(--amber-light); border-radius: 3px; }
 </style>
-
 </head>
 <body>
 
@@ -778,7 +776,6 @@ text-align: right;
 </nav>
 
 <!-- BACKUP BAR -->
-
 <div id="backupBar" style="background:var(--dark);border-bottom:1px solid rgba(200,134,10,0.3);padding:0.55rem 1.2rem;display:flex;align-items:center;gap:0.8rem;flex-wrap:wrap;justify-content:space-between;position:relative;z-index:99">
   <div style="display:flex;align-items:center;gap:0.8rem">
     <span id="driveStatus" style="color:rgba(251,245,230,0.55);font-size:0.82rem;font-style:italic;font-family:'Crimson Pro',serif">☁️ Google Drive: non connesso</span>
@@ -803,175 +800,170 @@ text-align: right;
 <main>
 
   <!-- ===== CALENDARIO ===== -->
-
   <section class="section active" id="calendario">
     <h2 class="section-title">Calendario dei Lavori</h2>
     <p class="section-subtitle">Guida completa alle attività stagionali nell'apiario</p>
 
-```
-<!-- PRIMAVERA -->
-<div class="season-header">
-  <span class="season-icon">🌿</span>
-  <h2>Primavera</h2>
-  <span class="season-badge">Marzo – Maggio</span>
-</div>
-<div class="month-card">
-  <div class="month-card-header" onclick="toggleCard(this)"><span>🌱</span><h3>Marzo — Ripresa primaverile</h3><span class="toggle-icon">▼</span></div>
-  <div class="month-card-body"><ul class="task-list">
-    <li class="task-highlight">Primo controllo sanitario dopo l'inverno: presenza della regina, scorte di miele e polline</li>
-    <li>Valutazione delle perdite invernali</li>
-    <li>Sostituzione degli alveari morti o debolissimi</li>
-    <li class="task-highlight">Trattamento antivarroa se non fatto in autunno (acido ossalico in assenza di covata)</li>
-    <li>Pulizia del fondo dell'alveare: morti, detriti</li>
-    <li>Sostituzione dei fondi sporchi o danneggiati</li>
-    <li>Verifica telaini: eliminare quelli anneriti e vecchi (oltre 3-4 anni)</li>
-    <li class="task-highlight">Nutrizione stimolante se scorte scarse: sciroppo 1:1 o candito</li>
-    <li>Controllo delle tarme della cera nei magazzini</li>
-  </ul></div>
-</div>
-<div class="month-card">
-  <div class="month-card-header" onclick="toggleCard(this)"><span>🌸</span><h3>Aprile — Sviluppo della famiglia</h3><span class="toggle-icon">▼</span></div>
-  <div class="month-card-body"><ul class="task-list">
-    <li>Controlli periodici ogni 7-10 giorni</li>
-    <li>Verifica della deposizione della regina (schema regolare e compatto)</li>
-    <li>Valutazione della popolazione: aggiungere spazio se necessario</li>
-    <li class="task-highlight">Inserimento del primo melario quando 8-9 telaini sono coperti di api</li>
-    <li class="task-highlight">Inizio controllo della sciamatura: verifica celle reali</li>
-    <li>Sostituzione di regine vecchie o poco prolifiche</li>
-    <li>Unione di famiglie deboli</li>
-    <li>Aggiornamento del registro di apiario (obbligatorio per legge in Italia)</li>
-  </ul></div>
-</div>
-<div class="month-card">
-  <div class="month-card-header" onclick="toggleCard(this)"><span>🌺</span><h3>Maggio — Piena produzione (acacia)</h3><span class="toggle-icon">▼</span></div>
-  <div class="month-card-body"><ul class="task-list">
-    <li class="task-highlight">Controllo anti-sciamatura ogni 5-7 giorni</li>
-    <li>Aggiunta di melari se il primo è quasi pieno</li>
-    <li>Inserimento di telaini con foglio cereo nei melari</li>
-    <li class="task-highlight">Raccolta miele di acacia quando i favi sono opercolati per almeno ⅔</li>
-    <li>Smielatura del miele di acacia (tempi stretti: fioritura breve)</li>
-    <li>Nucleazioni artificiali per prevenire la sciamatura</li>
-  </ul></div>
-</div>
+    <!-- PRIMAVERA -->
+    <div class="season-header">
+      <span class="season-icon">🌿</span>
+      <h2>Primavera</h2>
+      <span class="season-badge">Marzo – Maggio</span>
+    </div>
+    <div class="month-card">
+      <div class="month-card-header" onclick="toggleCard(this)"><span>🌱</span><h3>Marzo — Ripresa primaverile</h3><span class="toggle-icon">▼</span></div>
+      <div class="month-card-body"><ul class="task-list">
+        <li class="task-highlight">Primo controllo sanitario dopo l'inverno: presenza della regina, scorte di miele e polline</li>
+        <li>Valutazione delle perdite invernali</li>
+        <li>Sostituzione degli alveari morti o debolissimi</li>
+        <li class="task-highlight">Trattamento antivarroa se non fatto in autunno (acido ossalico in assenza di covata)</li>
+        <li>Pulizia del fondo dell'alveare: morti, detriti</li>
+        <li>Sostituzione dei fondi sporchi o danneggiati</li>
+        <li>Verifica telaini: eliminare quelli anneriti e vecchi (oltre 3-4 anni)</li>
+        <li class="task-highlight">Nutrizione stimolante se scorte scarse: sciroppo 1:1 o candito</li>
+        <li>Controllo delle tarme della cera nei magazzini</li>
+      </ul></div>
+    </div>
+    <div class="month-card">
+      <div class="month-card-header" onclick="toggleCard(this)"><span>🌸</span><h3>Aprile — Sviluppo della famiglia</h3><span class="toggle-icon">▼</span></div>
+      <div class="month-card-body"><ul class="task-list">
+        <li>Controlli periodici ogni 7-10 giorni</li>
+        <li>Verifica della deposizione della regina (schema regolare e compatto)</li>
+        <li>Valutazione della popolazione: aggiungere spazio se necessario</li>
+        <li class="task-highlight">Inserimento del primo melario quando 8-9 telaini sono coperti di api</li>
+        <li class="task-highlight">Inizio controllo della sciamatura: verifica celle reali</li>
+        <li>Sostituzione di regine vecchie o poco prolifiche</li>
+        <li>Unione di famiglie deboli</li>
+        <li>Aggiornamento del registro di apiario (obbligatorio per legge in Italia)</li>
+      </ul></div>
+    </div>
+    <div class="month-card">
+      <div class="month-card-header" onclick="toggleCard(this)"><span>🌺</span><h3>Maggio — Piena produzione (acacia)</h3><span class="toggle-icon">▼</span></div>
+      <div class="month-card-body"><ul class="task-list">
+        <li class="task-highlight">Controllo anti-sciamatura ogni 5-7 giorni</li>
+        <li>Aggiunta di melari se il primo è quasi pieno</li>
+        <li>Inserimento di telaini con foglio cereo nei melari</li>
+        <li class="task-highlight">Raccolta miele di acacia quando i favi sono opercolati per almeno ⅔</li>
+        <li>Smielatura del miele di acacia (tempi stretti: fioritura breve)</li>
+        <li>Nucleazioni artificiali per prevenire la sciamatura</li>
+      </ul></div>
+    </div>
 
-<!-- ESTATE -->
-<div class="season-header"><span class="season-icon">☀️</span><h2>Estate</h2><span class="season-badge">Giugno – Agosto</span></div>
-<div class="month-card">
-  <div class="month-card-header" onclick="toggleCard(this)"><span>🌻</span><h3>Giugno — Post-acacia e millefiori</h3><span class="toggle-icon">▼</span></div>
-  <div class="month-card-body"><ul class="task-list">
-    <li>Rimozione dei melari vuoti dopo l'acacia</li>
-    <li>Smielatura del millefiori se presente</li>
-    <li class="task-highlight">Controllo varroa con conta delle cadute naturali (striscia collante)</li>
-    <li>Se infestazione elevata: trattamento estivo con acido ossalico o formico</li>
-    <li>Verifica stato delle regine: sostituzione di quelle con 2 anni di età</li>
-    <li class="task-highlight">Allevamento regine (periodo ideale: maggio-giugno)</li>
-    <li>Produzione di nuclei per rimonta o vendita</li>
-  </ul></div>
-</div>
-<div class="month-card">
-  <div class="month-card-header" onclick="toggleCard(this)"><span>🔆</span><h3>Luglio — Periodo critico</h3><span class="toggle-icon">▼</span></div>
-  <div class="month-card-body"><ul class="task-list">
-    <li class="task-highlight">Garantire ombra e ventilazione agli alveari (caldo intenso)</li>
-    <li>Disponibilità di acqua nelle vicinanze dell'apiario</li>
-    <li class="task-highlight">Rischio saccheggio: ridurre le entrate nelle famiglie deboli</li>
-    <li>Controllo della varroa</li>
-    <li>Famiglie in diminuzione: normale riduzione della covata estiva</li>
-    <li>Evitare aperture inutili nelle ore calde (&gt;30°C)</li>
-  </ul></div>
-</div>
-<div class="month-card">
-  <div class="month-card-header" onclick="toggleCard(this)"><span>🍯</span><h3>Agosto — Preparazione all'autunno</h3><span class="toggle-icon">▼</span></div>
-  <div class="month-card-body"><ul class="task-list">
-    <li class="task-highlight">Trattamento antivarroa estivo (fondamentale per proteggere le api invernali)</li>
-    <li>Acido ossalico sublimato (più efficace)</li>
-    <li>Acido formico se temperature tra 15-30°C</li>
-    <li>Strips a base di amitraz o timolo</li>
-    <li>Verifica scorte: le famiglie non devono avere meno di 10-12 kg di miele</li>
-    <li>Sostituzione delle regine vecchie prima della fine dell'estate</li>
-    <li>Raccolta miele di sulla, girasole, millefiori estivo se presenti flussi</li>
-  </ul></div>
-</div>
+    <!-- ESTATE -->
+    <div class="season-header"><span class="season-icon">☀️</span><h2>Estate</h2><span class="season-badge">Giugno – Agosto</span></div>
+    <div class="month-card">
+      <div class="month-card-header" onclick="toggleCard(this)"><span>🌻</span><h3>Giugno — Post-acacia e millefiori</h3><span class="toggle-icon">▼</span></div>
+      <div class="month-card-body"><ul class="task-list">
+        <li>Rimozione dei melari vuoti dopo l'acacia</li>
+        <li>Smielatura del millefiori se presente</li>
+        <li class="task-highlight">Controllo varroa con conta delle cadute naturali (striscia collante)</li>
+        <li>Se infestazione elevata: trattamento estivo con acido ossalico o formico</li>
+        <li>Verifica stato delle regine: sostituzione di quelle con 2 anni di età</li>
+        <li class="task-highlight">Allevamento regine (periodo ideale: maggio-giugno)</li>
+        <li>Produzione di nuclei per rimonta o vendita</li>
+      </ul></div>
+    </div>
+    <div class="month-card">
+      <div class="month-card-header" onclick="toggleCard(this)"><span>🔆</span><h3>Luglio — Periodo critico</h3><span class="toggle-icon">▼</span></div>
+      <div class="month-card-body"><ul class="task-list">
+        <li class="task-highlight">Garantire ombra e ventilazione agli alveari (caldo intenso)</li>
+        <li>Disponibilità di acqua nelle vicinanze dell'apiario</li>
+        <li class="task-highlight">Rischio saccheggio: ridurre le entrate nelle famiglie deboli</li>
+        <li>Controllo della varroa</li>
+        <li>Famiglie in diminuzione: normale riduzione della covata estiva</li>
+        <li>Evitare aperture inutili nelle ore calde (&gt;30°C)</li>
+      </ul></div>
+    </div>
+    <div class="month-card">
+      <div class="month-card-header" onclick="toggleCard(this)"><span>🍯</span><h3>Agosto — Preparazione all'autunno</h3><span class="toggle-icon">▼</span></div>
+      <div class="month-card-body"><ul class="task-list">
+        <li class="task-highlight">Trattamento antivarroa estivo (fondamentale per proteggere le api invernali)</li>
+        <li>Acido ossalico sublimato (più efficace)</li>
+        <li>Acido formico se temperature tra 15-30°C</li>
+        <li>Strips a base di amitraz o timolo</li>
+        <li>Verifica scorte: le famiglie non devono avere meno di 10-12 kg di miele</li>
+        <li>Sostituzione delle regine vecchie prima della fine dell'estate</li>
+        <li>Raccolta miele di sulla, girasole, millefiori estivo se presenti flussi</li>
+      </ul></div>
+    </div>
 
-<!-- AUTUNNO -->
-<div class="season-header"><span class="season-icon">🍂</span><h2>Autunno</h2><span class="season-badge">Settembre – Novembre</span></div>
-<div class="month-card">
-  <div class="month-card-header" onclick="toggleCard(this)"><span>🍁</span><h3>Settembre — Consolidamento</h3><span class="toggle-icon">▼</span></div>
-  <div class="month-card-body"><ul class="task-list">
-    <li class="task-highlight">Ultimo controllo completo prima dell'inverno</li>
-    <li>Verifica presenza e qualità della regina</li>
-    <li>Valutazione della quantità di api e covata</li>
-    <li class="task-highlight">Nutrizione autunnale: sciroppo 2:1 in grandi quantità o candito</li>
-    <li>Unione delle famiglie deboli (tecnica del foglio di giornale)</li>
-    <li>Riduzione delle entrate con riduci-entrata per limitare il saccheggio</li>
-    <li class="task-highlight">Trattamento antivarroa con acido ossalico in assenza di covata</li>
-  </ul></div>
-</div>
-<div class="month-card">
-  <div class="month-card-header" onclick="toggleCard(this)"><span>🌫️</span><h3>Ottobre — Pre-invernamento</h3><span class="toggle-icon">▼</span></div>
-  <div class="month-card-body"><ul class="task-list">
-    <li>Completamento della nutrizione autunnale</li>
-    <li class="task-highlight">Trattamento antivarroa con acido ossalico (con covata ridotta al minimo)</li>
-    <li>Verifica dell'umidità interna: ventilazione adeguata contro la condensa</li>
-    <li>Sistemazione delle protezioni invernali (zone fredde)</li>
-    <li>Riduzione dell'entrata a 1-2 cm</li>
-    <li>Rimozione dei melari vuoti e loro pulizia</li>
-    <li class="task-highlight">Magazzinaggio melari: pulizia, trattamento anti-tarma, stoccaggio asciutto</li>
-  </ul></div>
-</div>
-<div class="month-card">
-  <div class="month-card-header" onclick="toggleCard(this)"><span>❄️</span><h3>Novembre — Invernamento</h3><span class="toggle-icon">▼</span></div>
-  <div class="month-card-body"><ul class="task-list">
-    <li class="task-highlight">Ultimo trattamento antivarroa con acido ossalico gocciolato (glomere formato, assenza covata)</li>
-    <li>Posizionamento protezioni contro vento e umidità</li>
-    <li>Controllo visivo esterno (non aprire)</li>
-    <li>Assicurare stabilità degli alveari (vento, neve)</li>
-    <li>Pulizia e manutenzione delle attrezzature in officina</li>
-  </ul></div>
-</div>
+    <!-- AUTUNNO -->
+    <div class="season-header"><span class="season-icon">🍂</span><h2>Autunno</h2><span class="season-badge">Settembre – Novembre</span></div>
+    <div class="month-card">
+      <div class="month-card-header" onclick="toggleCard(this)"><span>🍁</span><h3>Settembre — Consolidamento</h3><span class="toggle-icon">▼</span></div>
+      <div class="month-card-body"><ul class="task-list">
+        <li class="task-highlight">Ultimo controllo completo prima dell'inverno</li>
+        <li>Verifica presenza e qualità della regina</li>
+        <li>Valutazione della quantità di api e covata</li>
+        <li class="task-highlight">Nutrizione autunnale: sciroppo 2:1 in grandi quantità o candito</li>
+        <li>Unione delle famiglie deboli (tecnica del foglio di giornale)</li>
+        <li>Riduzione delle entrate con riduci-entrata per limitare il saccheggio</li>
+        <li class="task-highlight">Trattamento antivarroa con acido ossalico in assenza di covata</li>
+      </ul></div>
+    </div>
+    <div class="month-card">
+      <div class="month-card-header" onclick="toggleCard(this)"><span>🌫️</span><h3>Ottobre — Pre-invernamento</h3><span class="toggle-icon">▼</span></div>
+      <div class="month-card-body"><ul class="task-list">
+        <li>Completamento della nutrizione autunnale</li>
+        <li class="task-highlight">Trattamento antivarroa con acido ossalico (con covata ridotta al minimo)</li>
+        <li>Verifica dell'umidità interna: ventilazione adeguata contro la condensa</li>
+        <li>Sistemazione delle protezioni invernali (zone fredde)</li>
+        <li>Riduzione dell'entrata a 1-2 cm</li>
+        <li>Rimozione dei melari vuoti e loro pulizia</li>
+        <li class="task-highlight">Magazzinaggio melari: pulizia, trattamento anti-tarma, stoccaggio asciutto</li>
+      </ul></div>
+    </div>
+    <div class="month-card">
+      <div class="month-card-header" onclick="toggleCard(this)"><span>❄️</span><h3>Novembre — Invernamento</h3><span class="toggle-icon">▼</span></div>
+      <div class="month-card-body"><ul class="task-list">
+        <li class="task-highlight">Ultimo trattamento antivarroa con acido ossalico gocciolato (glomere formato, assenza covata)</li>
+        <li>Posizionamento protezioni contro vento e umidità</li>
+        <li>Controllo visivo esterno (non aprire)</li>
+        <li>Assicurare stabilità degli alveari (vento, neve)</li>
+        <li>Pulizia e manutenzione delle attrezzature in officina</li>
+      </ul></div>
+    </div>
 
-<!-- INVERNO -->
-<div class="season-header"><span class="season-icon">🌨️</span><h2>Inverno</h2><span class="season-badge">Dicembre – Febbraio</span></div>
-<div class="month-card">
-  <div class="month-card-header" onclick="toggleCard(this)"><span>🌙</span><h3>Dicembre – Gennaio — Riposo invernale</h3><span class="toggle-icon">▼</span></div>
-  <div class="month-card-body"><ul class="task-list">
-    <li class="task-highlight">Nessuna apertura: il glomere non deve essere disturbato</li>
-    <li>Controllo esterno: presenza di volo nelle giornate miti (&gt;10°C)</li>
-    <li>Ascolto rumori normali battendo sull'alveare</li>
-    <li>Protezione da picchi, cinciallegre e predatori (reti o riduci-entrata)</li>
-    <li class="task-highlight">Controllo del peso (bilance apistiche o sollevamento posteriore)</li>
-    <li>Se scorte scarse: somministrazione di candito senza aprire l'alveare</li>
-  </ul></div>
-</div>
-<div class="month-card">
-  <div class="month-card-header" onclick="toggleCard(this)"><span>🌤️</span><h3>Febbraio — Pre-ripresa</h3><span class="toggle-icon">▼</span></div>
-  <div class="month-card-body"><ul class="task-list">
-    <li>Nelle giornate miti: primo controllo rapido di scorte e glomere</li>
-    <li>Trattamento con acido ossalico gocciolato se non fatto in autunno</li>
-    <li class="task-highlight">Inizio preparazione attrezzature per la stagione</li>
-    <li>Fusione cera vecchia e costruzione/acquisto nuovi fogli cerei</li>
-    <li>Manutenzione e verniciatura delle arnie</li>
-    <li>Ordine del materiale: fogli cerei, farmaci, telaini, ecc.</li>
-  </ul></div>
-</div>
+    <!-- INVERNO -->
+    <div class="season-header"><span class="season-icon">🌨️</span><h2>Inverno</h2><span class="season-badge">Dicembre – Febbraio</span></div>
+    <div class="month-card">
+      <div class="month-card-header" onclick="toggleCard(this)"><span>🌙</span><h3>Dicembre – Gennaio — Riposo invernale</h3><span class="toggle-icon">▼</span></div>
+      <div class="month-card-body"><ul class="task-list">
+        <li class="task-highlight">Nessuna apertura: il glomere non deve essere disturbato</li>
+        <li>Controllo esterno: presenza di volo nelle giornate miti (&gt;10°C)</li>
+        <li>Ascolto rumori normali battendo sull'alveare</li>
+        <li>Protezione da picchi, cinciallegre e predatori (reti o riduci-entrata)</li>
+        <li class="task-highlight">Controllo del peso (bilance apistiche o sollevamento posteriore)</li>
+        <li>Se scorte scarse: somministrazione di candito senza aprire l'alveare</li>
+      </ul></div>
+    </div>
+    <div class="month-card">
+      <div class="month-card-header" onclick="toggleCard(this)"><span>🌤️</span><h3>Febbraio — Pre-ripresa</h3><span class="toggle-icon">▼</span></div>
+      <div class="month-card-body"><ul class="task-list">
+        <li>Nelle giornate miti: primo controllo rapido di scorte e glomere</li>
+        <li>Trattamento con acido ossalico gocciolato se non fatto in autunno</li>
+        <li class="task-highlight">Inizio preparazione attrezzature per la stagione</li>
+        <li>Fusione cera vecchia e costruzione/acquisto nuovi fogli cerei</li>
+        <li>Manutenzione e verniciatura delle arnie</li>
+        <li>Ordine del materiale: fogli cerei, farmaci, telaini, ecc.</li>
+      </ul></div>
+    </div>
 
-<!-- TUTTO L'ANNO -->
-<div class="season-header"><span class="season-icon">📋</span><h2>Tutto l'anno</h2><span class="season-badge">Lavori trasversali</span></div>
-<div class="month-card" style="border-left-color: var(--brown)">
-  <div class="month-card-header" onclick="toggleCard(this)"><span>🗂️</span><h3>Attività continue</h3><span class="toggle-icon">▼</span></div>
-  <div class="month-card-body"><ul class="task-list">
-    <li class="task-highlight">Registro di apiario: aggiornamento dopo ogni visita (obbligatorio per legge in Italia)</li>
-    <li>Annotazione trattamenti veterinari con prescrizione medico-veterinaria</li>
-    <li>Controllo e manutenzione continua delle attrezzature (smoker, leva, tuta)</li>
-    <li>Analisi del miele: umidità con rifrattometro prima della smielatura (&lt;18%)</li>
-    <li>Formazione e aggiornamento continuo</li>
-  </ul></div>
-</div>
-```
-
+    <!-- TUTTO L'ANNO -->
+    <div class="season-header"><span class="season-icon">📋</span><h2>Tutto l'anno</h2><span class="season-badge">Lavori trasversali</span></div>
+    <div class="month-card" style="border-left-color: var(--brown)">
+      <div class="month-card-header" onclick="toggleCard(this)"><span>🗂️</span><h3>Attività continue</h3><span class="toggle-icon">▼</span></div>
+      <div class="month-card-body"><ul class="task-list">
+        <li class="task-highlight">Registro di apiario: aggiornamento dopo ogni visita (obbligatorio per legge in Italia)</li>
+        <li>Annotazione trattamenti veterinari con prescrizione medico-veterinaria</li>
+        <li>Controllo e manutenzione continua delle attrezzature (smoker, leva, tuta)</li>
+        <li>Analisi del miele: umidità con rifrattometro prima della smielatura (&lt;18%)</li>
+        <li>Formazione e aggiornamento continuo</li>
+      </ul></div>
+    </div>
   </section>
 
   <!-- ===== ARNIE ===== -->
-
   <section class="section" id="arnie">
     <h2 class="section-title">Le Mie Arnie</h2>
     <p class="section-subtitle">Gestisci il censimento del tuo apiario</p>
@@ -982,7 +974,6 @@ text-align: right;
   </section>
 
   <!-- ===== REGISTRO ===== -->
-
   <section class="section" id="registro">
     <h2 class="section-title">Registro Visite</h2>
     <p class="section-subtitle">Tieni traccia di ogni ispezione e intervento</p>
@@ -1051,7 +1042,6 @@ text-align: right;
   </section>
 
   <!-- ===== MAGAZZINO ===== -->
-
   <section class="section" id="magazzino">
     <h2 class="section-title">Magazzino</h2>
     <p class="section-subtitle">Scorte, materiale apistico e prodotto finito</p>
@@ -1092,144 +1082,139 @@ text-align: right;
 </main>
 
 <!-- MODAL ARNIA -->
-
 <div class="modal-overlay" id="arniModal">
   <div class="modal" style="max-width:600px">
     <h3 id="arniModalTitle">🏠 Nuova Arnia</h3>
     <input type="hidden" id="editArniId">
 
-```
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
-  <div class="form-row">
-    <label>Numero / Codice</label>
-    <input type="text" id="arniNum" placeholder="Es. A1, 07, Nord...">
-  </div>
-  <div class="form-row">
-    <label>Nome (opzionale)</label>
-    <input type="text" id="arniNome" placeholder="Es. Regina Primavera">
-  </div>
-</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+      <div class="form-row">
+        <label>Numero / Codice</label>
+        <input type="text" id="arniNum" placeholder="Es. A1, 07, Nord...">
+      </div>
+      <div class="form-row">
+        <label>Nome (opzionale)</label>
+        <input type="text" id="arniNome" placeholder="Es. Regina Primavera">
+      </div>
+    </div>
 
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
-  <div class="form-row">
-    <label>Stato famiglia</label>
-    <select id="arniStatus">
-      <option value="attiva">✅ Attiva e forte</option>
-      <option value="debole">⚠️ Debole</option>
-      <option value="problema">❌ Problema</option>
-      <option value="invernata">❄️ Invernata</option>
-    </select>
-  </div>
-  <div class="form-row">
-    <label>Anno introduzione regina</label>
-    <input type="number" id="arniReginaAnno" placeholder="Es. 2023" min="2000" max="2099">
-  </div>
-</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+      <div class="form-row">
+        <label>Stato famiglia</label>
+        <select id="arniStatus">
+          <option value="attiva">✅ Attiva e forte</option>
+          <option value="debole">⚠️ Debole</option>
+          <option value="problema">❌ Problema</option>
+          <option value="invernata">❄️ Invernata</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Anno introduzione regina</label>
+        <input type="number" id="arniReginaAnno" placeholder="Es. 2023" min="2000" max="2099">
+      </div>
+    </div>
 
-<!-- RAZZA API -->
-<div style="border:1px solid var(--cream-dark);border-radius:4px;padding:1rem;margin-bottom:1rem;background:var(--amber-pale)">
-  <div style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--brown);margin-bottom:0.8rem;display:flex;align-items:center;gap:0.4rem">🐝 Razza delle api</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
-    <div class="form-row">
-      <label>Razza principale</label>
-      <select id="arniRazza">
-        <option value="">— Non specificata —</option>
-        <option value="Ligustica">Apis mellifera ligustica (Italiana)</option>
-        <option value="Carnica">Apis mellifera carnica (Carnica)</option>
-        <option value="Caucasica">Apis mellifera caucasica (Caucasica)</option>
-        <option value="Sicula">Apis mellifera sicula (Sicula)</option>
-        <option value="Buckfast">Buckfast</option>
-        <option value="Mellifera">Apis mellifera mellifera (Nera)</option>
-        <option value="Ibrida">Ibrida / Meticcia</option>
-        <option value="Altro">Altra razza</option>
-      </select>
+    <!-- RAZZA API -->
+    <div style="border:1px solid var(--cream-dark);border-radius:4px;padding:1rem;margin-bottom:1rem;background:var(--amber-pale)">
+      <div style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--brown);margin-bottom:0.8rem;display:flex;align-items:center;gap:0.4rem">🐝 Razza delle api</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+        <div class="form-row">
+          <label>Razza principale</label>
+          <select id="arniRazza">
+            <option value="">— Non specificata —</option>
+            <option value="Ligustica">Apis mellifera ligustica (Italiana)</option>
+            <option value="Carnica">Apis mellifera carnica (Carnica)</option>
+            <option value="Caucasica">Apis mellifera caucasica (Caucasica)</option>
+            <option value="Sicula">Apis mellifera sicula (Sicula)</option>
+            <option value="Buckfast">Buckfast</option>
+            <option value="Mellifera">Apis mellifera mellifera (Nera)</option>
+            <option value="Ibrida">Ibrida / Meticcia</option>
+            <option value="Altro">Altra razza</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Origine / Provenienza</label>
+          <input type="text" id="arniRazzaOrigine" placeholder="Es. Allevamento Rossi...">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.8rem">
+        <div class="form-row">
+          <label>Temperamento</label>
+          <select id="arniTemperamento">
+            <option value="">—</option>
+            <option value="Molto docile">😊 Molto docile</option>
+            <option value="Docile">🙂 Docile</option>
+            <option value="Normale">😐 Normale</option>
+            <option value="Nervosa">😤 Nervosa</option>
+            <option value="Aggressiva">😡 Aggressiva</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Tendenza sciamatura</label>
+          <select id="arniSciamatura">
+            <option value="">—</option>
+            <option value="Bassa">🟢 Bassa</option>
+            <option value="Media">🟡 Media</option>
+            <option value="Alta">🔴 Alta</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Produttività stimata</label>
+          <select id="arniProduttivita">
+            <option value="">—</option>
+            <option value="Alta">⭐⭐⭐ Alta</option>
+            <option value="Media">⭐⭐ Media</option>
+            <option value="Bassa">⭐ Bassa</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>Note sulla razza</label>
+        <input type="text" id="arniRazzaNote" placeholder="Es. buona raccolta su acacia, ottima svernata...">
+      </div>
     </div>
-    <div class="form-row">
-      <label>Origine / Provenienza</label>
-      <input type="text" id="arniRazzaOrigine" placeholder="Es. Allevamento Rossi...">
-    </div>
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.8rem">
-    <div class="form-row">
-      <label>Temperamento</label>
-      <select id="arniTemperamento">
-        <option value="">—</option>
-        <option value="Molto docile">😊 Molto docile</option>
-        <option value="Docile">🙂 Docile</option>
-        <option value="Normale">😐 Normale</option>
-        <option value="Nervosa">😤 Nervosa</option>
-        <option value="Aggressiva">😡 Aggressiva</option>
-      </select>
-    </div>
-    <div class="form-row">
-      <label>Tendenza sciamatura</label>
-      <select id="arniSciamatura">
-        <option value="">—</option>
-        <option value="Bassa">🟢 Bassa</option>
-        <option value="Media">🟡 Media</option>
-        <option value="Alta">🔴 Alta</option>
-      </select>
-    </div>
-    <div class="form-row">
-      <label>Produttività stimata</label>
-      <select id="arniProduttivita">
-        <option value="">—</option>
-        <option value="Alta">⭐⭐⭐ Alta</option>
-        <option value="Media">⭐⭐ Media</option>
-        <option value="Bassa">⭐ Bassa</option>
-      </select>
-    </div>
-  </div>
-  <div class="form-row">
-    <label>Note sulla razza</label>
-    <input type="text" id="arniRazzaNote" placeholder="Es. buona raccolta su acacia, ottima svernata...">
-  </div>
-</div>
 
-<!-- MELARI -->
-<div style="border:1px solid var(--cream-dark);border-radius:4px;padding:1rem;margin-bottom:1rem">
-  <div style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--brown);margin-bottom:0.8rem;display:flex;align-items:center;gap:0.4rem">🍯 Melari</div>
-  <div class="melario-list" id="melariList"></div>
-  <div class="add-melario-row" style="margin-top:0.8rem">
-    <div class="form-row" style="margin:0">
-      <label>N° telaini</label>
-      <input type="number" id="melNum" min="1" max="12" placeholder="Es. 10" style="width:100%;padding:0.5rem 0.7rem;border:1px solid var(--cream-dark);border-radius:3px;font-family:'Crimson Pro',serif;font-size:0.95rem;background:var(--cream)">
+    <!-- MELARI -->
+    <div style="border:1px solid var(--cream-dark);border-radius:4px;padding:1rem;margin-bottom:1rem">
+      <div style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--brown);margin-bottom:0.8rem;display:flex;align-items:center;gap:0.4rem">🍯 Melari</div>
+      <div class="melario-list" id="melariList"></div>
+      <div class="add-melario-row" style="margin-top:0.8rem">
+        <div class="form-row" style="margin:0">
+          <label>N° telaini</label>
+          <input type="number" id="melNum" min="1" max="12" placeholder="Es. 10" style="width:100%;padding:0.5rem 0.7rem;border:1px solid var(--cream-dark);border-radius:3px;font-family:'Crimson Pro',serif;font-size:0.95rem;background:var(--cream)">
+        </div>
+        <div class="form-row" style="margin:0">
+          <label>Data posizion.</label>
+          <input type="date" id="melData" style="width:100%;padding:0.5rem 0.7rem;border:1px solid var(--cream-dark);border-radius:3px;font-family:'Crimson Pro',serif;font-size:0.95rem;background:var(--cream)">
+        </div>
+        <div class="form-row" style="margin:0">
+          <label>Stato</label>
+          <select id="melStatus" style="width:100%;padding:0.5rem 0.7rem;border:1px solid var(--cream-dark);border-radius:3px;font-family:'Crimson Pro',serif;font-size:0.95rem;background:var(--cream)">
+            <option value="posizionato">In produzione</option>
+            <option value="rimosso">Rimosso</option>
+            <option value="produzione">Smielato</option>
+          </select>
+        </div>
+        <button class="btn" style="padding:0.5rem 0.9rem;font-size:0.9rem;align-self:flex-end" onclick="addMelario()">+ Aggiungi</button>
+      </div>
+      <div class="form-row" style="margin-top:0.5rem">
+        <label>Note melari</label>
+        <input type="text" id="melNote" placeholder="Es. acacia, 8 telaini opercolati...">
+      </div>
     </div>
-    <div class="form-row" style="margin:0">
-      <label>Data posizion.</label>
-      <input type="date" id="melData" style="width:100%;padding:0.5rem 0.7rem;border:1px solid var(--cream-dark);border-radius:3px;font-family:'Crimson Pro',serif;font-size:0.95rem;background:var(--cream)">
-    </div>
-    <div class="form-row" style="margin:0">
-      <label>Stato</label>
-      <select id="melStatus" style="width:100%;padding:0.5rem 0.7rem;border:1px solid var(--cream-dark);border-radius:3px;font-family:'Crimson Pro',serif;font-size:0.95rem;background:var(--cream)">
-        <option value="posizionato">In produzione</option>
-        <option value="rimosso">Rimosso</option>
-        <option value="produzione">Smielato</option>
-      </select>
-    </div>
-    <button class="btn" style="padding:0.5rem 0.9rem;font-size:0.9rem;align-self:flex-end" onclick="addMelario()">+ Aggiungi</button>
-  </div>
-  <div class="form-row" style="margin-top:0.5rem">
-    <label>Note melari</label>
-    <input type="text" id="melNote" placeholder="Es. acacia, 8 telaini opercolati...">
-  </div>
-</div>
 
-<div class="form-row">
-  <label>Note generali</label>
-  <textarea id="arniNote" placeholder="Posizione nell'apiario, caratteristiche particolari..."></textarea>
-</div>
-<div class="modal-footer">
-  <button class="btn btn-secondary" onclick="closeArniModal()">Annulla</button>
-  <button class="btn" onclick="saveArnia()">Salva arnia</button>
-</div>
-```
-
+    <div class="form-row">
+      <label>Note generali</label>
+      <textarea id="arniNote" placeholder="Posizione nell'apiario, caratteristiche particolari..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeArniModal()">Annulla</button>
+      <button class="btn" onclick="saveArnia()">Salva arnia</button>
+    </div>
   </div>
 </div>
 
 <!-- DETAIL PANEL -->
-
 <div class="detail-panel" id="detailPanel">
   <div class="detail-panel-header">
     <h3 id="detailTitle">Arnia</h3>
@@ -2107,8 +2092,11 @@ function setDriveLoading(on, msg = '') {
 // ======= INIT =======
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('logData').value = new Date().toISOString().slice(0, 10);
-  document.getElementById('artCategoria').addEventListener('change', toggleCampiConsumabile);
-  toggleCampiConsumabile();
+  const artCat = document.getElementById('artCategoria');
+  if(artCat) {
+    artCat.addEventListener('change', toggleCampiConsumabile);
+    toggleCampiConsumabile();
+  }
   renderArnie();
   renderStats();
   updateArniSelects();
@@ -2117,6 +2105,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
 window.addEventListener('load', () => { setTimeout(initGoogleDrive, 500); });
 </script>
-
 </body>
 </html>
