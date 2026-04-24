@@ -1081,6 +1081,103 @@
 
 </main>
 
+<!-- MODAL ARTICOLO -->
+<div class="modal-overlay" id="articoloModal">
+  <div class="modal" style="max-width:480px">
+    <h3 id="articoloModalTitle">📦 Nuovo articolo</h3>
+    <input type="hidden" id="editArticoloId">
+    <div class="form-row">
+      <label>Nome articolo</label>
+      <input type="text" id="artNome" placeholder="Es. Telaini nido, Acido ossalico...">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+      <div class="form-row">
+        <label>Categoria</label>
+        <select id="artCategoria">
+          <option value="materiale">🔧 Materiale apistico</option>
+          <option value="consumabile">💊 Consumabile / Farmaco</option>
+          <option value="prodotto">🍯 Prodotto finito</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Unità di misura</label>
+        <select id="artUnita">
+          <option value="pz">pz (pezzi)</option>
+          <option value="kg">kg</option>
+          <option value="g">g (grammi)</option>
+          <option value="l">l (litri)</option>
+          <option value="ml">ml</option>
+          <option value="vasi">vasi</option>
+          <option value="dosi">dosi</option>
+          <option value="strips">strips</option>
+          <option value="fogli">fogli</option>
+          <option value="sacchi">sacchi</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem" id="artCampiConsumabile">
+      <div class="form-row">
+        <label>Scadenza (mese/anno)</label>
+        <input type="month" id="artScadenza">
+      </div>
+      <div class="form-row">
+        <label>Lotto</label>
+        <input type="text" id="artLotto" placeholder="Es. AB123">
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Soglia minima scorta (avviso)</label>
+      <input type="number" id="artSoglia" min="0" placeholder="Es. 10 — lascia vuoto per disabilitare">
+    </div>
+    <div class="form-row">
+      <label>Note</label>
+      <input type="text" id="artNote" placeholder="Es. Langstroth, fornitore, ecc.">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeArticoloModal()">Annulla</button>
+      <button class="btn" onclick="saveArticolo()">Salva articolo</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL MOVIMENTAZIONE -->
+<div class="modal-overlay" id="movModal">
+  <div class="modal" style="max-width:440px">
+    <h3 id="movModalTitle">🔄 Nuova movimentazione</h3>
+    <input type="hidden" id="editMovId">
+    <div class="form-row">
+      <label>Data</label>
+      <input type="date" id="movData">
+    </div>
+    <div class="form-row">
+      <label>Articolo</label>
+      <select id="movArticolo"></select>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+      <div class="form-row">
+        <label>Tipo</label>
+        <select id="movTipo">
+          <option value="entrata">➕ Entrata</option>
+          <option value="uscita">➖ Uscita</option>
+          <option value="rettifica">🔧 Rettifica</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Quantità</label>
+        <input type="number" id="movQta" min="0" step="0.1" placeholder="Es. 10">
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Note</label>
+      <input type="text" id="movNote" placeholder="Es. acquisto Nicot, vendita fiera...">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeMovModal()">Annulla</button>
+      <button class="btn" onclick="saveMov()">Salva</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL ARNIA -->
 <div class="modal-overlay" id="arniModal">
   <div class="modal" style="max-width:600px">
