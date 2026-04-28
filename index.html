@@ -2177,12 +2177,12 @@ function renderHome() {
   const saldoTot  = mc.filter(m=>m.tipo==='entrata').reduce((s,m)=>s+parseFloat(m.importo||0),0)
                   - mc.filter(m=>m.tipo==='uscita').reduce((s,m)=>s+parseFloat(m.importo||0),0);
 
-  document.getElementById('homeKpi').innerHTML = `
-    <div class="stat-card"><div class="stat-number">${arnie.filter(a=>a.status==='attiva').length}</div><div class="stat-label">Arnie attive</div></div>
+ document.getElementById('homeKpi').innerHTML = `
+    <div class="stat-card" style="cursor:pointer" onclick="navigateTo('arnie')" onmouseover="this.style.boxShadow='0 4px 14px rgba(200,134,10,0.2)'" onmouseout="this.style.boxShadow=''"><div class="stat-number">${arnie.filter(a=>a.status==='attiva').length}</div><div class="stat-label">Arnie attive</div></div>
     <div class="stat-card"><div class="stat-number">${totMiele.toFixed(1)} kg</div><div class="stat-label">Miele totale</div></div>
-    <div class="stat-card"><div class="stat-number">${ispezioniAnno}</div><div class="stat-label">Ispezioni ${anno}</div></div>
-    <div class="stat-card" style="cursor:pointer" onclick="navigateTo('contabilita')"><div class="stat-number" style="color:${saldoAnno>=0?'var(--green)':'var(--red)'}">${saldoAnno>=0?'+':''}€${fmt(saldoAnno)}</div><div class="stat-label">Saldo ${anno}</div></div>
-    <div class="stat-card" style="cursor:pointer" onclick="navigateTo('contabilita')"><div class="stat-number" style="color:${saldoTot>=0?'var(--green)':'var(--red)'}">${saldoTot>=0?'+':''}€${fmt(saldoTot)}</div><div class="stat-label">Saldo totale</div></div>
+    <div class="stat-card" style="cursor:pointer" onclick="navigateTo('registro')" onmouseover="this.style.boxShadow='0 4px 14px rgba(200,134,10,0.2)'" onmouseout="this.style.boxShadow=''"><div class="stat-number">${ispezioniAnno}</div><div class="stat-label">Ispezioni ${anno}</div></div>
+    <div class="stat-card" style="cursor:pointer" onclick="navigateTo('contabilita')" onmouseover="this.style.boxShadow='0 4px 14px rgba(200,134,10,0.2)'" onmouseout="this.style.boxShadow=''"><div class="stat-number" style="color:${saldoAnno>=0?'var(--green)':'var(--red)'}">${saldoAnno>=0?'+':''}€${fmt(saldoAnno)}</div><div class="stat-label">Saldo ${anno}</div></div>
+    <div class="stat-card" style="cursor:pointer" onclick="navigateTo('contabilita')" onmouseover="this.style.boxShadow='0 4px 14px rgba(200,134,10,0.2)'" onmouseout="this.style.boxShadow=''"><div class="stat-number" style="color:${saldoTot>=0?'var(--green)':'var(--red)'}">${saldoTot>=0?'+':''}€${fmt(saldoTot)}</div><div class="stat-label">Saldo totale</div></div>
   `;
 
   // Arnie cards
