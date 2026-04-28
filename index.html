@@ -2343,8 +2343,8 @@ function renderHome() {
     <div class="stat-card"><div class="stat-number">${totMieleAnno.toFixed(1)} kg</div><div class="stat-label">Miele ${anno}</div></div>
     <div class="stat-card"><div class="stat-number">${totMiele.toFixed(1)} kg</div><div class="stat-label">Miele totale</div></div>
     <div class="stat-card" style="cursor:pointer" onclick="navigateTo('registro')" onmouseover="this.style.boxShadow='0 4px 14px rgba(200,134,10,0.2)'" onmouseout="this.style.boxShadow=''"><div class="stat-number">${ispezioniAnno}</div><div class="stat-label">Ispezioni ${anno}</div></div>
-    <div class="stat-card" style="cursor:pointer" onclick="navigateTo('contabilita')" onmouseover="this.style.boxShadow='0 4px 14px rgba(200,134,10,0.2)'" onmouseout="this.style.boxShadow=''"><div class="stat-number" style="color:${saldoAnno>=0?'var(--green)':'var(--red)'}">${saldoAnno>=0?'+€':'−€'}${fmt(Math.abs(saldoAnno))}</div><div class="stat-label">Saldo ${anno}</div></div>
-    <div class="stat-card" style="cursor:pointer" onclick="navigateTo('contabilita')" onmouseover="this.style.boxShadow='0 4px 14px rgba(200,134,10,0.2)'" onmouseout="this.style.boxShadow=''"><div class="stat-number" style="color:${saldoTot>=0?'var(--green)':'var(--red)'}">${saldoTot>=0?'+€':'−€'}${fmt(Math.abs(saldoTot))}</div><div class="stat-label">Saldo totale</div></div>
+    <div class="stat-card" style="cursor:pointer" onclick="navigateTo('contabilita')" onmouseover="this.style.boxShadow='0 4px 14px rgba(200,134,10,0.2)'" onmouseout="this.style.boxShadow=''"><div class="stat-number" style="color:${saldoAnno>=0?'var(--green)':'var(--red)'}">€${saldoAnno>=0?'':'-'}${fmt(Math.abs(saldoAnno))}</div><div class="stat-label">Saldo ${anno}</div></div>
+    <div class="stat-card" style="cursor:pointer" onclick="navigateTo('contabilita')" onmouseover="this.style.boxShadow='0 4px 14px rgba(200,134,10,0.2)'" onmouseout="this.style.boxShadow=''"><div class="stat-number" style="color:${saldoTot>=0?'var(--green)':'var(--red)'}">€${saldoTot>=0?'':'-'}${fmt(Math.abs(saldoTot))}</div><div class="stat-label">Saldo totale</div></div>
   `;
 
   // Arnie cards
