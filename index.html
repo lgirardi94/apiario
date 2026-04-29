@@ -2370,12 +2370,22 @@ function updateMovArticoloSelect(preselect) {
 function buildMovRiga(idx, preselect) {
   const div = document.createElement('div');
   div.id = `movRiga_${idx}`;
-  div.style.cssText = 'display:grid;grid-template-columns:1fr auto auto;gap:0.5rem;align-items:end;margin-bottom:0.5rem';
+  div.style.cssText = 'margin-bottom:0.7rem;';
   div.innerHTML = `
-    <select id="movArt_${idx}" onchange="movArtChange(${idx})" style="width:100%;padding:0.5rem 0.7rem;border:1px solid var(--cream-dark);border-radius:3px;font-family:'Crimson Pro',serif;font-size:0.95rem;background:white">
-      <option value="">— Seleziona articolo —</option>
-      ${articoli.map(a=>`<option value="${a.id}" data-unita="${a.unita}" ${a.id===preselect?'selected':''}>${a.nome} (${a.unita})</option>`).join('')}
-    </select>
+    <div style="display:flex;gap:0.4rem;margin-bottom:0.3rem">
+      <select id="movFiltrocat_${idx}" onchange="filtraMovArt(${idx})" style="padding:0.45rem 0.6rem;border:1px solid var(--cream-dark);border-radius:3px;font-family:'Crimson Pro',serif;font-size:0.85rem;background:white;color:var(--text)">
+        <option value="">Tutte le categorie</option>
+        <option value="materiale">🔧 Materiale</option>
+        <option value="consumabile">💊 Consumabili</option>
+        <option value="prodotto">🍯 Prodotto finito</option>
+      </select>
+      <input type="text" id="movSearch_${idx}" placeholder="🔍 Cerca..." oninput="filtraMovArt(${idx})" style="flex:1;padding:0.45rem 0.6rem;border:1px solid var(--cream-dark);border-radius:3px;font-family:'Crimson Pro',serif;font-size:0.85rem;background:white">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr auto auto;gap:0.5rem;align-items:center">
+      <select id="movArt_${idx}" onchange="movArtChange(${idx})" style="width:100%;padding:0.5rem 0.7rem;border:1px solid var(--cream-dark);border-radius:3px;font-family:'Crimson Pro',serif;font-size:0.95rem;background:white">
+        <option value="">— Seleziona articolo —</option>
+        ${articoli.map(a=>`<option value="${a.id}" data-unita="${a.unita}" data-cat="${a.categoria}" ${a.id===preselect?'selected':''}>${a.nome} (${a.unita})</option>`).join('')}
+      </select>
     <div style="display:flex;align-items:center;gap:0.3rem">
       <input type="number" id="movQta_${idx}" min="0" step="0.1" placeholder="Qtà" style="width:80px;padding:0.5rem 0.5rem;border:1px solid var(--cream-dark);border-radius:3px;font-family:'Crimson Pro',serif;font-size:0.95rem;background:white">
       <span id="movUnita_${idx}" style="font-size:0.82rem;color:var(--text-light);min-width:24px">—</span>
@@ -2393,6 +2403,20 @@ let movRigheCount = 0;
 
 function addMovRiga() { buildMovRiga(movRigheCount++); }
 function removeMovRiga(idx) { const el = document.getElementById(`movRiga_${idx}`); if(el) el.remove(); }
+function filtraMovArt(idx) {
+  const cat    = document.getElementById(`movFiltrocat_${idx}`)?.value || '';
+  const search = (document.getElementById(`movSearch_${idx}`)?.value || '').toLowerCase();
+  const sel    = document.getElementById(`movArt_${idx}`);
+  if(!sel) return;
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">— Seleziona articolo —</option>' +
+    articoli
+      .filter(a => (!cat || a.categoria === cat) && (!search || a.nome.toLowerCase().includes(search)))
+      .map(a => `<option value="${a.id}" data-unita="${a.unita}" data-cat="${a.categoria}" ${a.id===cur?'selected':''}>${a.nome} (${a.unita})</option>`)
+      .join('');
+  if(cur) sel.value = cur;
+  movArtChange(idx);
+}
 function movArtChange(idx) {
   const sel = document.getElementById(`movArt_${idx}`);
   const opt = sel.options[sel.selectedIndex];
