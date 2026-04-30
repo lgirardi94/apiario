@@ -1261,8 +1261,8 @@ main {
 .telaino-block[data-tipo="covata_opercolata"]  { background: #C8860A; }
 .telaino-block[data-tipo="scorte"]             { background: #F5C842; color: #2A1A05; }
 .telaino-block[data-tipo="cov_scorte"]         { background: #6BA05A; }
+.telaino-block[data-tipo="cov_op_scorte"]      { background: #7B4FA6; }
 .telaino-block[data-tipo="foglio_cereo"]       { background: #e3f2fd; color: #2C5F8A; border-color: #2C5F8A; }
-.telaino-block[data-tipo="vuoto"]              { background: #eee; color: #aaa; border-color: #ccc; }
 .telaino-block[data-tipo=""]                   { background: #eee; color: #aaa; border-color: #ccc; }
 .telaino-num {
   position: absolute;
