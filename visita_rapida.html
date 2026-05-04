@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Visita rapida</title>
+<title>Apiario — Visita rapida</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐝</text></svg>">
 <link rel="stylesheet" href="style-mobile.css">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -99,6 +99,23 @@
     border-color: var(--amber);
     background: var(--amber-pale);
     box-shadow: 0 2px 12px rgba(200,134,10,0.25);
+    position: relative;
+  }
+  .arnia-card-w.selected::after {
+    content: '✓';
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    width: 22px;
+    height: 22px;
+    background: var(--amber);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 700;
   }
   .arnia-card-w:active { transform: scale(0.98); }
   .arnia-card-num {
@@ -151,6 +168,23 @@
   .tipo-chip-w.selected {
     border-color: var(--amber);
     background: var(--amber-pale);
+    position: relative;
+  }
+  .tipo-chip-w.selected::after {
+    content: '✓';
+    position: absolute;
+    top: 4px;
+    right: 6px;
+    width: 16px;
+    height: 16px;
+    background: var(--amber);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    font-weight: 700;
   }
   .tipo-chip-w .chip-icon { font-size: 1.5rem; display: block; margin-bottom: 0.25rem; }
   .tipo-chip-w .chip-label { font-size: 0.85rem; font-weight: 600; color: var(--text); }
@@ -457,6 +491,11 @@
   </div>
 </div>
 
+<!-- BANNER ARNIA SELEZIONATA (visibile da step 2 in poi) -->
+<div id="wizArniaBanner" style="display:none;background:var(--amber-pale);border-bottom:1px solid var(--amber);padding:0.6rem 1.2rem;font-size:0.88rem;color:var(--brown);position:sticky;top:0;z-index:40">
+  <span style="font-weight:600">🐝 <span id="wizArniaBannerText">—</span></span>
+</div>
+
 <!-- LOGIN SCREEN -->
 <div id="wizLoginScreen" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70vh;padding:2rem;text-align:center;gap:1.5rem">
   <div style="font-size:3.5rem">🐝</div>
@@ -613,7 +652,7 @@
       <div class="step-sub">Aggiungi osservazioni e verifica il riepilogo</div>
 
       <div class="w-form-group">
-        <label class="w-label">Note / Osservazioni</label>
+        <label class="w-label">Note / Osservazioni <span style="font-weight:400;font-size:0.7rem;color:var(--text-light);text-transform:none;letter-spacing:0">(opzionale)</span></label>
         <textarea id="wizNote" class="w-textarea" placeholder="Es. Regina vista, covata compatta, aggiunto melario..."></textarea>
         <div id="wizNoteSuggerimenti" style="margin-top:0.5rem;display:flex;flex-wrap:wrap;gap:0.35rem">
           <button type="button" onclick="aggiungiNotaSuggerita('Regina vista')" class="nota-chip">👑 Regina vista</button>
@@ -686,6 +725,26 @@ function aggiungiNotaSuggerita(testo) {
   ta.value = ta.value ? ta.value.trim() + '. ' + testo : testo;
   updateWizNav();
   ta.focus();
+}
+
+// ===== Helper: giorni passati da una data ISO =====
+function daysSince(dateStr) {
+  if(!dateStr) return null;
+  const d = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now - d;
+  return Math.floor(diffMs / (1000 * 60 * 60 * 24));
+}
+function formatGiorniFa(dateStr) {
+  const d = daysSince(dateStr);
+  if(d === null) return '';
+  if(d === 0) return 'oggi';
+  if(d === 1) return 'ieri';
+  if(d < 7) return `${d} giorni fa`;
+  if(d < 14) return '1 settimana fa';
+  if(d < 30) return `${Math.floor(d/7)} settimane fa`;
+  if(d < 60) return '1 mese fa';
+  return `${Math.floor(d/30)} mesi fa`;
 }
 
 // ===== DRIVE =====
@@ -776,15 +835,24 @@ function updateWizNav() {
 function isStepValid(s) {
   if(s === 1) return !!selectedArniaId;
   if(s === 2) return selectedTipi.length > 0;
-  if(s === 3) return true; // step opzionale
-  if(s === 4) return !!document.getElementById('wizNote')?.value.trim();
-  return true;
+  return true; // step 3 e 4 sempre validi (note opzionali)
 }
 
 function showStep(n) {
   for(let i=1; i<=4; i++) document.getElementById(`step${i}`).style.display = 'none';
   document.getElementById(`step${n}`).style.display = 'block';
   step = n;
+  // Banner arnia selezionata visibile solo dallo step 2 in poi
+  const banner = document.getElementById('wizArniaBanner');
+  if(n > 1 && selectedArniaId) {
+    const a = (dbData.arnie||[]).find(x => x.id === selectedArniaId);
+    if(a) {
+      document.getElementById('wizArniaBannerText').textContent = `Arnia #${a.num}${a.nome?' — '+a.nome:''}`;
+      banner.style.display = 'block';
+    }
+  } else {
+    banner.style.display = 'none';
+  }
   updateWizNav();
   window.scrollTo(0,0);
 }
@@ -806,10 +874,6 @@ function prevStep() {
 function validateStep(s) {
   if(s === 1 && !selectedArniaId) { showToast('⚠️ Seleziona un\'arnia'); return false; }
   if(s === 2 && selectedTipi.length === 0) { showToast('⚠️ Seleziona almeno un tipo di intervento'); return false; }
-  if(s === 4) {
-    const note = document.getElementById('wizNote').value.trim();
-    if(!note) { showToast('⚠️ Aggiungi almeno una nota'); return false; }
-  }
   return true;
 }
 
@@ -835,7 +899,7 @@ function renderStep1() {
       <div class="arnia-card-info">
         <div class="arnia-card-nome">${a.nome||'Arnia #'+a.num}</div>
         <div class="arnia-card-meta">${a.razza||''}${a.razza&&a.reginaAnno?' · ':''}${a.reginaAnno?'Regina '+a.reginaAnno:''}</div>
-        ${ultimaIsp?`<div class="arnia-last-isp">Ultima isp: ${formatDate(ultimaIsp.data)}</div>`:''}
+        ${ultimaIsp?`<div class="arnia-last-isp">Ultima isp: ${formatGiorniFa(ultimaIsp.data)} (${formatDate(ultimaIsp.data)})</div>`:''}
       </div>
       <span class="arnia-card-stato ${statoCls[a.status]||'stato-attiva'}">${statoLabel[a.status]||a.status}</span>
     </div>`;
@@ -1041,7 +1105,7 @@ function renderRiepilogo() {
 // ===== SALVATAGGIO =====
 async function saveVisita() {
   const note = document.getElementById('wizNote').value.trim();
-  if(!note) { showToast('⚠️ Aggiungi almeno una nota'); return; }
+  // Note opzionali — se vuote ok
 
   const arnia = (dbData.arnie||[]).find(a => a.id === selectedArniaId);
   const data  = document.getElementById('wizData').value;
@@ -1123,7 +1187,23 @@ async function saveVisita() {
 
     // Proponi di schedulare la prossima visita
     const arniaLabel = arnia ? `#${arnia.num}${arnia.nome?' — '+arnia.nome:''}` : '';
-    setTimeout(() => showCalendarPopup(arniaLabel), 600);
+    setTimeout(() => {
+      console.log('[Apiario] Apertura popup calendario per', arniaLabel);
+      try {
+        showCalendarPopup(arniaLabel);
+        // Verifica che il popup sia stato effettivamente creato
+        setTimeout(() => {
+          const popup = document.getElementById('calendarPopupOverlay');
+          if(!popup) {
+            console.warn('[Apiario] Popup calendar non creato — fallback');
+            showToast('⚠️ Popup calendario non disponibile');
+          }
+        }, 100);
+      } catch(err) {
+        console.error('[Apiario] Errore showCalendarPopup:', err);
+        showToast('❌ Errore: ' + err.message);
+      }
+    }, 600);
 
   } catch(e) {
     showToast('❌ Errore salvataggio: ' + e.message);
@@ -1138,6 +1218,7 @@ function resetWizard() {
   wizRaccoltaCount = 0;
   document.getElementById('wizSuccess').classList.remove('show');
   document.getElementById('wizNav').style.display = 'flex';
+  document.getElementById('wizArniaBanner').style.display = 'none';
   // Reset step 2
   document.querySelectorAll('.tipo-chip-w').forEach(c => c.classList.remove('selected'));
   // Reset step 3
