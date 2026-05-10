@@ -16,11 +16,12 @@ function navigateTo(id) {
 
 function showSection(id) { navigateTo(id); }
 
-// ===== UTILITY TABS (Calendario / Sciroppo / Trattamenti) =====
+// ===== UTILITY TABS (Calendario / Sciroppo / Trattamenti / Etichette) =====
 function showUtilTab(tab, btn) {
   document.getElementById('utilTabCalendario').style.display   = tab === 'calendario'   ? 'block' : 'none';
   document.getElementById('utilTabSciroppo').style.display     = tab === 'sciroppo'     ? 'block' : 'none';
   document.getElementById('utilTabTrattamenti').style.display  = tab === 'trattamenti'  ? 'block' : 'none';
+  document.getElementById('utilTabEtichette').style.display    = tab === 'etichette'    ? 'block' : 'none';
   document.querySelectorAll('#utility > .mag-tabs .mag-tab').forEach(b => b.classList.remove('active'));
   if(btn) btn.classList.add('active');
   if(tab === 'sciroppo') sciCalc();
