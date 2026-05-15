@@ -498,6 +498,9 @@
       page-break-after: always;
       page-break-inside: avoid;
       box-sizing: border-box;
+      /* IMPORTANTE: annulla lo scaling usato in anteprima */
+      transform: none !important;
+      margin-bottom: 0 !important;
     }
     .preview-wrap .a4:last-child { page-break-after: auto; }
 
@@ -1332,7 +1335,7 @@ window.addEventListener('load', () => {
       const action = input.dataset.action;
       const idx = parseInt(input.dataset.idx);
       const el = cfg.elements[idx];
-      input.addEventListener("change", e => {
+      const handler = e => {
         const v = input.type === "checkbox" ? input.checked : input.value;
         switch (action) {
           case "toggle-vis":   el.visible = v; break;
@@ -1350,8 +1353,15 @@ window.addEventListener('load', () => {
           case "set-diamonds": el.showDiamonds = v; break;
           case "set-letter-spacing": el.letterSpacing = parseFloat(v); break;
         }
-        save(); render();
-      });
+        save();
+        // Solo aggiorna l'anteprima — non re-renderizzare l'editor (evita perdita del focus)
+        renderA4();
+      };
+      input.addEventListener("change", handler);
+      // Per input testuali e numerici, ascolta anche 'input' per feedback realtime
+      if (input.tagName === "INPUT" && (input.type === "text" || input.type === "number")) {
+        input.addEventListener("input", handler);
+      }
     });
   }
 
@@ -1458,8 +1468,11 @@ window.addEventListener('load', () => {
     const fontWeight = el.bold ? (typeof el.bold === "number" ? el.bold : "bold") : "normal";
     const fontStyle = el.italic ? "italic" : "normal";
     const ls = el.letterSpacing ? `letter-spacing:${el.letterSpacing}px;` : "";
-    // size è in pt come negli stili rettangolari (per coerenza UI)
-    const styleAttr = `fill:${color};font-family:${fontFam};font-size:${el.size}pt;font-weight:${fontWeight};font-style:${fontStyle};${ls}`;
+    // Conversione pt → user units SVG (viewBox 240 su etichetta 58mm)
+    // 58mm = 219px reali, viewBox 240. Quindi 1 user-unit ≈ 0.91px reali ≈ 0.683pt
+    // → 1pt ≈ 1.46 user units. Approssimato a 1.5 per visibilità migliore.
+    const sizeInUserUnits = (el.size || 10) * 1.5;
+    const styleAttr = `fill:${color};font-family:${fontFam};font-size:${sizeInUserUnits}px;font-weight:${fontWeight};font-style:${fontStyle};${ls}`;
 
     const text = tmpl(el.text || "");
 
@@ -1671,8 +1684,26 @@ window.addEventListener('load', () => {
     // Imposta orientamento A4 in base al formato corrente
     const fmt = getFormat(currentFormat);
     setPrintPageSize(fmt.page);
+
+    // Rimuovi temporaneamente il transform di scaling (usato solo in anteprima)
+    const pages = document.querySelectorAll(".a4");
+    const savedTransforms = [];
+    pages.forEach(p => {
+      savedTransforms.push({ transform: p.style.transform, marginBottom: p.style.marginBottom });
+      p.style.transform = "";
+      p.style.marginBottom = "";
+    });
+
     // Stampa
     window.print();
+
+    // Ripristina il scaling per l'anteprima
+    setTimeout(() => {
+      pages.forEach((p, i) => {
+        p.style.transform = savedTransforms[i].transform;
+        p.style.marginBottom = savedTransforms[i].marginBottom;
+      });
+    }, 100);
   }
 
   // Inserisce/aggiorna una <style> con @page size dinamica
