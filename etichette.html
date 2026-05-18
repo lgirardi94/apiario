@@ -601,6 +601,7 @@
     <div class="panel">
       <h2>
         Personalizza stile
+        <span class="toggle" onclick="saveStyleAsDefault()" style="margin-right:8px">💾 Salva come mio default</span>
         <span class="toggle" onclick="resetCurrentStyle()">↺ Ripristina default</span>
       </h2>
       <div class="style-tabs" id="styleTabs"></div>
@@ -644,7 +645,7 @@ async function saveToDrive() {
     await driveWriteFile('apiario_etichette.json', {
       version: 3,
       savedAt: new Date().toISOString(),
-      types, rows, styleConfig, savedConfigs, printHistory, currentFormat
+      types, rows, styleConfig, savedConfigs, printHistory, currentFormat, userDefaults
     });
   } catch(e) {
     console.error('[Etichette] Errore salvataggio:', e);
@@ -665,6 +666,7 @@ async function loadFromDrive() {
       if(Array.isArray(data.savedConfigs)) savedConfigs = data.savedConfigs;
       if(Array.isArray(data.printHistory)) printHistory = data.printHistory;
       if(data.currentFormat) currentFormat = data.currentFormat;
+      if(data.userDefaults) userDefaults = data.userDefaults;
       // Reinizializza eventuali stili mancanti (nuovi stili tondi)
       for (const s of STYLES) {
         if (!styleConfig[s.id]) styleConfig[s.id] = defaultStyleConfig()[s.id];
@@ -916,6 +918,7 @@ window.addEventListener('load', () => {
   let savedConfigs = [];  // configurazioni salvate manualmente con nome
   let printHistory = [];  // storico automatico delle ultime 5 stampe
   let currentFormat = "wide";  // formato A4 selezionato (Wide/Vino/Bandiera/Tonda)
+  let userDefaults = null;  // null = usa default di fabbrica. Altrimenti contiene styleConfig salvato dall'utente
   let currentStyleTab = "rustico";
 
   // Se mancano stili (es. dopo aggiornamento), reinizializzali
@@ -974,9 +977,33 @@ window.addEventListener('load', () => {
   }
 
   function resetCurrentStyle() {
-    if (!confirm("Ripristinare le impostazioni di default per lo stile " + currentStyleTab + "?")) return;
-    styleConfig[currentStyleTab] = defaultStyleConfig()[currentStyleTab];
+    // Decidi cosa "default" significa: userDefaults se presente, altrimenti factory
+    const hasUserDefault = userDefaults && userDefaults[currentStyleTab];
+    const label = hasUserDefault ? "ai tuoi default salvati" : "ai default di fabbrica";
+    if (!confirm(`Ripristinare lo stile "${currentStyleTab}" ${label}?`)) return;
+    if (hasUserDefault) {
+      styleConfig[currentStyleTab] = JSON.parse(JSON.stringify(userDefaults[currentStyleTab]));
+    } else {
+      styleConfig[currentStyleTab] = defaultStyleConfig()[currentStyleTab];
+    }
     save(); render();
+  }
+
+  // Salva il design attuale di TUTTI gli stili come default personale dell'utente
+  function saveStyleAsDefault() {
+    if (!confirm("Salvare il design attuale di tutti gli stili come tuoi default personali?\n\nDa qui in avanti, il pulsante \"↺ Ripristina default\" caricherà questi valori invece di quelli di fabbrica.")) return;
+    userDefaults = JSON.parse(JSON.stringify(styleConfig));
+    save();
+    alert("✓ Design salvato come tuo default personale.");
+  }
+
+  // Cancella i default personali (torna ai default di fabbrica)
+  function clearUserDefaults() {
+    if (!userDefaults) { alert("Non hai default personali salvati."); return; }
+    if (!confirm("Cancellare i tuoi default personali e tornare ai default di fabbrica?")) return;
+    userDefaults = null;
+    save();
+    alert("✓ Default personali cancellati. \"Ripristina default\" tornerà a usare i default di fabbrica.");
   }
 
   function renderRows() {
@@ -1108,6 +1135,17 @@ window.addEventListener('load', () => {
     const cfg = styleConfig[currentStyleTab];
     const ed = document.getElementById("styleEditor");
     ed.innerHTML = "";
+
+    // Indicatore se ci sono default personali salvati
+    if (userDefaults) {
+      const info = document.createElement("div");
+      info.style.cssText = "background:rgba(200,134,10,0.08);border-left:3px solid var(--accent);padding:8px 12px;border-radius:4px;margin-bottom:12px;font-size:12px;color:var(--muted);display:flex;justify-content:space-between;align-items:center;gap:8px";
+      info.innerHTML = `
+        <span>✓ Hai default personali salvati. "Ripristina default" carica i tuoi valori.</span>
+        <button onclick="clearUserDefaults()" style="background:transparent;color:var(--red);border:1px solid var(--red);border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;font-family:inherit;white-space:nowrap">Cancella miei default</button>
+      `;
+      ed.appendChild(info);
+    }
 
     // controlli generali (cornici)
     const general = document.createElement("div");
