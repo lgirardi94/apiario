@@ -484,14 +484,14 @@
           <div class="sci-acid-box">
             <div class="sci-acid-title">Acido citrico · Dr. Oetker (bustine da 5 g)</div>
             <div class="sci-acid-body">
-              Dose: 2 g per litro → <strong id="sci-r-grams">—</strong> g totali
+              Dose: 0,5 g per litro → <strong id="sci-r-grams">—</strong> g totali
               <div class="sci-bustina-pill" id="sci-r-bust">—</div>
               <div style="margin-top:6px;font-size:0.85rem;color:var(--green)" id="sci-r-resto"></div>
             </div>
           </div>
           <div class="sci-metrics" style="margin-top:0.8rem;margin-bottom:0">
             <div class="sci-metric"><span class="sci-val" id="sci-r-brix">—</span><span class="sci-lbl">Gradi Brix approx.</span></div>
-            <div class="sci-metric"><span class="sci-val">~4.5</span><span class="sci-lbl">pH con acido citrico</span></div>
+            <div class="sci-metric"><span class="sci-val">~5.5</span><span class="sci-lbl">pH con acido citrico</span></div>
             <div class="sci-metric"><span class="sci-val"><span id="sci-r-uso" class="sci-uso-badge sci-uso-primavera">Primavera</span></span><span class="sci-lbl">Uso consigliato</span></div>
           </div>
           </div>
@@ -514,6 +514,7 @@
             <div class="sci-step-body">
               <h3>Togli dal fuoco e aggiungi lo zucchero</h3>
               <p>Versa lo zucchero semolato bianco nell'acqua calda fuori dal fuoco — mai il contrario. Mescola energicamente per 2–3 minuti finché lo sciroppo è completamente limpido.</p>
+              <div class="sci-note sci-note-tip"><strong>Rapporti in peso (non volume)</strong><br>I rapporti 1:1 e 2:1 sono <strong>in peso</strong>: 1 kg di zucchero in 1 L di acqua per il primaverile, 2 kg di zucchero in 1 L di acqua per l'autunnale. Lo zucchero, sciogliendosi, aumenta il volume finale dello sciroppo (~1,6 L per il 1:1, ~2,3 L per il 2:1).</div>
               <div class="sci-note sci-note-err">Solo saccarosio bianco raffinato. Vietati: zucchero di canna grezzo, dolcificanti artificiali, miele di origine ignota o acquistato.</div>
             </div>
           </div>
@@ -521,9 +522,10 @@
             <div class="sci-step-left"><div class="sci-step-num sci-step-green">3</div><div class="sci-step-line"></div></div>
             <div class="sci-step-body">
               <h3>Lascia raffreddare sotto i 40°C — poi aggiungi l'acido citrico</h3>
-              <p>Aspetta che lo sciroppo sia tiepido prima di aggiungere il Dr. Oetker. Se aggiungi l'acido a sciroppo ancora caldo, parte dell'acido si volatilizza.</p>
-              <div class="sci-note sci-note-tip"><strong>Come usare le bustine Dr. Oetker da 5 g</strong><br>Ogni bustina contiene 5 g di acido citrico puro (E 330). A 2 g/litro, una bustina copre 2,5 litri di sciroppo.</div>
-              <div class="sci-note sci-note-tip" style="margin-top:8px"><strong>Senza bilancina?</strong><br>Una bustina intera (5 g) ogni 2,5 litri di sciroppo. Per piccole quantità, dividi visivamente la bustina a metà o in quarti.</div>
+              <p>Aspetta che lo sciroppo sia tiepido prima di aggiungere il Dr. Oetker. Se aggiungi l'acido a sciroppo ancora caldo, parte dell'acido si volatilizza. La dose corretta è <strong>0,5 g per litro di sciroppo</strong> (acidificazione gentile, pH ~5.5, ben tollerata dalle api).</p>
+              <div class="sci-note sci-note-tip"><strong>Come usare le bustine Dr. Oetker da 5 g</strong><br>Ogni bustina contiene 5 g di acido citrico puro (E 330). A 0,5 g/litro, una bustina copre <strong>10 litri di sciroppo</strong>.</div>
+              <div class="sci-note sci-note-tip" style="margin-top:8px"><strong>Senza bilancina?</strong><br>Una bustina intera (5 g) ogni 10 litri di sciroppo. Per quantità minori dividi visivamente: metà bustina (2,5 g) per 5 L, un quarto (1,25 g) per 2,5 L. Non serve precisione assoluta.</div>
+              <div class="sci-note sci-note-warn" style="margin-top:8px"><strong>Perché 0,5 g/L e non di più?</strong><br>Dosi superiori (1-2 g/L) acidificano troppo lo sciroppo (pH &lt; 5), risultando meno appetibile per le api e potendo irritarle. La dose di 0,5 g/L è il compromesso tra effetto inversione/conservazione e accettabilità.</div>
             </div>
           </div>
           <div class="sci-step">
@@ -560,19 +562,53 @@
 
       <!-- TAB CONSERVAZIONE -->
       <div id="sciTabConservazione" style="display:none">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.2rem">
-          <div class="sci-conserv-card">
-            <div class="sci-c-label">Sciroppo 1:1</div>
-            <div class="sci-c-val">10–14 giorni</div>
-            <p>In frigorifero, contenitore chiuso, lontano dalla luce. L'acido citrico prolunga la durata rispetto allo sciroppo non acidificato.</p>
+
+        <!-- SCIROPPO 1:1 -->
+        <div style="margin-bottom:1.5rem">
+          <h3 style="margin:0 0 0.6rem;color:var(--ink);font-size:1.05rem">Sciroppo 1:1 (50% zucchero · primavera)</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.8rem">
+            <div class="sci-conserv-card">
+              <div class="sci-c-label">In frigorifero (4°C)</div>
+              <div class="sci-c-val">10–14 giorni</div>
+              <p>Contenitore chiuso, lontano dalla luce. L'acido citrico prolunga la durata rispetto allo sciroppo non acidificato.</p>
+            </div>
+            <div class="sci-conserv-card">
+              <div class="sci-c-label">A temperatura ambiente</div>
+              <div class="sci-c-val">2–4 giorni</div>
+              <p>Fino a 20–22°C, contenitore ermetico, al buio. Sopra 25°C la fermentazione inizia entro 24–48 ore. Usare prima possibile.</p>
+            </div>
           </div>
-          <div class="sci-conserv-card">
-            <div class="sci-c-label">Sciroppo 2:1</div>
-            <div class="sci-c-val">2–3 settimane</div>
-            <p>In frigorifero. La maggiore concentrazione di zucchero inibisce naturalmente la fermentazione. Agitare prima dell'uso.</p>
-          </div>
+          <div class="sci-note sci-note-tip" style="margin-bottom:0"><strong>Perché si conserva poco</strong><br>Lo sciroppo 1:1 è una soluzione zuccherina diluita (Brix ~50°): l'acqua libera è elevata e i lieviti naturali iniziano a fermentare rapidamente, soprattutto al caldo. Prepara solo la quantità che usi in 2–3 giorni.</div>
         </div>
-        <div class="sci-note sci-note-err">Scartare immediatamente se: compare muffa, odore acetico (aceto), torbidità bianca o schiuma anomala.</div>
+
+        <!-- SCIROPPO 2:1 -->
+        <div style="margin-bottom:1.5rem">
+          <h3 style="margin:0 0 0.6rem;color:var(--ink);font-size:1.05rem">Sciroppo 2:1 (~67% zucchero · autunno)</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.8rem">
+            <div class="sci-conserv-card">
+              <div class="sci-c-label">In frigorifero (4°C)</div>
+              <div class="sci-c-val">3–4 settimane</div>
+              <p>Contenitore chiuso. La maggiore concentrazione di zucchero inibisce naturalmente la fermentazione. Agitare prima dell'uso.</p>
+            </div>
+            <div class="sci-conserv-card">
+              <div class="sci-c-label">A temperatura ambiente</div>
+              <div class="sci-c-val">1–2 settimane</div>
+              <p>Fino a 22°C, contenitore ermetico, al buio. Sopra 25°C ridurre a 5–7 giorni. Più stabile del 1:1 grazie alla bassa attività dell'acqua (~67° Brix).</p>
+            </div>
+          </div>
+          <div class="sci-note sci-note-tip" style="margin-bottom:0"><strong>Perché si conserva meglio</strong><br>Lo sciroppo 2:1 ha una concentrazione zuccherina vicina a quella del miele invernale (~70° Brix), quindi è meno soggetto alla fermentazione. È adatto a preparazioni in anticipo per la nutrizione autunnale.</p>
+        </div>
+
+        <!-- CONSIGLI PRATICI -->
+        <h3 style="margin:0 0 0.6rem;color:var(--ink);font-size:1.05rem">Consigli pratici</h3>
+        <div style="display:grid;grid-template-columns:1fr;gap:0.6rem;margin-bottom:1rem">
+          <div class="sci-note sci-note-tip" style="margin:0"><strong>📦 Contenitori</strong><br>Vetro o plastica alimentare con tappo a vite. Riempi fino al collo per minimizzare l'aria. Se conservi più giorni, contenitori da 1–2 litri sono più gestibili di tanichette grandi.</div>
+          <div class="sci-note sci-note-tip" style="margin:0"><strong>🌡️ Temperatura ideale</strong><br>Più freddo è meglio (4°C ottimale). Cantina fresca/garage non riscaldato in inverno = come frigorifero. Mai in luoghi con escursioni termiche (es. vicino a fonti di calore o esposti al sole).</div>
+          <div class="sci-note sci-note-tip" style="margin:0"><strong>🔍 Controllo prima dell'uso</strong><br>Annusa e osserva: deve avere solo odore neutro dolce, essere limpido o leggermente opaco. La cristallizzazione sul fondo (specialmente nel 2:1 freddo) è normale — basta scaldare a bagnomaria sotto i 40°C e mescolare.</div>
+          <div class="sci-note sci-note-tip" style="margin:0"><strong>♻️ Riutilizzo dopo qualche giorno</strong><br>Lo sciroppo lasciato nel nutritore va sostituito ogni 3–4 giorni in primavera (1:1) o ogni 7 giorni in autunno (2:1) se rimane non consumato, perché in arnia diluisce e fermenta più velocemente.</div>
+        </div>
+
+        <div class="sci-note sci-note-err" style="margin:0"><strong>⚠️ Scartare immediatamente se:</strong> compare muffa visibile, odore acetico (di aceto) o alcolico, torbidità bianca/lattiginosa, schiuma anomala in superficie, bollicine che salgono spontaneamente (= fermentazione attiva). Lo sciroppo fermentato è dannoso per le api.</div>
       </div>
 
       <!-- TAB INTEGRATORI -->
