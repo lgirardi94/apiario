@@ -1136,11 +1136,16 @@
       <div id="contKpiGrid" class="cont-kpi-grid"></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:1.2rem">
         <div class="cont-chart-wrap">
-          <div class="cont-chart-title">📅 Anno corrente — per mese</div>
+          <div class="cont-chart-title" style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+            <span>📅 Andamento mensile</span>
+            <select id="chartMensileAnno" onchange="renderContRiepilogo()" style="padding:4px 8px;font-size:13px;border:1px solid var(--cream-dark);border-radius:4px;background:white;color:var(--brown);font-family:inherit"></select>
+          </div>
+          <div id="chartMensileTotali" style="font-size:12px;color:var(--text-light);margin-bottom:8px"></div>
           <div class="bar-chart" id="chartMensile"></div>
         </div>
         <div class="cont-chart-wrap">
-          <div class="cont-chart-title">📆 Confronto annate</div>
+          <div class="cont-chart-title">📆 Confronto annate (tutti gli anni)</div>
+          <div id="chartAnnateTotali" style="font-size:12px;color:var(--text-light);margin-bottom:8px"></div>
           <div class="bar-chart" id="chartAnnate"></div>
         </div>
       </div>
