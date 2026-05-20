@@ -1134,21 +1134,76 @@
     <!-- TAB RIEPILOGO -->
     <div id="contTabRiepilogo">
       <div id="contKpiGrid" class="cont-kpi-grid"></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:1.2rem">
-        <div class="cont-chart-wrap">
-          <div class="cont-chart-title" style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
-            <span>📅 Andamento mensile</span>
-            <select id="chartMensileAnno" onchange="renderContRiepilogo()" style="padding:4px 8px;font-size:13px;border:1px solid var(--cream-dark);border-radius:4px;background:white;color:var(--brown);font-family:inherit"></select>
-          </div>
-          <div id="chartMensileTotali" style="font-size:12px;color:var(--text-light);margin-bottom:8px"></div>
-          <div class="bar-chart" id="chartMensile"></div>
-        </div>
-        <div class="cont-chart-wrap">
-          <div class="cont-chart-title">📆 Confronto annate (tutti gli anni)</div>
-          <div id="chartAnnateTotali" style="font-size:12px;color:var(--text-light);margin-bottom:8px"></div>
-          <div class="bar-chart" id="chartAnnate"></div>
-        </div>
+
+      <!-- ⭐ TOP DELL'ANNO -->
+      <div class="cont-chart-wrap">
+        <div class="cont-chart-title">⭐ Top dell'anno corrente</div>
+        <div id="contTopAnno" class="cont-top-grid"></div>
       </div>
+
+      <!-- 📅 SEZIONE ANDAMENTO -->
+      <div class="cont-section-divider">📅 Andamento nel tempo</div>
+
+      <!-- ANDAMENTO MENSILE A DIAMANTE -->
+      <div class="cont-chart-wrap">
+        <div class="cont-chart-title" style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+          <span>Andamento mensile</span>
+          <select id="chartMensileAnno" onchange="renderContRiepilogo()" style="padding:4px 8px;font-size:13px;border:1px solid var(--cream-dark);border-radius:4px;background:white;color:var(--brown);font-family:inherit"></select>
+        </div>
+        <div id="chartMensileTotali" style="font-size:12px;color:var(--text-light);margin-bottom:8px"></div>
+        <div class="cont-diamond-chart" id="chartMensile"></div>
+        <div class="cont-diamond-labels" id="chartMensileLabels"></div>
+      </div>
+
+      <!-- SALDO CUMULATIVO -->
+      <div class="cont-chart-wrap">
+        <div class="cont-chart-title" style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+          <span>📈 Saldo cumulativo nel tempo</span>
+          <select id="chartCumAnno" onchange="renderContRiepilogo()" style="padding:4px 8px;font-size:13px;border:1px solid var(--cream-dark);border-radius:4px;background:white;color:var(--brown);font-family:inherit"></select>
+        </div>
+        <div style="font-size:12px;color:var(--text-light);margin-bottom:8px">Linea che mostra come cresce/cala il saldo mese per mese. Area verde = profitto, rossa = perdita.</div>
+        <div id="chartCumulativo"></div>
+      </div>
+
+      <!-- 🥧 SEZIONE CATEGORIE -->
+      <div class="cont-section-divider">🥧 Categorie</div>
+
+      <!-- TORTE CATEGORIE -->
+      <div class="cont-chart-wrap">
+        <div class="cont-chart-title" style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+          <span>Ripartizione per categoria</span>
+          <select id="chartPieAnno" onchange="renderContRiepilogo()" style="padding:4px 8px;font-size:13px;border:1px solid var(--cream-dark);border-radius:4px;background:white;color:var(--brown);font-family:inherit"></select>
+        </div>
+        <div id="chartTorte" class="cont-pie-grid"></div>
+      </div>
+
+      <!-- TOP MOVIMENTI -->
+      <div class="cont-chart-wrap">
+        <div class="cont-chart-title" style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+          <span>🏆 Top 5 movimenti dell'anno</span>
+          <select id="chartTopMovAnno" onchange="renderContRiepilogo()" style="padding:4px 8px;font-size:13px;border:1px solid var(--cream-dark);border-radius:4px;background:white;color:var(--brown);font-family:inherit"></select>
+        </div>
+        <div id="chartTopMov" class="cont-topmov-grid"></div>
+      </div>
+
+      <!-- 🗺️ SEZIONE CONFRONTO ANNATE -->
+      <div class="cont-section-divider">🗺️ Confronto annate</div>
+
+      <!-- HEATMAP -->
+      <div class="cont-chart-wrap">
+        <div class="cont-chart-title">🔥 Heatmap pluriennale</div>
+        <div style="font-size:12px;color:var(--text-light);margin-bottom:8px">Colori più scuri = entrate più alte. Passa sopra le celle per i dettagli.</div>
+        <div id="chartHeatmap" style="overflow-x:auto"></div>
+      </div>
+
+      <!-- CONFRONTO ANNATE (esistente migliorato) -->
+      <div class="cont-chart-wrap">
+        <div class="cont-chart-title">📆 Confronto annate</div>
+        <div id="chartAnnateTotali" style="font-size:12px;color:var(--text-light);margin-bottom:8px"></div>
+        <div class="bar-chart" id="chartAnnate"></div>
+      </div>
+
+      <!-- ULTIME -->
       <div class="cont-chart-wrap">
         <div class="cont-chart-title">🏷️ Ultime movimentazioni</div>
         <div id="contUltime"></div>
@@ -1547,16 +1602,16 @@
 </div><!-- fine appContent -->
 
 <!-- ===== JS MODULES — ordine importante! ===== -->
-<script src="js/state.js"></script>
-<script src="js/nav.js"></script>
-<script src="js/import-export.js"></script>
-<script src="js/registro.js"></script>
-<script src="js/arnie.js"></script>
-<script src="js/magazzino.js"></script>
-<script src="js/contabilita.js"></script>
-<script src="js/obiettivi.js"></script>
-<script src="js/sciroppo.js"></script>
-<script src="js/home.js"></script>
+<script src="js/state.js?v=20260516"></script>
+<script src="js/nav.js?v=20260516"></script>
+<script src="js/import-export.js?v=20260516"></script>
+<script src="js/registro.js?v=20260516"></script>
+<script src="js/arnie.js?v=20260516"></script>
+<script src="js/magazzino.js?v=20260516"></script>
+<script src="js/contabilita.js?v=20260516"></script>
+<script src="js/obiettivi.js?v=20260516"></script>
+<script src="js/sciroppo.js?v=20260516"></script>
+<script src="js/home.js?v=20260516"></script>
 <script src="js/drive-app.js"></script>
 
 </body>
