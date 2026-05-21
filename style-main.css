@@ -1240,6 +1240,8 @@ main {
   font-weight: 600;
 }
 .sci-uso-primavera { background: #e8f5e9; color: var(--green); }
+.sci-uso-inverno   { background: #e3f2fd; color: #1565c0; }
+.sci-uso-autunno   { background: #fff3e0; color: #e65100; }
 .sci-uso-autunno   { background: #e6f1fb; color: var(--blue); }
 
 /* STEPS */

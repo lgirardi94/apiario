@@ -130,6 +130,7 @@
     <div class="mag-tabs" style="margin-bottom:2rem">
       <button class="mag-tab active" id="utilTabBtnCalendario" data-tab="calendario" onclick="showUtilTab('calendario', this)">📅 Calendario Lavori</button>
       <button class="mag-tab" id="utilTabBtnSciroppo" data-tab="sciroppo" onclick="showUtilTab('sciroppo', this)">🍬 Sciroppo</button>
+      <button class="mag-tab" id="utilTabBtnCandito" data-tab="candito" onclick="showUtilTab('candito', this)">🍯 Candito</button>
       <button class="mag-tab" id="utilTabBtnTrattamenti" data-tab="trattamenti" onclick="showUtilTab('trattamenti', this)">💊 Trattamenti</button>
       <button class="mag-tab" id="utilTabBtnEtichette" data-tab="etichette" onclick="showUtilTab('etichette', this)">🏷️ Etichette</button>
     </div>
@@ -635,6 +636,278 @@
       </div>
 
     </div><!-- fine utilTabSciroppo -->
+
+    <!-- SUB: CANDITO -->
+    <div id="utilTabCandito" style="display:none">
+      <p class="section-subtitle" style="margin-top:-1rem">Ricetta del candito da nutrizione · Versione classica e con polline · Calcolatore dosi</p>
+
+      <div class="mag-tabs">
+        <button class="mag-tab active" onclick="showCanditoTab('calcolatore', this)">🧮 Calcolatore</button>
+        <button class="mag-tab" onclick="showCanditoTab('procedimento', this)">📋 Procedimento</button>
+        <button class="mag-tab" onclick="showCanditoTab('conservazione', this)">🧊 Conservazione</button>
+        <button class="mag-tab" onclick="showCanditoTab('quando', this)">📅 Quando si usa</button>
+      </div>
+
+      <!-- ============================================ -->
+      <!-- TAB CALCOLATORE -->
+      <!-- ============================================ -->
+      <div id="candTabCalcolatore">
+        <div class="sci-type-row">
+          <button class="sci-type-btn on-1to1" id="cand-btn-classico" onclick="candSetMode('classico')">
+            <strong>Classico</strong><small>Zucchero a velo + miele</small>
+          </button>
+          <button class="sci-type-btn" id="cand-btn-polline" onclick="candSetMode('polline')">
+            <strong>Con polline</strong><small>+ polline come stimolante proteico</small>
+          </button>
+        </div>
+
+        <div class="sci-calc-card">
+          <div class="sci-calc-card-accent" id="candCalcAccent"></div>
+          <div class="sci-calc-card-body">
+            <div class="sci-calc-card-title">Calcolatore dosi candito</div>
+            <div class="sci-slider-row">
+              <label>Numero di alveari</label>
+              <input type="range" min="1" max="20" value="3" step="1" id="cand-sl-hives" oninput="candCalc()">
+              <span class="sci-slider-val" id="cand-out-hives">3</span>
+            </div>
+            <div class="sci-slider-row">
+              <label>Grammi di candito per alveare</label>
+              <input type="range" min="250" max="2500" value="1000" step="250" id="cand-sl-grams" oninput="candCalc()">
+              <span class="sci-slider-val" id="cand-out-grams">1.0 kg</span>
+            </div>
+
+            <div class="sci-metrics">
+              <div class="sci-metric"><span class="sci-val" id="cand-r-zucchero">—</span><span class="sci-lbl">Zucchero a velo (g)</span></div>
+              <div class="sci-metric"><span class="sci-val" id="cand-r-miele">—</span><span class="sci-lbl">Miele (g)</span></div>
+              <div class="sci-metric"><span class="sci-val" id="cand-r-acqua">—</span><span class="sci-lbl">Acqua (ml) <small>opzionale</small></span></div>
+            </div>
+
+            <div class="sci-acid-box" id="candPollineBox" style="display:none">
+              <div class="sci-acid-title">🌾 Polline (sostituisce parte del miele)</div>
+              <div class="sci-acid-body">
+                Polline (10% del peso totale): <strong id="cand-r-polline">—</strong> g
+                <div style="margin-top:6px;font-size:0.85rem;color:var(--text-light)">
+                  Il polline va sgranato, fresco o congelato (non essiccato). Apporta proteine essenziali per la covata.
+                </div>
+              </div>
+            </div>
+
+            <div class="sci-metrics" style="margin-top:0.8rem;margin-bottom:0">
+              <div class="sci-metric"><span class="sci-val" id="cand-r-totale">—</span><span class="sci-lbl">Candito totale (g)</span></div>
+              <div class="sci-metric"><span class="sci-val"><span id="cand-r-uso" class="sci-uso-badge sci-uso-inverno">Inverno</span></span><span class="sci-lbl">Uso consigliato</span></div>
+              <div class="sci-metric"><span class="sci-val">~14% acqua</span><span class="sci-lbl">Contenuto idrico</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sci-note sci-note-tip" style="margin-top:1rem">
+          <strong>💡 Proporzioni tipiche</strong><br>
+          La ricetta standard è <strong>80-83% zucchero a velo + 17-20% miele</strong> (con eventuale acqua per regolare la consistenza). Per la versione proteica si sostituisce <strong>~10% del peso totale</strong> con polline sgranato.
+        </div>
+      </div>
+
+      <!-- ============================================ -->
+      <!-- TAB PROCEDIMENTO -->
+      <!-- ============================================ -->
+      <div id="candTabProcedimento" style="display:none">
+
+        <div class="sci-note sci-note-warn">
+          <strong>⚠️ Sicurezza prima di tutto</strong><br>
+          Usa solo <strong>miele del tuo apiario</strong> o di apicoltori di fiducia certificati. Il miele commerciale o di origine sconosciuta può trasmettere <strong>spore di Paenibacillus larvae</strong> (peste americana) e altre malattie pericolose. Mai usare miele dei supermercati o importato.
+        </div>
+
+        <div class="sci-steps" style="margin-top:1rem">
+
+          <div class="sci-step">
+            <div class="sci-step-left"><div class="sci-step-num">1</div><div class="sci-step-line"></div></div>
+            <div class="sci-step-body">
+              <h3>Prepara gli ingredienti</h3>
+              <p>Pesa tutti gli ingredienti con la bilancia. La precisione è importante per ottenere la giusta consistenza.</p>
+              <div class="sci-note sci-note-tip"><strong>Zucchero a velo</strong><br>Usa zucchero a velo <strong>senza amido</strong> (leggi l'etichetta: deve contenere solo saccarosio). Lo zucchero a velo industriale contiene spesso amido di mais che le api non digeriscono bene. Se non lo trovi, puoi macinare zucchero semolato bianco con un macinacaffè o un robot da cucina fino a polvere finissima.</div>
+              <div class="sci-note sci-note-tip" style="margin-top:8px"><strong>Miele</strong><br>Preferibilmente miele <strong>cristallizzato</strong> (più semplice da impastare) o liquido leggermente scaldato. Se cristallizzato, riscaldalo a bagnomaria sotto i 40°C per renderlo fluido.</div>
+              <div class="sci-note sci-note-tip" style="margin-top:8px"><strong>Polline (versione proteica)</strong><br>Usa polline raccolto da te (raccoglitore di polline) o acquistato da apicoltori di fiducia. Deve essere <strong>fresco o congelato</strong>, mai essiccato a temperature elevate (perde proteine attive). Sgrana i pellet con un mortaio o un macinino prima dell'uso.</div>
+            </div>
+          </div>
+
+          <div class="sci-step">
+            <div class="sci-step-left"><div class="sci-step-num">2</div><div class="sci-step-line"></div></div>
+            <div class="sci-step-body">
+              <h3>Impasta zucchero e miele</h3>
+              <p>In una ciotola capiente versa lo zucchero a velo e crea una fontana al centro. Aggiungi il miele al centro. Inizia a impastare con le mani <strong>pulite e asciutte</strong> (o un cucchiaio robusto in legno) finché tutto l'impasto è uniforme.</p>
+              <div class="sci-note sci-note-tip"><strong>Consistenza ideale</strong><br>L'impasto deve essere come una <strong>pasta frolla soda</strong>: compatto ma plasmabile, non appiccicoso, non secco. Se si sbriciola troppo, aggiungi un goccio di miele o pochissima acqua (1 cucchiaino alla volta). Se è troppo molle, aggiungi zucchero a velo poco per volta.</div>
+              <div class="sci-note sci-note-tip" style="margin-top:8px"><strong>Test della pallina</strong><br>Prendi un pezzettino e prova a fare una pallina: se mantiene la forma senza appiccicarsi alle dita, la consistenza è corretta. Se si rompe, è troppo secca. Se si appiccica, troppo umida.</div>
+              <div class="sci-note sci-note-warn" style="margin-top:8px"><strong>Non usare l'acqua per sciogliere il candito</strong><br>L'acqua va aggiunta solo se assolutamente necessario per regolare la consistenza (max 1-2% del peso totale). Troppa acqua provoca fermentazione.</div>
+            </div>
+          </div>
+
+          <div class="sci-step" id="candStepPolline" style="display:none">
+            <div class="sci-step-left"><div class="sci-step-num">3</div><div class="sci-step-line"></div></div>
+            <div class="sci-step-body">
+              <h3>Aggiungi il polline (versione proteica)</h3>
+              <p>Sgrana i pellet di polline con un mortaio o un macinino fino a polvere grossolana. Incorpora il polline all'impasto poco per volta, continuando a impastare finché è distribuito uniformemente.</p>
+              <div class="sci-note sci-note-tip"><strong>Dose corretta</strong><br>Il polline rappresenta circa <strong>10% del peso totale</strong> del candito. Quantità eccessive (oltre 15%) possono essere meno appetibili. Quantità troppo basse (sotto 5%) hanno effetto stimolante limitato.</div>
+              <div class="sci-note sci-note-tip" style="margin-top:8px"><strong>Polline alternativo: integratori commerciali</strong><br>In alternativa al polline naturale, esistono integratori proteici specifici per api (es. Apifonda, Apipasta) già pronti. Sono comodi ma più costosi e meno nutrienti del polline fresco.</div>
+            </div>
+          </div>
+
+          <div class="sci-step">
+            <div class="sci-step-left"><div class="sci-step-num" id="candNum4">3</div><div class="sci-step-line"></div></div>
+            <div class="sci-step-body">
+              <h3>Formatura e riposo</h3>
+              <p>Forma palline o panetti da 500g-1kg (più pratici per la somministrazione). Avvolgi ogni panetto in <strong>carta forno</strong> o pellicola alimentare. Lascia riposare 24 ore a temperatura ambiente prima di usare o conservare: l'impasto si stabilizza e diventa più compatto.</p>
+              <div class="sci-note sci-note-tip"><strong>Panetti pronti all'uso</strong><br>Lo standard commerciale è di <strong>500g o 1kg per panetto</strong>. Per somministrazione singola sopra il copri-favo, un panetto da 500g dura tipicamente 2-4 settimane in inverno.</div>
+              <div class="sci-note sci-note-tip" style="margin-top:8px"><strong>Forma a "salsicciotto"</strong><br>Una variante pratica: forma cilindri lunghi che si appoggiano sopra l'apertura del copri-favo. Le api accederanno dal foro centrale.</div>
+            </div>
+          </div>
+
+          <div class="sci-step">
+            <div class="sci-step-left"><div class="sci-step-num" id="candNum5">4</div></div>
+            <div class="sci-step-body">
+              <h3>Somministrazione</h3>
+              <p>Apri la copertura dell'arnia, appoggia il panetto <strong>sopra il copri-favo</strong> direttamente sopra il foro di nutrizione (o sopra il glomere se non c'è copri-favo). Lascia la carta forno sotto: le api la perforeranno autonomamente quando hanno bisogno di cibo.</p>
+              <div class="sci-note sci-note-tip"><strong>Posizione ottimale</strong><br>Il candito deve essere <strong>direttamente sopra il glomere</strong> per essere accessibile alle api senza che debbano allontanarsi dal calore della cova. Se non è ben posizionato, le api potrebbero non raggiungerlo nei mesi più freddi.</div>
+              <div class="sci-note sci-note-tip" style="margin-top:8px"><strong>Quando ricaricare</strong><br>Controlla ogni 2-3 settimane (rapidamente, senza aprire troppo). Quando il panetto è consumato per circa metà o ¾, aggiungi un nuovo panetto.</div>
+              <div class="sci-note sci-note-warn" style="margin-top:8px"><strong>⚠️ Non somministrare candito a temperature inferiori a 5°C</strong><br>Quando fa molto freddo le api non riescono a "lavorare" l'impasto solido. Se necessario, aspetta una giornata più mite per il primo posizionamento, oppure preferisci miele liquido sul copri-favo.</div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ============================================ -->
+      <!-- TAB CONSERVAZIONE -->
+      <!-- ============================================ -->
+      <div id="candTabConservazione" style="display:none">
+
+        <!-- CANDITO CLASSICO -->
+        <div style="margin-bottom:1.5rem">
+          <h3 style="margin:0 0 0.6rem;color:var(--ink);font-size:1.05rem">Candito classico (zucchero + miele)</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.8rem">
+            <div class="sci-conserv-card">
+              <div class="sci-c-label">A temperatura ambiente</div>
+              <div class="sci-c-val">6–12 mesi</div>
+              <p>Avvolto in carta forno o pellicola, in luogo fresco e asciutto (15–20°C). Si può preparare in anticipo per tutto l'inverno. L'alta concentrazione di zucchero inibisce naturalmente lo sviluppo di muffe e fermentazioni.</p>
+            </div>
+            <div class="sci-conserv-card">
+              <div class="sci-c-label">In frigorifero (4°C)</div>
+              <div class="sci-c-val">12+ mesi</div>
+              <p>Diventa più duro col freddo. Prima dell'uso, lascialo a temperatura ambiente per qualche ora per ammorbidirlo. Conservazione massima ma raramente necessaria.</p>
+            </div>
+          </div>
+          <div class="sci-note sci-note-tip" style="margin-bottom:0">
+            <strong>Perché si conserva tanto</strong><br>
+            Il candito ha solo il 14-18% di acqua e una concentrazione zuccherina del ~80%: condizioni in cui lieviti e muffe non possono svilupparsi. È uno degli alimenti per api più stabili nel tempo.
+          </div>
+        </div>
+
+        <!-- CANDITO CON POLLINE -->
+        <div style="margin-bottom:1.5rem">
+          <h3 style="margin:0 0 0.6rem;color:var(--ink);font-size:1.05rem">Candito proteico (con polline)</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.8rem">
+            <div class="sci-conserv-card">
+              <div class="sci-c-label">A temperatura ambiente</div>
+              <div class="sci-c-val">2–3 mesi</div>
+              <p>Il polline è proteico e ricco di acqua libera: si conserva meno del classico. Prepara solo la quantità necessaria per la stagione (tipicamente fine inverno/inizio primavera).</p>
+            </div>
+            <div class="sci-conserv-card">
+              <div class="sci-c-label">In frigorifero (4°C)</div>
+              <div class="sci-c-val">6 mesi</div>
+              <p>Da preferire per il candito proteico. In frigorifero il polline non si deteriora e mantiene le proteine attive. Lascia ammorbidire 2-3 ore a temperatura ambiente prima dell'uso.</p>
+            </div>
+          </div>
+          <div class="sci-note sci-note-warn" style="margin-bottom:0">
+            <strong>⚠️ Attenzione al polline</strong><br>
+            Il polline contiene umidità e proteine che possono attirare muffe e tarme se l'impasto è poco saturo di zucchero. Se prepari grandi quantità di candito proteico, conserva in frigo o congelatore.
+          </div>
+        </div>
+
+        <!-- CONSIGLI PRATICI -->
+        <h3 style="margin:0 0 0.6rem;color:var(--ink);font-size:1.05rem">Consigli pratici</h3>
+        <div style="display:grid;grid-template-columns:1fr;gap:0.6rem;margin-bottom:1rem">
+          <div class="sci-note sci-note-tip" style="margin:0"><strong>📦 Confezionamento</strong><br>Avvolgi ogni panetto in <strong>carta forno</strong> (preferibile alla pellicola: traspira e impedisce muffe). Etichetta con data di produzione e tipo (classico/proteico). Conserva in scatole di cartone in luogo asciutto.</div>
+          <div class="sci-note sci-note-tip" style="margin:0"><strong>🌡️ Temperatura di stoccaggio</strong><br>Idealmente 10-20°C, lontano da fonti di umidità. Cantina fresca o dispensa vanno bene. Evita garage non isolati (sbalzi termici causano umidità di condensa).</div>
+          <div class="sci-note sci-note-tip" style="margin:0"><strong>🔍 Controllo prima dell'uso</strong><br>Controlla che non ci siano muffe visibili (puntini bianchi o verdi), odore strano (acetico, ammoniaca) o presenza di tarme (filamenti, larve). In caso di dubbio, scartare.</div>
+          <div class="sci-note sci-note-tip" style="margin:0"><strong>❄️ Congelatore per scorte annuali</strong><br>Se prepari grandi quantità in autunno per tutto l'inverno, conservare in freezer (-18°C) prolunga la durata fino a 2 anni. Scongelare 24h in frigo prima dell'uso.</div>
+        </div>
+
+        <div class="sci-note sci-note-err" style="margin:0"><strong>⚠️ Scartare immediatamente se:</strong> compaiono muffe (puntini bianchi/verdi/neri), odore acetico o di fermentato, presenza di tarme o piccoli filamenti, indurimento eccessivo con cristalli grandi (indica disidratazione), colore alterato (scurimento del polline = ossidazione delle proteine).</div>
+      </div>
+
+      <!-- ============================================ -->
+      <!-- TAB QUANDO SI USA -->
+      <!-- ============================================ -->
+      <div id="candTabQuando" style="display:none">
+
+        <h3 style="margin:0 0 0.8rem;color:var(--ink);font-size:1.05rem">📅 Calendario d'uso del candito</h3>
+
+        <div class="sci-conserv-card" style="margin-bottom:1rem">
+          <div class="sci-c-label">🌨️ Inverno (Dicembre – Febbraio)</div>
+          <div class="sci-c-val" style="font-size:1.05rem">Nutrizione di emergenza</div>
+          <p>Se in autunno la famiglia non ha accumulato scorte sufficienti (controllo del peso dell'arnia in novembre), il candito è il modo migliore per integrarle senza disturbare il glomere. Non stimola la covata (importante in inverno) ma fornisce energia per la termoregolazione.</p>
+          <p style="font-size:0.85rem;color:var(--text-light);margin-top:0.4rem"><strong>Usa il candito classico</strong> (senza polline). Quantità tipica: 1-2 kg per arnia, da rinnovare ogni 3-4 settimane se necessario.</p>
+        </div>
+
+        <div class="sci-conserv-card" style="margin-bottom:1rem">
+          <div class="sci-c-label">🌿 Fine inverno / Inizio primavera (Febbraio – Marzo)</div>
+          <div class="sci-c-val" style="font-size:1.05rem">Stimolazione della covata</div>
+          <p>Quando le giornate cominciano ad allungarsi e la regina riprende a deporre, le api hanno bisogno di proteine per allevare le prime covate. <strong>Questo è il momento del candito proteico (con polline)</strong>.</p>
+          <p style="font-size:0.85rem;color:var(--text-light);margin-top:0.4rem">Stimola la deposizione e prepara la famiglia all'esplosione primaverile. Da somministrare quando le temperature minime non scendono più sotto 0°C stabilmente.</p>
+        </div>
+
+        <div class="sci-conserv-card" style="margin-bottom:1rem">
+          <div class="sci-c-label">🐝 Sciami e nuclei (Aprile – Giugno)</div>
+          <div class="sci-c-val" style="font-size:1.05rem">Aiuto allo sviluppo</div>
+          <p>Per sciami appena catturati o nuclei deboli che non hanno ancora costruito favi sufficienti, il candito aiuta lo sviluppo iniziale. Si appoggia direttamente sopra il foro di nutrizione.</p>
+          <p style="font-size:0.85rem;color:var(--text-light);margin-top:0.4rem">In questo periodo è preferibile lo <strong>sciroppo 1:1 stimolante</strong> per chi può fare visite frequenti, ma il candito è una buona alternativa per chi vuole una somministrazione meno gestita.</p>
+        </div>
+
+        <div class="sci-conserv-card" style="margin-bottom:1rem">
+          <div class="sci-c-label">☀️ Estate</div>
+          <div class="sci-c-val" style="font-size:1.05rem">Generalmente non si usa</div>
+          <p>In estate le api hanno abbondante nettare e polline naturale: il candito non è necessario. Inoltre con temperature elevate il candito si scioglie e cola, sporcando il copri-favo.</p>
+        </div>
+
+        <div class="sci-conserv-card" style="margin-bottom:1rem">
+          <div class="sci-c-label">🍂 Autunno (Settembre – Novembre)</div>
+          <div class="sci-c-val" style="font-size:1.05rem">Preferire lo sciroppo 2:1</div>
+          <p>Per costituire le scorte invernali è meglio lo <strong>sciroppo 2:1</strong>: le api lo immagazzinano facilmente nelle celle. Il candito si usa solo come "extra" se ad inizio inverno il peso non è sufficiente.</p>
+        </div>
+
+        <h3 style="margin:1.5rem 0 0.8rem;color:var(--ink);font-size:1.05rem">💡 Confronto rapido: candito vs sciroppo</h3>
+
+        <div style="overflow-x:auto;margin-bottom:1rem">
+          <table style="width:100%;border-collapse:collapse;font-size:0.88rem;background:white;border:1px solid var(--cream-dark);border-radius:6px;overflow:hidden">
+            <thead>
+              <tr style="background:var(--cream)">
+                <th style="padding:10px;text-align:left;border-bottom:1px solid var(--cream-dark);color:var(--brown)">Caratteristica</th>
+                <th style="padding:10px;text-align:left;border-bottom:1px solid var(--cream-dark);color:var(--brown)">🍬 Sciroppo</th>
+                <th style="padding:10px;text-align:left;border-bottom:1px solid var(--cream-dark);color:var(--brown)">🍯 Candito</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td style="padding:8px 10px;border-bottom:1px solid var(--cream-dark);font-weight:600">Stato</td><td style="padding:8px 10px;border-bottom:1px solid var(--cream-dark)">Liquido</td><td style="padding:8px 10px;border-bottom:1px solid var(--cream-dark)">Solido</td></tr>
+              <tr><td style="padding:8px 10px;border-bottom:1px solid var(--cream-dark);font-weight:600">Stagione</td><td style="padding:8px 10px;border-bottom:1px solid var(--cream-dark)">Primavera (1:1) / Autunno (2:1)</td><td style="padding:8px 10px;border-bottom:1px solid var(--cream-dark)">Inverno / Inizio primavera</td></tr>
+              <tr><td style="padding:8px 10px;border-bottom:1px solid var(--cream-dark);font-weight:600">Preparazione</td><td style="padding:8px 10px;border-bottom:1px solid var(--cream-dark)">Veloce (5-10 min)</td><td style="padding:8px 10px;border-bottom:1px solid var(--cream-dark)">Media (15-20 min)</td></tr>
+              <tr><td style="padding:8px 10px;border-bottom:1px solid var(--cream-dark);font-weight:600">Conservazione</td><td style="padding:8px 10px;border-bottom:1px solid var(--cream-dark)">Breve (giorni-settimane)</td><td style="padding:8px 10px;border-bottom:1px solid var(--cream-dark)">Molto lunga (mesi-anni)</td></tr>
+              <tr><td style="padding:8px 10px;border-bottom:1px solid var(--cream-dark);font-weight:600">Somministrazione</td><td style="padding:8px 10px;border-bottom:1px solid var(--cream-dark)">Nutritore (richiede gestione)</td><td style="padding:8px 10px;border-bottom:1px solid var(--cream-dark)">Sopra copri-favo (set & forget)</td></tr>
+              <tr><td style="padding:8px 10px;border-bottom:1px solid var(--cream-dark);font-weight:600">Disturbo all'arnia</td><td style="padding:8px 10px;border-bottom:1px solid var(--cream-dark)">Maggiore (apertura frequente)</td><td style="padding:8px 10px;border-bottom:1px solid var(--cream-dark)">Minimo (un solo posizionamento)</td></tr>
+              <tr><td style="padding:8px 10px;font-weight:600">Stimola covata</td><td style="padding:8px 10px">Sì (1:1)</td><td style="padding:8px 10px">No (classico), Sì (proteico)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="sci-note sci-note-tip" style="margin-top:1rem">
+          <strong>🐝 Riassunto operativo</strong><br>
+          <strong>Inverno</strong>: candito classico se serve integrare scorte<br>
+          <strong>Fine inverno</strong>: candito proteico per stimolare la covata<br>
+          <strong>Primavera</strong>: sciroppo 1:1 per stimolazione attiva<br>
+          <strong>Autunno</strong>: sciroppo 2:1 per scorte invernali
+        </div>
+
+      </div>
+
+    </div><!-- fine utilTabCandito -->
 
     <!-- SUB: TRATTAMENTI -->
     <div id="utilTabTrattamenti" style="display:none">
@@ -1602,16 +1875,17 @@
 </div><!-- fine appContent -->
 
 <!-- ===== JS MODULES — ordine importante! ===== -->
-<script src="js/state.js?v=20260516"></script>
-<script src="js/nav.js?v=20260516"></script>
-<script src="js/import-export.js?v=20260516"></script>
-<script src="js/registro.js?v=20260516"></script>
-<script src="js/arnie.js?v=20260516"></script>
-<script src="js/magazzino.js?v=20260516"></script>
-<script src="js/contabilita.js?v=20260516"></script>
-<script src="js/obiettivi.js?v=20260516"></script>
-<script src="js/sciroppo.js?v=20260516"></script>
-<script src="js/home.js?v=20260516"></script>
+<script src="js/state.js?v=20260516a"></script>
+<script src="js/nav.js?v=20260516a"></script>
+<script src="js/import-export.js?v=20260516a"></script>
+<script src="js/registro.js?v=20260516a"></script>
+<script src="js/arnie.js?v=20260516a"></script>
+<script src="js/magazzino.js?v=20260516a"></script>
+<script src="js/contabilita.js?v=20260516a"></script>
+<script src="js/obiettivi.js?v=20260516a"></script>
+<script src="js/sciroppo.js?v=20260516a"></script>
+<script src="js/candito.js?v=20260516a"></script>
+<script src="js/home.js?v=20260516a"></script>
 <script src="js/drive-app.js"></script>
 
 </body>
