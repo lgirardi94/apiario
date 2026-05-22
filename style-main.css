@@ -516,6 +516,308 @@ main {
   background: rgba(139,107,177,0.08);
   box-shadow: 0 2px 6px rgba(139,107,177,0.15);
 }
+
+/* ============================================ */
+/* SCHEDA ARNIA DETTAGLIATA */
+/* ============================================ */
+.scheda-arnia-modal {
+  max-width: 900px;
+  width: 95%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
+
+.scheda-header {
+  background: linear-gradient(135deg, var(--brown), #8B4513);
+  color: white;
+  padding: 1.3rem 1.8rem;
+  display: flex;
+  align-items: center;
+  gap: 1.3rem;
+}
+.scheda-num-badge {
+  width: 70px;
+  height: 70px;
+  background: rgba(245,200,66,0.2);
+  border: 2px solid #F5C842;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.scheda-header-info { flex: 1; min-width: 0; }
+.scheda-header-info h2 { font-size: 1.5rem; font-family: 'Playfair Display', serif; margin: 0; }
+.scheda-tipo-pill {
+  display: inline-block;
+  font-size: 0.72rem;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.scheda-tipo-pill.badge-famiglia   { background: rgba(255,255,255,0.2); color: white; }
+.scheda-tipo-pill.badge-nucleo     { background: rgba(245,200,66,0.4); color: white; }
+.scheda-tipo-pill.badge-nucleo_fec { background: rgba(216,180,254,0.4); color: white; }
+.scheda-tipo-pill.badge-sciame     { background: rgba(168,201,119,0.5); color: white; }
+
+.scheda-tags-row {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+.scheda-tag {
+  background: rgba(255,255,255,0.2);
+  padding: 3px 9px;
+  border-radius: 11px;
+  font-size: 0.74rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.scheda-tag-custom { background: rgba(245,200,66,0.4); }
+.scheda-tag-add {
+  background: transparent;
+  border: 1px dashed rgba(255,255,255,0.4);
+  color: white;
+  padding: 2px 9px;
+  border-radius: 11px;
+  font-size: 0.74rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+.scheda-tag-add:hover { border-color: white; background: rgba(255,255,255,0.1); }
+
+.scheda-tabs {
+  display: flex;
+  background: var(--cream);
+  border-bottom: 1px solid var(--cream-dark);
+}
+.scheda-tab {
+  flex: 1;
+  padding: 0.85rem 0.5rem;
+  text-align: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: 'Crimson Pro', serif;
+  font-size: 0.9rem;
+  color: var(--text-light);
+  font-weight: 600;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s;
+}
+.scheda-tab:hover { background: rgba(200,134,10,0.05); }
+.scheda-tab.active {
+  color: var(--brown);
+  border-bottom-color: var(--amber);
+  background: white;
+}
+
+.scheda-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem 1.8rem;
+  background: white;
+}
+
+.scheda-footer {
+  display: flex;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  background: var(--cream);
+  border-top: 1px solid var(--cream-dark);
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+/* Health card */
+.scheda-health-card {
+  background: linear-gradient(135deg, var(--cream), var(--cream-dark));
+  padding: 1.2rem;
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+.scheda-health-score {
+  width: 75px;
+  height: 75px;
+  border-radius: 50%;
+  background: #9ca3af;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.scheda-health-card.high .scheda-health-score    { background: var(--green); }
+.scheda-health-card.medium .scheda-health-score  { background: var(--amber); }
+.scheda-health-card.low .scheda-health-score     { background: #E89488; }
+.scheda-health-card.critical .scheda-health-score { background: var(--red); }
+.scheda-health-card.unknown .scheda-health-score { background: #9ca3af; }
+.scheda-health-info h3 { margin: 0 0 0.3rem; color: var(--brown); font-family: 'Playfair Display', serif; font-size: 1.05rem; }
+.scheda-health-info p { margin: 0; color: var(--text-light); font-size: 0.86rem; line-height: 1.5; }
+
+/* Anagrafica grid */
+.scheda-anag-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+}
+.scheda-anag-card {
+  background: var(--cream);
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+}
+.scheda-anag-label {
+  font-size: 0.7rem;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.scheda-anag-val {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.05rem;
+  color: var(--brown);
+  font-weight: 700;
+  margin-top: 0.2rem;
+  line-height: 1.3;
+}
+
+.scheda-section {
+  background: var(--cream);
+  padding: 1rem 1.2rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+.scheda-section h4 {
+  margin: 0 0 0.7rem;
+  color: var(--brown);
+  font-family: 'Playfair Display', serif;
+  font-size: 1rem;
+}
+
+/* Genealogia tree */
+.genealogia-tree { display: flex; flex-direction: column; gap: 0.5rem; }
+.genealogia-line {
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: white;
+  font-size: 0.92rem;
+}
+.genealogia-line.parent  { background: rgba(92,58,16,0.05); border-left: 3px solid var(--brown); }
+.genealogia-line.current { background: rgba(200,134,10,0.1); border-left: 3px solid var(--amber); font-weight: 600; }
+.genealogia-line.child   { background: rgba(93,140,68,0.05); border-left: 3px solid var(--green); margin-left: 20px; }
+
+/* Timeline */
+.scheda-timeline { position: relative; padding-left: 28px; }
+.scheda-timeline::before {
+  content: '';
+  position: absolute;
+  left: 9px; top: 0; bottom: 0;
+  width: 2px;
+  background: var(--cream-dark);
+}
+.scheda-timeline-item { position: relative; margin-bottom: 1.2rem; }
+.scheda-timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -23px; top: 7px;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: var(--amber);
+  border: 2px solid white;
+}
+.scheda-timeline-item.visit::before { background: var(--green); }
+.scheda-timeline-item.treatment::before { background: var(--red); }
+.scheda-timeline-item.event::before { background: var(--amber); }
+.scheda-timeline-date {
+  font-family: 'Playfair Display', serif;
+  color: var(--brown);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.scheda-timeline-card {
+  background: var(--cream);
+  padding: 0.7rem 1rem;
+  border-radius: 6px;
+  margin-top: 0.3rem;
+  border-left: 3px solid var(--amber);
+}
+.scheda-timeline-card.visit { border-left-color: var(--green); }
+.scheda-timeline-card.treatment { border-left-color: var(--red); }
+.scheda-timeline-type {
+  font-size: 0.72rem;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.3rem;
+  font-weight: 700;
+}
+.scheda-timeline-details {
+  font-size: 0.88rem;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+/* Stats grid */
+.scheda-stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.scheda-stat-card {
+  background: var(--cream);
+  padding: 1rem;
+  border-radius: 8px;
+}
+.scheda-stat-card h4 {
+  margin: 0 0 0.6rem;
+  color: var(--brown);
+  font-family: 'Playfair Display', serif;
+  font-size: 0.95rem;
+}
+.stat-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+  font-size: 0.82rem;
+}
+.stat-bar-track {
+  flex: 1;
+  height: 10px;
+  background: white;
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid var(--cream-dark);
+}
+.stat-bar-fill {
+  height: 100%;
+  background: var(--amber);
+  border-radius: 3px;
+  transition: width 0.4s;
+}
+
+@media (max-width: 720px) {
+  .scheda-stat-grid { grid-template-columns: 1fr; }
+  .scheda-anag-grid { grid-template-columns: 1fr 1fr; }
+}
 .arnia-num {
   font-family: 'Playfair Display', serif;
   font-size: 1.5rem;

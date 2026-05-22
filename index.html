@@ -1292,6 +1292,8 @@
     <p class="section-subtitle">Gestisci il censimento del tuo apiario</p>
     <div style="display:flex;gap:0.8rem;margin-bottom:1.5rem;flex-wrap:wrap">
       <button class="btn" onclick="openArniModal()">+ Aggiungi Arnia</button>
+      <button class="btn btn-secondary" onclick="generaReportCompleto()" title="Genera report PDF completo annuale">📄 Report annuale</button>
+      <button class="btn btn-secondary" onclick="generaReportTrattamenti()" title="Registro trattamenti per ispezione veterinaria">💊 Registro trattamenti</button>
     </div>
     <div class="arnie-grid" id="arnieGrid"></div>
   </section>
@@ -1965,20 +1967,40 @@
 </div>
 <div id="detailOverlay" onclick="closeDetail()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:199"></div>
 
+<!-- SCHEDA ARNIA DETTAGLIATA (Step 3) -->
+<div class="modal-overlay" id="schedaArniaModal">
+  <div class="modal scheda-arnia-modal">
+    <div class="scheda-header" id="schedaHeader"></div>
+    <div class="scheda-tabs">
+      <button class="scheda-tab active" data-tab="anagrafica" onclick="setSchedaTab('anagrafica')">📋 Anagrafica</button>
+      <button class="scheda-tab" data-tab="timeline" onclick="setSchedaTab('timeline')">📅 Timeline</button>
+      <button class="scheda-tab" data-tab="stats" onclick="setSchedaTab('stats')">📊 Statistiche</button>
+      <button class="scheda-tab" data-tab="note" onclick="setSchedaTab('note')">📝 Note</button>
+    </div>
+    <div class="scheda-body" id="schedaBody"></div>
+    <div class="scheda-footer">
+      <button class="btn btn-secondary" onclick="closeSchedaDettagliata()">Chiudi</button>
+      <button class="btn" onclick="closeSchedaDettagliata();openArniModal(_currentSchedaArniaId || '')">✏️ Modifica</button>
+      <button id="schedaPromuoviBtn" class="btn btn-primary" onclick="promuoviNucleo(_currentSchedaArniaId)" style="display:none">⬆️ Promuovi a Famiglia</button>
+    </div>
+  </div>
+</div>
+
 </div><!-- fine appContent -->
 
 <!-- ===== JS MODULES — ordine importante! ===== -->
-<script src="js/state.js?v=20260517"></script>
-<script src="js/nav.js?v=20260517"></script>
-<script src="js/import-export.js?v=20260517"></script>
-<script src="js/registro.js?v=20260517"></script>
-<script src="js/arnie.js?v=20260517"></script>
-<script src="js/magazzino.js?v=20260517"></script>
-<script src="js/contabilita.js?v=20260517"></script>
-<script src="js/obiettivi.js?v=20260517"></script>
-<script src="js/sciroppo.js?v=20260517"></script>
-<script src="js/candito.js?v=20260517"></script>
-<script src="js/home.js?v=20260517"></script>
+<script src="js/state.js?v=20260518"></script>
+<script src="js/nav.js?v=20260518"></script>
+<script src="js/import-export.js?v=20260518"></script>
+<script src="js/registro.js?v=20260518"></script>
+<script src="js/arnie.js?v=20260518"></script>
+<script src="js/magazzino.js?v=20260518"></script>
+<script src="js/contabilita.js?v=20260518"></script>
+<script src="js/obiettivi.js?v=20260518"></script>
+<script src="js/sciroppo.js?v=20260518"></script>
+<script src="js/candito.js?v=20260518"></script>
+<script src="js/report.js?v=20260518"></script>
+<script src="js/home.js?v=20260518"></script>
 <script src="js/drive-app.js"></script>
 
 </body>
