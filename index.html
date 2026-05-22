@@ -1724,10 +1724,19 @@
     <h3 id="arniModalTitle">🏠 Nuova Arnia</h3>
     <input type="hidden" id="editArniId">
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+    <div style="display:grid;grid-template-columns:80px 1fr 1fr;gap:0.8rem">
       <div class="form-row">
-        <label>Numero / Codice</label>
-        <input type="text" id="arniNum" placeholder="Es. A1, 07, Nord...">
+        <label>N°</label>
+        <input type="text" id="arniNum" readonly title="Numero auto-assegnato" style="background:var(--cream);font-weight:700;text-align:center;font-family:'Playfair Display',serif;color:var(--brown)">
+      </div>
+      <div class="form-row">
+        <label>Tipo arnia</label>
+        <select id="arniTipo">
+          <option value="famiglia">🏠 Famiglia (standard)</option>
+          <option value="nucleo">🍯 Nucleo (in sviluppo)</option>
+          <option value="nucleo_fec">👑 Nucleo fecondazione</option>
+          <option value="sciame">🐝 Sciame catturato</option>
+        </select>
       </div>
       <div class="form-row">
         <label>Nome (opzionale)</label>
@@ -1875,17 +1884,17 @@
 </div><!-- fine appContent -->
 
 <!-- ===== JS MODULES — ordine importante! ===== -->
-<script src="js/state.js?v=20260516a"></script>
-<script src="js/nav.js?v=20260516a"></script>
-<script src="js/import-export.js?v=20260516a"></script>
-<script src="js/registro.js?v=20260516a"></script>
-<script src="js/arnie.js?v=20260516a"></script>
-<script src="js/magazzino.js?v=20260516a"></script>
-<script src="js/contabilita.js?v=20260516a"></script>
-<script src="js/obiettivi.js?v=20260516a"></script>
-<script src="js/sciroppo.js?v=20260516a"></script>
-<script src="js/candito.js?v=20260516a"></script>
-<script src="js/home.js?v=20260516a"></script>
+<script src="js/state.js?v=20260516b"></script>
+<script src="js/nav.js?v=20260516b"></script>
+<script src="js/import-export.js?v=20260516b"></script>
+<script src="js/registro.js?v=20260516b"></script>
+<script src="js/arnie.js?v=20260516b"></script>
+<script src="js/magazzino.js?v=20260516b"></script>
+<script src="js/contabilita.js?v=20260516b"></script>
+<script src="js/obiettivi.js?v=20260516b"></script>
+<script src="js/sciroppo.js?v=20260516b"></script>
+<script src="js/candito.js?v=20260516b"></script>
+<script src="js/home.js?v=20260516b"></script>
 <script src="js/drive-app.js"></script>
 
 </body>
