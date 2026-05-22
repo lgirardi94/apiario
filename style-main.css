@@ -838,7 +838,19 @@ main {
 .status-problema { background: #fce8e8; color: var(--red); }
 .status-invernata{ background: #e3f2fd; color: var(--blue); }
 .arnia-info { font-size: 0.9rem; color: var(--text-light); line-height: 1.7; }
-.arnia-actions { display: flex; gap: 0.4rem; margin-top: 0.8rem; }
+.arnia-actions {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.8rem;
+  flex-wrap: wrap;
+}
+.arnia-actions .btn {
+  flex: 1 1 auto;
+  min-width: 60px;
+  white-space: nowrap;
+  padding: 0.4rem 0.6rem !important;
+  font-size: 0.78rem !important;
+}
 
 /* SECTION TITLE */
 .section-title {
