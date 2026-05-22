@@ -495,6 +495,27 @@ main {
 .arnia-tipo-badge.badge-nucleo     { background: rgba(200,134,10,0.2); color: var(--amber); }
 .arnia-tipo-badge.badge-nucleo_fec { background: rgba(139,107,177,0.2); color: #8B6BB1; }
 .arnia-tipo-badge.badge-sciame     { background: rgba(93,140,68,0.2);  color: var(--green); }
+
+/* ===== ORIGINE REGINA (radio cards) ===== */
+.regina-opt-radio {
+  background: white;
+  border: 2px solid var(--cream-dark);
+  border-radius: 6px;
+  padding: 0.6rem 0.5rem;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+  user-select: none;
+}
+.regina-opt-radio:hover {
+  border-color: rgba(139,107,177,0.5);
+  background: rgba(139,107,177,0.03);
+}
+.regina-opt-radio.selected {
+  border-color: #8B6BB1;
+  background: rgba(139,107,177,0.08);
+  box-shadow: 0 2px 6px rgba(139,107,177,0.15);
+}
 .arnia-num {
   font-family: 'Playfair Display', serif;
   font-size: 1.5rem;
