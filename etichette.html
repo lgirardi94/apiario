@@ -261,11 +261,61 @@
   }
 
   /* ====== EDITOR STILE ====== */
+  .style-category-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+    padding: 6px;
+    background: rgba(200,134,10,0.06);
+    border-radius: 8px;
+    flex-wrap: wrap;
+  }
+  .style-cat-tab {
+    flex: 1;
+    min-width: 90px;
+    padding: 10px 14px;
+    background: white;
+    border: 1.5px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--muted);
+    transition: all 0.15s;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .style-cat-tab:hover {
+    background: rgba(255,255,255,0.7);
+    color: var(--ink);
+  }
+  .style-cat-tab.active {
+    background: white;
+    border-color: var(--accent);
+    color: var(--ink);
+    box-shadow: 0 2px 6px rgba(200,134,10,0.15);
+  }
+  .style-cat-tab .cat-count {
+    background: rgba(200,134,10,0.15);
+    color: var(--accent);
+    font-size: 11px;
+    padding: 1px 6px;
+    border-radius: 9px;
+    font-weight: 700;
+  }
+  .style-cat-tab.active .cat-count {
+    background: var(--accent);
+    color: white;
+  }
   .style-tabs {
     display: flex;
     gap: 4px;
     margin-bottom: 14px;
     border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
   }
   .style-tab {
     padding: 8px 14px;
@@ -277,10 +327,18 @@
     border-bottom: 2px solid transparent;
     margin-bottom: -1px;
   }
+  .style-tab .shape-icon {
+    opacity: 0.5;
+    font-size: 11px;
+    margin-right: 3px;
+  }
   .style-tab.active {
     color: var(--ink);
     border-bottom-color: var(--accent);
     font-weight: 600;
+  }
+  .style-tab.active .shape-icon {
+    opacity: 0.8;
   }
   .style-editor {
     font-size: 13px;
@@ -604,6 +662,7 @@
         <span class="toggle" onclick="saveStyleAsDefault()" style="margin-right:8px">💾 Salva come mio default</span>
         <span class="toggle" onclick="resetCurrentStyle()">↺ Ripristina default</span>
       </h2>
+      <div class="style-category-tabs" id="styleCategoryTabs"></div>
       <div class="style-tabs" id="styleTabs"></div>
       <div class="style-editor" id="styleEditor"></div>
     </div>
@@ -1057,6 +1116,7 @@ window.addEventListener('load', () => {
   let currentFormat = "wide";  // formato A4 selezionato (Wide/Vino/Bandiera/Tonda)
   let userDefaults = null;  // null = usa default di fabbrica. Altrimenti contiene styleConfig salvato dall'utente
   let currentStyleTab = "rustico";
+  let currentCategory = "miele"; // 'miele' | 'propoli' | 'polline'
 
   // Se mancano stili (es. dopo aggiornamento), reinizializzali
   for (const s of STYLES) {
@@ -1439,20 +1499,73 @@ window.addEventListener('load', () => {
 
   // ====== UI: EDITOR STILE ======
   function renderStyleEditor() {
-    // tabs (filtra per formato corrente)
+    const availableStyles = getAvailableStyles();
+
+    // 1. MACRO-TAB CATEGORIE
+    const catTabs = document.getElementById("styleCategoryTabs");
+    const categories = [
+      { id: 'miele',   label: '🍯 Miele' },
+      { id: 'propoli', label: '🌿 Propoli' },
+      { id: 'polline', label: '🌾 Polline' },
+    ];
+    // Conta gli stili disponibili per categoria
+    const stylesByCategory = {};
+    categories.forEach(c => {
+      stylesByCategory[c.id] = availableStyles.filter(s => (s.category || 'miele') === c.id);
+    });
+
+    // Se la categoria corrente non ha stili in questo formato, fallback alla prima con stili
+    if (stylesByCategory[currentCategory].length === 0) {
+      const fallback = categories.find(c => stylesByCategory[c.id].length > 0);
+      if (fallback) currentCategory = fallback.id;
+    }
+
+    catTabs.innerHTML = "";
+    categories.forEach(cat => {
+      const count = stylesByCategory[cat.id].length;
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "style-cat-tab" + (cat.id === currentCategory ? " active" : "");
+      btn.innerHTML = `${cat.label} <span class="cat-count">${count}</span>`;
+      btn.disabled = count === 0;
+      if (count === 0) {
+        btn.style.opacity = '0.4';
+        btn.style.cursor = 'not-allowed';
+        btn.title = `Nessuno stile ${cat.label} disponibile per questo formato`;
+      } else {
+        btn.onclick = () => {
+          currentCategory = cat.id;
+          // Se il currentStyleTab non appartiene alla nuova categoria, switcha al primo della categoria
+          const stylesInNewCat = stylesByCategory[cat.id];
+          if (!stylesInNewCat.find(s => s.id === currentStyleTab)) {
+            currentStyleTab = stylesInNewCat[0].id;
+          }
+          renderStyleEditor();
+        };
+      }
+      catTabs.appendChild(btn);
+    });
+
+    // 2. TAB STILI (solo della categoria attiva)
     const tabs = document.getElementById("styleTabs");
     tabs.innerHTML = "";
-    const availableStyles = getAvailableStyles();
-    // Se currentStyleTab non è nel formato corrente, ripiega su primo disponibile
-    if (!availableStyles.find(s => s.id === currentStyleTab)) {
-      currentStyleTab = availableStyles[0]?.id || "rustico";
+    const stylesInCategory = stylesByCategory[currentCategory];
+
+    // Se currentStyleTab non è nella categoria corrente, ripiega sul primo della categoria
+    if (!stylesInCategory.find(s => s.id === currentStyleTab)) {
+      currentStyleTab = stylesInCategory[0]?.id || "rustico";
     }
-    availableStyles.forEach(s => {
+    // Aggiorna anche currentCategory per coerenza con il currentStyleTab
+    const currentStyleDef = STYLES.find(s => s.id === currentStyleTab);
+    if (currentStyleDef && (currentStyleDef.category || 'miele') !== currentCategory) {
+      currentCategory = currentStyleDef.category || 'miele';
+    }
+
+    stylesInCategory.forEach(s => {
       const btn = document.createElement("button");
       btn.className = "style-tab" + (s.id === currentStyleTab ? " active" : "");
-      const cat = s.category || 'miele';
-      const catIcon = cat === 'propoli' ? '🌿 ' : (cat === 'polline' ? '🌾 ' : '🍯 ');
-      btn.textContent = catIcon + s.name;
+      const shapeIcon = s.shape === 'round' ? '⭕' : '▭';
+      btn.innerHTML = `<span class="shape-icon">${shapeIcon}</span>${s.name}`;
       btn.onclick = () => { currentStyleTab = s.id; renderStyleEditor(); };
       tabs.appendChild(btn);
     });
