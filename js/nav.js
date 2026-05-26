@@ -1,4 +1,5 @@
 // ===== NAVIGAZIONE =====
+
 function navigateTo(id) {
   const btn = [...document.querySelectorAll('nav button')].find(b => b.getAttribute('onclick')?.includes(`'${id}'`));
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
