@@ -914,7 +914,7 @@ function renderStep1() {
       <div class="arnia-card-num">#${a.num}</div>
       <div class="arnia-card-info">
         <div class="arnia-card-nome">${a.nome||'Arnia #'+a.num}</div>
-        <div class="arnia-card-meta">${a.razza||''}${a.razza&&a.reginaAnno?' · ':''}${a.reginaAnno?'Regina '+a.reginaAnno:''}</div>
+        <div class="arnia-card-meta">${a.razza||''}${a.razza&&a.reginaAnno?' · ':''}${a.reginaAnno?(typeof getReginaPallino==='function'?getReginaPallino(a.reginaAnno,11):'')+'Regina '+a.reginaAnno:''}</div>
         ${ultimaIsp?`<div class="arnia-last-isp">Ultima isp: ${formatGiorniFa(ultimaIsp.data)} (${formatDate(ultimaIsp.data)})</div>`:''}
       </div>
       <span class="arnia-card-stato ${statoCls[a.status]||'stato-attiva'}">${statoLabel[a.status]||a.status}</span>

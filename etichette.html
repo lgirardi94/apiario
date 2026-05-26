@@ -723,16 +723,25 @@ window.addEventListener('load', () => {
   const DEFAULT_WEIGHTS = ["250 g", "500 g", "1000 g"];
 
   const STYLES = [
-    // Stili rettangolari
-    { id: "rustico",  name: "Rustico",  shape: "rect" },
-    { id: "minimal",  name: "Minimal",  shape: "rect" },
-    { id: "vintage",  name: "Vintage",  shape: "rect" },
-    { id: "classico", name: "Classico", shape: "rect" },
-    // Stili tondi
-    { id: "alveare",  name: "Alveare",  shape: "round" },
-    { id: "stemma",   name: "Stemma",   shape: "round" },
-    { id: "antico",   name: "Antico",   shape: "round" },
-    { id: "favo",     name: "Favo",     shape: "round" },
+    // ===== MIELE =====
+    // Stili rettangolari miele
+    { id: "rustico",  name: "Rustico",  shape: "rect", category: "miele" },
+    { id: "minimal",  name: "Minimal",  shape: "rect", category: "miele" },
+    { id: "vintage",  name: "Vintage",  shape: "rect", category: "miele" },
+    { id: "classico", name: "Classico", shape: "rect", category: "miele" },
+    // Stili tondi miele
+    { id: "alveare",  name: "Alveare",  shape: "round", category: "miele" },
+    { id: "stemma",   name: "Stemma",   shape: "round", category: "miele" },
+    { id: "antico",   name: "Antico",   shape: "round", category: "miele" },
+    { id: "favo",     name: "Favo",     shape: "round", category: "miele" },
+    // ===== PROPOLI (3 stili dedicati, rettangolari) =====
+    { id: "prop_apothecary", name: "Apothecary",      shape: "rect", category: "propoli" },
+    { id: "prop_classica",   name: "Classica orn.",   shape: "rect", category: "propoli" },
+    { id: "prop_tag",        name: "Tag farmacia",    shape: "rect", category: "propoli" },
+    // ===== POLLINE (3 stili, varianti miele) =====
+    { id: "poll_tondo",      name: "Tondo polline",   shape: "round", category: "polline" },
+    { id: "poll_hexagon",    name: "Hexagon polline", shape: "rect",  category: "polline" },
+    { id: "poll_linea",      name: "Linea polline",   shape: "rect",  category: "polline" },
   ];
 
   // ====== FORMATI (dimensione foglio + etichetta + layout) ======
@@ -908,6 +917,116 @@ window.addEventListener('load', () => {
           { id: "weight",  kind: "weight", visible: true, font: '"Cormorant Garamond", serif', size: 7, letterSpacing: 3, color: "ink", prefix: "— ", suffix: " —" },
         ],
       },
+
+      // ====== PROPOLI ======
+
+      // Apothecary verticale - rettangolare alto/stretto (es. 30x80mm)
+      prop_apothecary: {
+        showOuterFrame: true,
+        showInnerFrame: true,
+        category: "propoli",
+        elements: [
+          { id: "kicker",   kind: "text",       text: "TINTURA DI",  visible: true,  font: 'Georgia, serif', size: 6, italic: false, bold: false, transform: "spaced", color: "type" },
+          { id: "name",     kind: "name",       visible: true, font: '"Playfair Display", serif', size: 14, italic: true, bold: true, transform: "none", color: "type" },
+          { id: "line",     kind: "decoration", deco: "line", visible: true, width: 18 },
+          { id: "conc",     kind: "text-conc",  visible: true, font: '"Playfair Display", serif', size: 22, italic: false, bold: true, transform: "none", color: "type" },
+          { id: "tipoprop", kind: "text-tipoprop", visible: true, font: 'Georgia, serif', size: 6, italic: false, bold: false, transform: "spaced", color: "ink" },
+          { id: "volume",   kind: "text-volume",   visible: true, font: 'Georgia, serif', size: 9, italic: false, bold: true, transform: "none", color: "type" },
+          { id: "datapr",   kind: "text-datapr",   visible: true, font: 'Georgia, serif', size: 6, italic: false, bold: false, transform: "none", color: "ink" },
+          { id: "brand",    kind: "text", text: "Apicoltura Girardi", visible: false, font: 'Georgia, serif', size: 6, italic: true, bold: false, transform: "none", color: "ink" },
+          { id: "warning",  kind: "text-warning", visible: true, font: 'Georgia, serif', size: 5, italic: true, bold: false, transform: "none", color: "ink" },
+        ],
+      },
+
+      // Classica con ornamento - rettangolare medio (es. 70x40mm)
+      prop_classica: {
+        showOuterFrame: true,
+        showInnerFrame: false,
+        category: "propoli",
+        elements: [
+          { id: "ornL",     kind: "decoration", deco: "flower", visible: true, char: "❦", size: 8 },
+          { id: "kicker",   kind: "text",       text: "APICOLTURA", visible: true,  font: 'Georgia, serif', size: 6, italic: false, bold: false, transform: "spaced", color: "type" },
+          { id: "name",     kind: "name",       visible: true, font: '"Playfair Display", serif', size: 14, italic: true, bold: true, transform: "none", color: "type" },
+          { id: "line",     kind: "decoration", deco: "deco-line", visible: true, width: 30 },
+          { id: "conc",     kind: "text-conc",  visible: true, font: 'Georgia, serif', size: 9, italic: false, bold: true, transform: "none", color: "type", prefix: "Concentrazione " },
+          { id: "tipoprop", kind: "text-tipoprop", visible: true, font: 'Georgia, serif', size: 7, italic: true, bold: false, transform: "none", color: "ink" },
+          { id: "volume",   kind: "text-volume",   visible: true, font: 'Georgia, serif', size: 8, italic: false, bold: true, transform: "none", color: "type" },
+          { id: "datapr",   kind: "text-datapr",   visible: true, font: 'Georgia, serif', size: 6, italic: false, bold: false, transform: "none", color: "ink", prefix: "Preparato il " },
+          { id: "brand",    kind: "text", text: "Apicoltura Girardi", visible: true, font: 'Georgia, serif', size: 7, italic: true, bold: false, transform: "none", color: "ink" },
+          { id: "warning",  kind: "text-warning", visible: true, font: 'Georgia, serif', size: 5, italic: true, bold: false, transform: "none", color: "ink" },
+        ],
+      },
+
+      // Tag farmacia vintage - quadrato/verticale (es. 40x60mm)
+      prop_tag: {
+        showOuterFrame: true,
+        showInnerFrame: false,
+        category: "propoli",
+        elements: [
+          { id: "icon",     kind: "decoration", deco: "flower", visible: true, char: "🌿", size: 12 },
+          { id: "kicker",   kind: "text",       text: "Tintura di", visible: true,  font: 'Georgia, serif', size: 6, italic: false, bold: false, transform: "spaced", color: "type" },
+          { id: "name",     kind: "name",       visible: true, font: '"Playfair Display", serif', size: 12, italic: true, bold: true, transform: "none", color: "type" },
+          { id: "conc",     kind: "text-conc",  visible: true, font: '"Playfair Display", serif', size: 18, italic: false, bold: true, transform: "none", color: "type" },
+          { id: "tipoprop", kind: "text-tipoprop", visible: true, font: 'Georgia, serif', size: 6, italic: true, bold: false, transform: "none", color: "ink" },
+          { id: "volume",   kind: "text-volume",   visible: true, font: 'Georgia, serif', size: 8, italic: false, bold: true, transform: "none", color: "type" },
+          { id: "datapr",   kind: "text-datapr",   visible: true, font: 'Georgia, serif', size: 6, italic: false, bold: false, transform: "none", color: "ink" },
+          { id: "warning",  kind: "text-warning", visible: true, font: 'Georgia, serif', size: 5, italic: true, bold: false, transform: "none", color: "ink" },
+        ],
+      },
+
+      // ====== POLLINE ======
+
+      // Tondo classico polline (round, simile a 'alveare' del miele)
+      poll_tondo: {
+        showOuterFrame: true,
+        showInnerFrame: true,
+        shape: "round",
+        category: "polline",
+        elements: [
+          { id: "kicker",   kind: "text-curved-top", text: "POLLINE D'API", visible: true, font: '"Cinzel", serif', size: 8, bold: 600, letterSpacing: 5, color: "ink" },
+          { id: "name",     kind: "name", visible: true, font: '"Playfair Display", serif', size: 17, bold: 700, color: "type", stroke: 0.6 },
+          { id: "deco",     kind: "decoration-line", visible: true, width: 50, color: "amber" },
+          { id: "stato",    kind: "text-stato", visible: true, font: '"Cormorant Garamond", serif', size: 7, letterSpacing: 3, color: "ink", transform: "spaced" },
+          { id: "weight",   kind: "weight", visible: true, font: '"Playfair Display", serif', size: 14, bold: 700, color: "type" },
+          { id: "origflor", kind: "text-origflor", visible: true, font: '"Cormorant Garamond", serif', size: 7, italic: true, color: "ink" },
+          { id: "brand",    kind: "text", text: "Apicoltura Girardi", visible: false, font: '"Cormorant Garamond", serif', size: 7, italic: true, letterSpacing: 1.5, color: "ink" },
+        ],
+      },
+
+      // Hexagon polline (rect, esagonale visuale)
+      poll_hexagon: {
+        showOuterFrame: true,
+        showInnerFrame: true,
+        category: "polline",
+        elements: [
+          { id: "icon",     kind: "decoration", deco: "flower", visible: true, char: "🌾", size: 12 },
+          { id: "kicker",   kind: "text", text: "POLLINE", visible: true, font: 'Georgia, serif', size: 7, bold: false, transform: "spaced", color: "type" },
+          { id: "name",     kind: "name", visible: true, font: '"Playfair Display", serif', size: 14, italic: true, bold: true, transform: "none", color: "type" },
+          { id: "stato",    kind: "text-stato", visible: true, font: 'Georgia, serif', size: 6, italic: false, transform: "spaced", color: "ink" },
+          { id: "weight",   kind: "weight", visible: true, font: '"Playfair Display", serif', size: 13, bold: true, color: "type" },
+          { id: "origflor", kind: "text-origflor", visible: true, font: 'Georgia, serif', size: 7, italic: true, color: "ink" },
+          { id: "brand",    kind: "text", text: "Apicoltura Girardi", visible: false, font: 'Georgia, serif', size: 6, italic: true, color: "ink" },
+        ],
+      },
+
+      // Linea moderna polline (rect, verticale, bande dorate)
+      poll_linea: {
+        showOuterFrame: false,
+        showInnerFrame: false,
+        category: "polline",
+        elements: [
+          { id: "bandTop",  kind: "decoration", deco: "deco-line", visible: true, width: 38 },
+          { id: "icon",     kind: "decoration", deco: "flower", visible: true, char: "🌾", size: 11 },
+          { id: "kicker",   kind: "text", text: "POLLINE D'API", visible: true, font: 'Georgia, serif', size: 6, bold: false, transform: "spaced", color: "type" },
+          { id: "name",     kind: "name", visible: true, font: '"Playfair Display", serif', size: 12, italic: true, bold: true, transform: "none", color: "type" },
+          { id: "line",     kind: "decoration", deco: "line", visible: true, width: 18 },
+          { id: "stato",    kind: "text-stato", visible: true, font: 'Georgia, serif', size: 6, italic: true, color: "ink" },
+          { id: "weight",   kind: "weight", visible: true, font: '"Playfair Display", serif', size: 15, bold: true, color: "type" },
+          { id: "origflor", kind: "text-origflor", visible: true, font: 'Georgia, serif', size: 6, italic: true, color: "ink" },
+          { id: "bandBot",  kind: "decoration", deco: "deco-line", visible: true, width: 38 },
+          { id: "brand",    kind: "text", text: "Apicoltura Girardi", visible: false, font: 'Georgia, serif', size: 5, italic: true, color: "ink" },
+        ],
+      },
     };
   }
 
@@ -1028,11 +1147,31 @@ window.addEventListener('load', () => {
       availableStyles.forEach(s => {
         const opt = document.createElement("option");
         opt.value = s.id;
-        opt.textContent = s.name;
+        // Aggiungi prefisso categoria per chiarezza
+        const cat = s.category || 'miele';
+        const catIcon = cat === 'propoli' ? '🌿 ' : (cat === 'polline' ? '🌾 ' : '🍯 ');
+        opt.textContent = catIcon + s.name;
         if (s.id === r.style) opt.selected = true;
         styleSel.appendChild(opt);
       });
-      styleSel.onchange = e => { rows[i].style = e.target.value; save(); render(); };
+      styleSel.onchange = e => {
+        rows[i].style = e.target.value;
+        // Inizializza campi extra in base alla categoria del nuovo stile
+        const newStyleDef = STYLES.find(s => s.id === rows[i].style);
+        if (newStyleDef?.category === 'propoli') {
+          if (!rows[i].concentrazione) rows[i].concentrazione = "20%";
+          if (!rows[i].volume) rows[i].volume = "30 ml";
+          if (!rows[i].tipoProp) rows[i].tipoProp = "Alcool 70°";
+          if (!rows[i].dataPrep) rows[i].dataPrep = new Date().toLocaleDateString('it-CH');
+          if (!rows[i].avvertenze) rows[i].avvertenze = "Contiene alcool. Non per bambini, gestanti e intolleranti.";
+        } else if (newStyleDef?.category === 'polline') {
+          if (!rows[i].statoPoll) rows[i].statoPoll = "Fresco da frigo";
+          if (!rows[i].origFlor) rows[i].origFlor = "Millefiori";
+          // Per il polline il peso può venire dal campo weight standard
+        }
+        save();
+        render();
+      };
 
       const wInput = document.createElement("input");
       wInput.type = "text";
@@ -1050,6 +1189,18 @@ window.addEventListener('load', () => {
         save(); render();
       };
 
+      // Pulsante campi extra (solo se la categoria dello stile è propoli o polline)
+      const currentStyleDef = STYLES.find(s => s.id === r.style);
+      let extraBtn = null;
+      if (currentStyleDef && currentStyleDef.category && currentStyleDef.category !== 'miele') {
+        extraBtn = document.createElement("button");
+        extraBtn.type = "button";
+        extraBtn.textContent = "⚙️";
+        extraBtn.title = "Campi extra (concentrazione, volume, ecc.)";
+        extraBtn.style.cssText = "background:rgba(200,134,10,0.15);border:1px solid var(--accent);color:var(--accent);border-radius:4px;padding:4px 8px;cursor:pointer;font-size:14px";
+        extraBtn.onclick = () => openExtraFieldsModal(i);
+      }
+
       const del = document.createElement("button");
       del.className = "del";
       del.textContent = "✕";
@@ -1059,6 +1210,7 @@ window.addEventListener('load', () => {
       div.appendChild(styleSel);
       div.appendChild(wInput);
       div.appendChild(qInput);
+      if (extraBtn) div.appendChild(extraBtn);
       div.appendChild(del);
       container.appendChild(div);
     });
@@ -1070,6 +1222,160 @@ window.addEventListener('load', () => {
       document.body.appendChild(dl);
     }
     dl.innerHTML = DEFAULT_WEIGHTS.map(w => `<option value="${w}">`).join("");
+  }
+
+  // ====== MINI-MODALE CAMPI EXTRA (propoli/polline) ======
+  function openExtraFieldsModal(rowIdx) {
+    const r = rows[rowIdx];
+    const styleDef = STYLES.find(s => s.id === r.style);
+    if (!styleDef || styleDef.category === 'miele') return;
+
+    const isProp = styleDef.category === 'propoli';
+    const isPoll = styleDef.category === 'polline';
+
+    // Crea overlay
+    const overlay = document.createElement('div');
+    overlay.id = 'extraFieldsOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px';
+    overlay.onclick = (e) => { if (e.target === overlay) closeExtraFieldsModal(); };
+
+    const modal = document.createElement('div');
+    modal.style.cssText = 'background:white;border-radius:8px;padding:1.5rem;max-width:500px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.3)';
+
+    let html = `<h3 style="margin:0 0 1rem;color:var(--brown);font-family:Georgia,serif">⚙️ Campi ${isProp ? 'propoli' : 'polline'} — Riga ${rowIdx+1}</h3>`;
+
+    if (isProp) {
+      html += `
+        <div style="margin-bottom:0.8rem">
+          <label style="display:block;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Tipo propoli</label>
+          <select id="extraTipoProp" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;font-family:inherit;font-size:14px">
+            <option value="Alcool 70°" ${r.tipoProp==='Alcool 70°'?'selected':''}>🍷 Alcolica (Alcool 70°)</option>
+            <option value="Glicerica 60:40" ${r.tipoProp==='Glicerica 60:40'?'selected':''}>💧 Analcolica (Glicerica 60:40)</option>
+            <option value="__custom__">📝 Personalizzato...</option>
+          </select>
+          <input type="text" id="extraTipoPropCustom" value="${(r.tipoProp && !['Alcool 70°','Glicerica 60:40'].includes(r.tipoProp)) ? r.tipoProp : ''}" placeholder="Es. Alcool 65°" style="display:${(r.tipoProp && !['Alcool 70°','Glicerica 60:40'].includes(r.tipoProp))?'block':'none'};margin-top:4px;width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;font-family:inherit;font-size:14px">
+        </div>
+
+        <div style="margin-bottom:0.8rem">
+          <label style="display:block;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Concentrazione</label>
+          <input type="text" id="extraConc" value="${r.concentrazione||'20%'}" list="concList" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;font-family:inherit;font-size:14px">
+          <datalist id="concList">
+            <option value="10%"><option value="20%"><option value="30%">
+          </datalist>
+        </div>
+
+        <div style="margin-bottom:0.8rem">
+          <label style="display:block;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Volume</label>
+          <input type="text" id="extraVolume" value="${r.volume||'30 ml'}" list="volumeList" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;font-family:inherit;font-size:14px">
+          <datalist id="volumeList">
+            <option value="10 ml"><option value="30 ml"><option value="50 ml"><option value="100 ml"><option value="200 ml"><option value="500 ml">
+          </datalist>
+        </div>
+
+        <div style="margin-bottom:0.8rem">
+          <label style="display:block;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Data preparazione</label>
+          <input type="text" id="extraDataPr" value="${r.dataPrep||''}" placeholder="Es. 15.05.2026" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;font-family:inherit;font-size:14px">
+        </div>
+
+        <div style="margin-bottom:0.8rem">
+          <label style="display:block;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">⚠️ Avvertenze (solo se alcolica)</label>
+          <textarea id="extraAvv" rows="2" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;font-family:inherit;font-size:13px;resize:vertical">${r.avvertenze||'Contiene alcool. Non per bambini, gestanti e intolleranti.'}</textarea>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px;font-style:italic">Le avvertenze appaiono in etichetta solo se il tipo contiene "alcool"</div>
+        </div>
+      `;
+    } else if (isPoll) {
+      html += `
+        <div style="margin-bottom:0.8rem">
+          <label style="display:block;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Stato</label>
+          <select id="extraStato" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;font-family:inherit;font-size:14px">
+            <option value="Fresco da frigo" ${r.statoPoll==='Fresco da frigo'?'selected':''}>❄️ Fresco da frigo</option>
+            <option value="Essiccato" ${r.statoPoll==='Essiccato'?'selected':''}>☀️ Essiccato</option>
+            <option value="Surgelato" ${r.statoPoll==='Surgelato'?'selected':''}>🧊 Surgelato</option>
+            <option value="__custom__">📝 Personalizzato...</option>
+          </select>
+          <input type="text" id="extraStatoCustom" value="${(r.statoPoll && !['Fresco da frigo','Essiccato','Surgelato'].includes(r.statoPoll)) ? r.statoPoll : ''}" placeholder="Es. Liofilizzato" style="display:${(r.statoPoll && !['Fresco da frigo','Essiccato','Surgelato'].includes(r.statoPoll))?'block':'none'};margin-top:4px;width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;font-family:inherit;font-size:14px">
+        </div>
+
+        <div style="margin-bottom:0.8rem">
+          <label style="display:block;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Origine floreale</label>
+          <input type="text" id="extraOrigFlor" value="${r.origFlor||'Millefiori'}" list="origFlorList" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;font-family:inherit;font-size:14px">
+          <datalist id="origFlorList">
+            <option value="Millefiori">
+            <option value="Primavera">
+            <option value="Acacia">
+            <option value="Castagno">
+            <option value="Tarassaco">
+            <option value="Trifoglio">
+            <option value="Eucalipto">
+            <option value="Lavanda">
+          </datalist>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px;font-style:italic">Puoi anche digitare un'origine personalizzata</div>
+        </div>
+
+        <div style="margin-bottom:0.8rem">
+          <label style="display:block;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Conservazione (note)</label>
+          <input type="text" id="extraCons" value="${r.conservazione||''}" placeholder="Es. Conservare in frigo dopo apertura" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;font-family:inherit;font-size:14px">
+        </div>
+
+        <div style="background:rgba(200,134,10,0.08);padding:8px 12px;border-radius:4px;margin-bottom:0.8rem;font-size:12px;color:var(--muted)">
+          💡 Il <strong>peso</strong> (50g / 100g / ecc.) si imposta nella colonna principale della riga.
+        </div>
+      `;
+    }
+
+    html += `
+      <div style="display:flex;gap:0.5rem;justify-content:flex-end;margin-top:1rem;border-top:1px solid #eee;padding-top:1rem">
+        <button type="button" onclick="closeExtraFieldsModal()" style="background:transparent;border:1px solid #ccc;padding:8px 16px;border-radius:4px;cursor:pointer;font-family:inherit">Annulla</button>
+        <button type="button" onclick="saveExtraFields(${rowIdx})" style="background:var(--accent);color:white;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-family:inherit;font-weight:600">💾 Salva</button>
+      </div>
+    `;
+
+    modal.innerHTML = html;
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    // Setup handlers per i select "personalizzato"
+    if (isProp) {
+      const sel = document.getElementById('extraTipoProp');
+      const custom = document.getElementById('extraTipoPropCustom');
+      sel.onchange = () => { custom.style.display = sel.value === '__custom__' ? 'block' : 'none'; };
+    }
+    if (isPoll) {
+      const sel = document.getElementById('extraStato');
+      const custom = document.getElementById('extraStatoCustom');
+      sel.onchange = () => { custom.style.display = sel.value === '__custom__' ? 'block' : 'none'; };
+    }
+  }
+
+  function closeExtraFieldsModal() {
+    const o = document.getElementById('extraFieldsOverlay');
+    if (o) o.remove();
+  }
+
+  function saveExtraFields(rowIdx) {
+    const r = rows[rowIdx];
+    const styleDef = STYLES.find(s => s.id === r.style);
+    if (!styleDef) return;
+
+    if (styleDef.category === 'propoli') {
+      const tipoSel = document.getElementById('extraTipoProp')?.value;
+      const tipoCustom = document.getElementById('extraTipoPropCustom')?.value.trim();
+      r.tipoProp = (tipoSel === '__custom__') ? tipoCustom : tipoSel;
+      r.concentrazione = document.getElementById('extraConc')?.value.trim() || '20%';
+      r.volume = document.getElementById('extraVolume')?.value.trim() || '30 ml';
+      r.dataPrep = document.getElementById('extraDataPr')?.value.trim() || '';
+      r.avvertenze = document.getElementById('extraAvv')?.value.trim() || '';
+    } else if (styleDef.category === 'polline') {
+      const statoSel = document.getElementById('extraStato')?.value;
+      const statoCustom = document.getElementById('extraStatoCustom')?.value.trim();
+      r.statoPoll = (statoSel === '__custom__') ? statoCustom : statoSel;
+      r.origFlor = document.getElementById('extraOrigFlor')?.value.trim() || 'Millefiori';
+      r.conservazione = document.getElementById('extraCons')?.value.trim() || '';
+    }
+
+    save();
+    closeExtraFieldsModal();
+    render();
   }
 
   function addRow() {
@@ -1631,8 +1937,63 @@ window.addEventListener('load', () => {
     }
 
     if (el.kind === "weight") {
-      const txt = transformText((el.prefix || "") + l.weight, el.transform);
+      const txt = transformText((el.prefix || "") + l.weight + (el.suffix || ""), el.transform);
       return `<div class="el" style="${textStyle}; margin-top: 1mm;">${escapeHtml(txt)}</div>`;
+    }
+
+    // ====== NUOVI KIND PROPOLI/POLLINE ======
+    if (el.kind === "text-conc") {
+      // Concentrazione propoli (es. "20%")
+      const val = l.concentrazione || "20%";
+      const txt = transformText((el.prefix || "") + val + (el.suffix || ""), el.transform);
+      return `<div class="el" style="${textStyle}">${escapeHtml(txt)}</div>`;
+    }
+
+    if (el.kind === "text-volume") {
+      // Volume propoli (es. "30 ml")
+      const val = l.volume || "30 ml";
+      const txt = transformText((el.prefix || "") + val + (el.suffix || ""), el.transform);
+      return `<div class="el" style="${textStyle}">${escapeHtml(txt)}</div>`;
+    }
+
+    if (el.kind === "text-tipoprop") {
+      // Tipo propoli (es. "Alcool 70°" oppure "Glicerica 60:40")
+      const val = l.tipoProp || "Alcool 70°";
+      const txt = transformText((el.prefix || "") + val + (el.suffix || ""), el.transform);
+      return `<div class="el" style="${textStyle}">${escapeHtml(txt)}</div>`;
+    }
+
+    if (el.kind === "text-datapr") {
+      // Data preparazione (es. "15.05.2026")
+      const val = l.dataPrep || "";
+      if (!val) return "";
+      const txt = transformText((el.prefix || "") + val + (el.suffix || ""), el.transform);
+      return `<div class="el" style="${textStyle}">${escapeHtml(txt)}</div>`;
+    }
+
+    if (el.kind === "text-warning") {
+      // Avvertenza propoli (solo alcolica)
+      // Mostra solo se tipoProp contiene "alcool" o "alcolica"
+      const tipo = (l.tipoProp || "").toLowerCase();
+      const isAlcolica = tipo.includes("alcool") || tipo.includes("alcolic");
+      if (!isAlcolica) return "";
+      const val = l.avvertenze || "Contiene alcool. Non per bambini, gestanti e intolleranti.";
+      const txt = transformText((el.prefix || "") + val + (el.suffix || ""), el.transform);
+      return `<div class="el" style="${textStyle};margin-top:1.5mm;line-height:1.2;text-align:center">${escapeHtml(txt)}</div>`;
+    }
+
+    if (el.kind === "text-stato") {
+      // Stato polline (es. "Fresco da frigo")
+      const val = l.statoPoll || "Fresco";
+      const txt = transformText((el.prefix || "") + val + (el.suffix || ""), el.transform);
+      return `<div class="el" style="${textStyle}">${escapeHtml(txt)}</div>`;
+    }
+
+    if (el.kind === "text-origflor") {
+      // Origine floreale polline (es. "Millefiori - Primavera")
+      const val = l.origFlor || "Millefiori";
+      const txt = transformText((el.prefix || "") + val + (el.suffix || ""), el.transform);
+      return `<div class="el" style="${textStyle}">${escapeHtml(txt)}</div>`;
     }
 
     if (el.kind === "decoration") {
