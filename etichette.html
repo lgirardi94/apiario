@@ -772,10 +772,28 @@ window.addEventListener('load', () => {
       padX: 6, padY: 12, marginX: 2, marginY: 1.5
     },
     {
-      id: "tonda", name: "⭕ Tonda (Ø58mm, 12 per foglio)", shape: "round",
+      id: "tonda", name: "⭕ Tonda Ø58mm (12 per foglio) — per Miele/Polline", shape: "round",
       page: "portrait", pageW: 210, pageH: 297,
       labelW: 58, labelH: 58, cols: 3, rows: 4,
       padX: 13, padY: 21, marginX: 1.5, marginY: 1.5
+    },
+    {
+      id: "propoli_vert", name: "🌿 Propoli verticale (30×70mm, 28 per foglio) — per bottigliette 30-50ml", shape: "rect",
+      page: "portrait", pageW: 210, pageH: 297,
+      labelW: 30, labelH: 70, cols: 5, rows: 4,
+      padX: 25, padY: 12, marginX: 5, marginY: 3
+    },
+    {
+      id: "propoli_quad", name: "🌿 Propoli quadrata (45×45mm, 20 per foglio) — per flaconi medi", shape: "rect",
+      page: "portrait", pageW: 210, pageH: 297,
+      labelW: 45, labelH: 45, cols: 4, rows: 5,
+      padX: 13, padY: 30, marginX: 4, marginY: 4
+    },
+    {
+      id: "polline_tonda", name: "🌾 Polline tonda Ø45mm (20 per foglio) — per vasetti polline", shape: "round",
+      page: "portrait", pageW: 210, pageH: 297,
+      labelW: 45, labelH: 45, cols: 4, rows: 5,
+      padX: 13, padY: 30, marginX: 4, marginY: 4
     },
   ];
 
@@ -1432,7 +1450,9 @@ window.addEventListener('load', () => {
     availableStyles.forEach(s => {
       const btn = document.createElement("button");
       btn.className = "style-tab" + (s.id === currentStyleTab ? " active" : "");
-      btn.textContent = s.name;
+      const cat = s.category || 'miele';
+      const catIcon = cat === 'propoli' ? '🌿 ' : (cat === 'polline' ? '🌾 ' : '🍯 ');
+      btn.textContent = catIcon + s.name;
       btn.onclick = () => { currentStyleTab = s.id; renderStyleEditor(); };
       tabs.appendChild(btn);
     });
