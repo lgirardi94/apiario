@@ -1,4 +1,5 @@
 // ======= ISPEZIONE =======
+
 // (TELAINO_OPZIONI, CELLE_REALI_LABEL e renderTelainiVisual sono ora in shared.js)
 
 function precompilaDaUltimaIspezione() {
