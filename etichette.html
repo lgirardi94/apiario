@@ -1503,6 +1503,10 @@ window.addEventListener('load', () => {
 
     // 1. MACRO-TAB CATEGORIE
     const catTabs = document.getElementById("styleCategoryTabs");
+    if (!catTabs) {
+      console.warn('[Etichette] styleCategoryTabs non trovato nel DOM');
+      return;
+    }
     const categories = [
       { id: 'miele',   label: '🍯 Miele' },
       { id: 'propoli', label: '🌿 Propoli' },
@@ -1571,7 +1575,24 @@ window.addEventListener('load', () => {
     });
 
     // editor
-    const cfg = styleConfig[currentStyleTab];
+    let cfg = styleConfig[currentStyleTab];
+    if (!cfg) {
+      // Fallback: stile non presente nella config (es. nuovo stile dopo aggiornamento), reinizializza
+      console.warn('[Etichette] Stile mancante in styleConfig, reinizializzo:', currentStyleTab);
+      const factory = defaultStyleConfig();
+      if (factory[currentStyleTab]) {
+        styleConfig[currentStyleTab] = JSON.parse(JSON.stringify(factory[currentStyleTab]));
+        cfg = styleConfig[currentStyleTab];
+      } else {
+        // Fallback estremo: scegli il primo stile disponibile
+        currentStyleTab = stylesInCategory[0]?.id || 'rustico';
+        cfg = styleConfig[currentStyleTab];
+      }
+      if (!cfg) {
+        document.getElementById("styleEditor").innerHTML = '<p style="color:var(--red);font-style:italic">Errore: stile non disponibile</p>';
+        return;
+      }
+    }
     const ed = document.getElementById("styleEditor");
     ed.innerHTML = "";
 
@@ -1851,8 +1872,22 @@ window.addEventListener('load', () => {
 
   // ====== COSTRUZIONE ETICHETTA ======
   function buildLabel(l) {
-    const cfg = styleConfig[l.style];
-    const isRound = cfg.shape === "round";
+    let cfg = styleConfig[l.style];
+    if (!cfg) {
+      // Stile non in config: reinizializza dal factory
+      const factory = defaultStyleConfig();
+      if (factory[l.style]) {
+        styleConfig[l.style] = JSON.parse(JSON.stringify(factory[l.style]));
+        cfg = styleConfig[l.style];
+      } else {
+        // Fallback finale: usa rustico
+        cfg = styleConfig['rustico'] || factory['rustico'];
+      }
+    }
+    // Determina shape dalla definizione in STYLES se non c'è nel cfg
+    const styleDef = STYLES.find(s => s.id === l.style);
+    const shape = cfg.shape || styleDef?.shape || 'rect';
+    const isRound = shape === "round";
 
     if (isRound) {
       return buildRoundLabel(l, cfg);

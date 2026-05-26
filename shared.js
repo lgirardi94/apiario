@@ -87,6 +87,36 @@ function getTelainoInfo(tipo) {
 }
 
 /**
+ * Genera la riga di pillole produzione (melari / rete propoli / trappola polline)
+ * Mostra sempre tutte e 3 le pillole, attive in colore o spente in grigio.
+ */
+function getProduzioneBadges(arnia) {
+  if (!arnia) return '';
+  const melariAttivi = (arnia.melari || []).filter(m => m.status === 'posizionato').length;
+  const reteAttiva = arnia.retePropoli && arnia.retePropoli.attiva !== false;
+  const trappolaAttiva = arnia.trappolaPolline && arnia.trappolaPolline.attiva !== false;
+
+  const mk = (icon, label, active, count) => {
+    const bg = active ? 'rgba(200,134,10,0.18)' : 'rgba(0,0,0,0.04)';
+    const color = active ? '#5C3A10' : '#999';
+    const border = active ? '1px solid rgba(200,134,10,0.4)' : '1px solid rgba(0,0,0,0.08)';
+    const opacity = active ? '1' : '0.55';
+    const content = (count !== undefined)
+      ? `${icon}<sup style="font-weight:700;margin-left:1px">${count}</sup>`
+      : icon;
+    return `<span title="${label}: ${active ? (count !== undefined ? count + ' attivi' : 'attiva') : 'non attiva'}" style="display:inline-flex;align-items:center;gap:2px;padding:2px 7px;border-radius:11px;background:${bg};color:${color};border:${border};font-size:0.85rem;opacity:${opacity};line-height:1.2;white-space:nowrap">${content}</span>`;
+  };
+
+  return `
+    <div style="display:flex;gap:4px;margin-top:0.4rem;flex-wrap:wrap">
+      ${mk('🍯', 'Melari', melariAttivi > 0, melariAttivi)}
+      ${mk('🌿', 'Rete propoli', reteAttiva)}
+      ${mk('🌾', 'Trappola polline', trappolaAttiva)}
+    </div>
+  `;
+}
+
+/**
  * Rende la mappa telaini come HTML inline
  */
 function renderTelainiVisualHTML(mappa) {
