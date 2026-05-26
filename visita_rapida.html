@@ -644,6 +644,12 @@
       <div id="wizNoDetail" style="display:none;color:var(--text-light);font-style:italic;font-size:0.9rem;text-align:center;padding:1.5rem">
         Nessun dettaglio specifico per questo tipo di intervento.<br>Vai al passo successivo per aggiungere note.
       </div>
+
+      <!-- ACCESSORI PRODUTTIVI (sempre visibile) -->
+      <div id="wizAccessoriSection" style="background:var(--cream);padding:0.9rem 1rem;border-radius:8px;margin-top:1rem">
+        <div style="font-weight:700;color:var(--brown);margin-bottom:0.6rem;font-size:0.95rem">🍯 Accessori produttivi</div>
+        <div id="wizAccessoriContent"></div>
+      </div>
     </div>
 
     <!-- STEP 4: NOTE + RIEPILOGO -->
@@ -951,6 +957,181 @@ function renderStep3() {
   if(hasIsp) renderWizIspezione();
   if(hasRac) renderWizRaccolta();
   if(hasTrat) renderWizTrattamento();
+
+  // Sempre: render accessori produttivi
+  renderWizAccessori();
+}
+
+// ===== ACCESSORI PRODUTTIVI (Wizard) =====
+let _wizAccPending = { melariDaRimuovere: [], reteToggle: null, trappolaToggle: null };
+let _wizMelariAggiunti = [];
+
+function renderWizAccessori() {
+  const cont = document.getElementById('wizAccessoriContent');
+  if(!cont) return;
+  const a = (dbData.arnie||[]).find(x => x.id === selectedArniaId);
+  if(!a) { cont.innerHTML = '<div style="color:var(--text-light);font-style:italic;font-size:0.85rem">Seleziona prima un\'arnia.</div>'; return; }
+
+  let html = '';
+
+  // Melari
+  const melari = a.melari || [];
+  const melariAttivi = melari.filter((m, i) => m.status === 'posizionato' && !_wizAccPending.melariDaRimuovere.includes(i));
+  html += '<div style="margin-bottom:0.8rem">';
+  html += '<div style="font-weight:600;color:var(--brown);margin-bottom:0.3rem;font-size:0.88rem">🍯 Melari</div>';
+  if(melariAttivi.length === 0) {
+    html += '<div style="font-size:0.82rem;color:var(--text-light);font-style:italic;margin-bottom:0.3rem">Nessun melario attivo</div>';
+  } else {
+    melariAttivi.forEach(m => {
+      const realIdx = melari.indexOf(m);
+      html += `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:0.35rem 0.55rem;background:white;border:1px solid var(--cream-dark);border-radius:4px;margin-bottom:0.25rem;font-size:0.82rem">
+          <span><strong>${m.num} tel.</strong>${m.note ? ' '+m.note : ''}</span>
+          <button type="button" onclick="wizRimuoviMelario(${realIdx})" style="background:var(--red);color:white;border:none;padding:0.2rem 0.5rem;border-radius:3px;font-size:0.72rem;cursor:pointer">🗑</button>
+        </div>
+      `;
+    });
+  }
+  if(_wizAccPending.melariDaRimuovere.length > 0) {
+    html += `<div style="font-size:0.78rem;color:var(--red);font-style:italic;margin-top:0.2rem">⚠️ ${_wizAccPending.melariDaRimuovere.length} melario(i) verrà(nno) smielato(i)</div>`;
+  }
+  html += `<div style="display:flex;gap:0.3rem;margin-top:0.3rem">
+    <input type="number" id="wizMelNum" min="1" max="12" placeholder="N° tel." style="flex:1;padding:0.3rem 0.5rem;border:1px solid var(--cream-dark);border-radius:3px;font-size:0.82rem">
+    <input type="text" id="wizMelNote" placeholder="Note" style="flex:2;padding:0.3rem 0.5rem;border:1px solid var(--cream-dark);border-radius:3px;font-size:0.82rem">
+    <button type="button" onclick="wizAggiungiMelario()" style="background:var(--amber);color:white;border:none;padding:0.3rem 0.6rem;border-radius:3px;font-size:0.78rem;cursor:pointer">➕</button>
+  </div>`;
+  if(_wizMelariAggiunti.length > 0) {
+    html += '<div style="margin-top:0.4rem;padding:0.35rem 0.55rem;background:#EEF6E7;border-left:3px solid var(--green);border-radius:3px;font-size:0.78rem">';
+    html += `<strong>${_wizMelariAggiunti.length} da aggiungere:</strong> ${_wizMelariAggiunti.map(m=>m.num+' tel.').join(', ')}`;
+    html += '</div>';
+  }
+  html += '</div>';
+
+  // Rete propoli
+  html += '<div style="margin-bottom:0.8rem">';
+  html += '<div style="font-weight:600;color:var(--brown);margin-bottom:0.3rem;font-size:0.88rem">🌿 Rete propoli</div>';
+  const reteAtt = a.retePropoli && a.retePropoli.attiva !== false && _wizAccPending.reteToggle !== 'disattiva';
+  const reteAttPend = _wizAccPending.reteToggle === 'attiva';
+  const reteEff = reteAtt || reteAttPend;
+  if(reteEff) {
+    html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:0.35rem 0.55rem;background:white;border:1px solid var(--cream-dark);border-radius:4px;font-size:0.82rem">
+      <span>✓ Attiva${reteAttPend?' <em style="color:var(--green)">(nuova)</em>':''}</span>
+      <button type="button" onclick="wizToggleRete('disattiva')" style="background:var(--red);color:white;border:none;padding:0.2rem 0.5rem;border-radius:3px;font-size:0.72rem;cursor:pointer">🗑</button>
+    </div>`;
+  } else if(_wizAccPending.reteToggle === 'disattiva') {
+    html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:0.35rem 0.55rem;background:#FDF0F0;border:1px solid var(--red);border-radius:4px;font-size:0.82rem">
+      <span style="color:var(--red)">⚠️ Sarà disattivata</span>
+      <button type="button" onclick="wizToggleRete(null)" style="background:none;border:1px solid var(--text-light);color:var(--text-light);padding:0.2rem 0.5rem;border-radius:3px;font-size:0.72rem;cursor:pointer">↶</button>
+    </div>`;
+  } else {
+    html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:0.35rem 0.55rem;background:white;border:1px dashed var(--cream-dark);border-radius:4px;font-size:0.82rem">
+      <span style="color:var(--text-light);font-style:italic">Non attiva</span>
+      <button type="button" onclick="wizToggleRete('attiva')" style="background:var(--amber);color:white;border:none;padding:0.2rem 0.6rem;border-radius:3px;font-size:0.72rem;cursor:pointer">➕ Attiva</button>
+    </div>`;
+  }
+  html += '</div>';
+
+  // Trappola polline
+  html += '<div>';
+  html += '<div style="font-weight:600;color:var(--brown);margin-bottom:0.3rem;font-size:0.88rem">🌾 Trappola polline</div>';
+  const trapAtt = a.trappolaPolline && a.trappolaPolline.attiva !== false && _wizAccPending.trappolaToggle !== 'disattiva';
+  const trapAttPend = _wizAccPending.trappolaToggle === 'attiva';
+  const trapEff = trapAtt || trapAttPend;
+  if(trapEff) {
+    const pos = a.trappolaPolline?.posizione || 'Entrata';
+    html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:0.35rem 0.55rem;background:white;border:1px solid var(--cream-dark);border-radius:4px;font-size:0.82rem">
+      <span>✓ Attiva (${pos})${trapAttPend?' <em style="color:var(--green)">(nuova)</em>':''}</span>
+      <button type="button" onclick="wizToggleTrappola('disattiva')" style="background:var(--red);color:white;border:none;padding:0.2rem 0.5rem;border-radius:3px;font-size:0.72rem;cursor:pointer">🗑</button>
+    </div>`;
+  } else if(_wizAccPending.trappolaToggle === 'disattiva') {
+    html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:0.35rem 0.55rem;background:#FDF0F0;border:1px solid var(--red);border-radius:4px;font-size:0.82rem">
+      <span style="color:var(--red)">⚠️ Sarà disattivata</span>
+      <button type="button" onclick="wizToggleTrappola(null)" style="background:none;border:1px solid var(--text-light);color:var(--text-light);padding:0.2rem 0.5rem;border-radius:3px;font-size:0.72rem;cursor:pointer">↶</button>
+    </div>`;
+  } else {
+    html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:0.35rem 0.55rem;background:white;border:1px dashed var(--cream-dark);border-radius:4px;font-size:0.82rem">
+      <span style="color:var(--text-light);font-style:italic">Non attiva</span>
+      <button type="button" onclick="wizToggleTrappola('attiva')" style="background:var(--amber);color:white;border:none;padding:0.2rem 0.6rem;border-radius:3px;font-size:0.72rem;cursor:pointer">➕ Attiva</button>
+    </div>`;
+  }
+  html += '</div>';
+
+  cont.innerHTML = html;
+}
+
+function wizRimuoviMelario(idx) {
+  hapticTap();
+  if(!_wizAccPending.melariDaRimuovere.includes(idx)) {
+    _wizAccPending.melariDaRimuovere.push(idx);
+  }
+  renderWizAccessori();
+}
+
+function wizAggiungiMelario() {
+  hapticTap();
+  const num = document.getElementById('wizMelNum')?.value;
+  if(!num) { showToast('Inserisci il numero di telaini'); return; }
+  const note = document.getElementById('wizMelNote')?.value.trim() || '';
+  _wizMelariAggiunti.push({ num, note, data: document.getElementById('wizData')?.value || new Date().toISOString().slice(0,10), status: 'posizionato', id: Date.now().toString() });
+  document.getElementById('wizMelNum').value = '';
+  document.getElementById('wizMelNote').value = '';
+  renderWizAccessori();
+}
+
+function wizToggleRete(action) {
+  hapticTap();
+  _wizAccPending.reteToggle = action;
+  renderWizAccessori();
+}
+
+function wizToggleTrappola(action) {
+  hapticTap();
+  _wizAccPending.trappolaToggle = action;
+  renderWizAccessori();
+}
+
+function applicaModificheAccessoriWiz(arniaObj, dataVisita) {
+  if(!arniaObj) return;
+  // Melari rimossi → smielati
+  if(_wizAccPending.melariDaRimuovere.length > 0) {
+    if(!arniaObj.melari) arniaObj.melari = [];
+    _wizAccPending.melariDaRimuovere.forEach(idx => {
+      if(arniaObj.melari[idx]) {
+        arniaObj.melari[idx].status = 'produzione';
+        arniaObj.melari[idx].dataFine = dataVisita;
+      }
+    });
+  }
+  // Melari aggiunti
+  if(_wizMelariAggiunti.length > 0) {
+    if(!arniaObj.melari) arniaObj.melari = [];
+    _wizMelariAggiunti.forEach(m => arniaObj.melari.push({ ...m, data: m.data || dataVisita }));
+  }
+  // Rete propoli
+  if(_wizAccPending.reteToggle === 'attiva') {
+    arniaObj.retePropoli = { data: dataVisita, note: '', attiva: true, storico: arniaObj.retePropoli?.storico || [] };
+  } else if(_wizAccPending.reteToggle === 'disattiva') {
+    const r = arniaObj.retePropoli;
+    if(r) {
+      const storico = r.storico || [];
+      storico.push({ dataInizio: r.data, dataFine: dataVisita, note: r.note, stato: 'raschiata' });
+      arniaObj.retePropoli = { attiva: false, storico };
+    }
+  }
+  // Trappola polline
+  if(_wizAccPending.trappolaToggle === 'attiva') {
+    arniaObj.trappolaPolline = { posizione: arniaObj.trappolaPolline?.posizione || 'Entrata', data: dataVisita, note: '', attiva: true, storico: arniaObj.trappolaPolline?.storico || [] };
+  } else if(_wizAccPending.trappolaToggle === 'disattiva') {
+    const t = arniaObj.trappolaPolline;
+    if(t) {
+      const storico = t.storico || [];
+      storico.push({ dataInizio: t.data, dataFine: dataVisita, posizione: t.posizione, note: t.note });
+      arniaObj.trappolaPolline = { attiva: false, storico };
+    }
+  }
+  // Reset
+  _wizAccPending = { melariDaRimuovere: [], reteToggle: null, trappolaToggle: null };
+  _wizMelariAggiunti = [];
 }
 
 function renderWizTrattamento() {
@@ -1149,6 +1330,12 @@ async function saveVisita() {
   if(!dbData.logBook) dbData.logBook = [];
   dbData.logBook.unshift(entry);
 
+  // Applica modifiche accessori produttivi (melari, rete, trappola)
+  if(arnia) {
+    applicaModificheAccessoriWiz(arnia, data);
+    dbData.arnie = dbData.arnie.map(a => a.id===selectedArniaId ? arnia : a);
+  }
+
   // Movimenti magazzino per raccolta
   if(raccoltaData) {
     raccoltaData.forEach(r => {
@@ -1219,6 +1406,9 @@ function resetWizard() {
   selectedArniaId = null;
   selectedTipi    = [];
   wizRaccoltaCount = 0;
+  // Reset accessori produttivi
+  _wizAccPending = { melariDaRimuovere: [], reteToggle: null, trappolaToggle: null };
+  _wizMelariAggiunti = [];
   document.getElementById('wizSuccess').classList.remove('show');
   document.getElementById('wizNav').style.display = 'flex';
   document.getElementById('wizArniaBanner').style.display = 'none';

@@ -131,6 +131,7 @@
       <button class="mag-tab active" id="utilTabBtnCalendario" data-tab="calendario" onclick="showUtilTab('calendario', this)">📅 Calendario Lavori</button>
       <button class="mag-tab" id="utilTabBtnSciroppo" data-tab="sciroppo" onclick="showUtilTab('sciroppo', this)">🍬 Sciroppo</button>
       <button class="mag-tab" id="utilTabBtnCandito" data-tab="candito" onclick="showUtilTab('candito', this)">🍯 Candito</button>
+      <button class="mag-tab" id="utilTabBtnPropoli" data-tab="propoli" onclick="showUtilTab('propoli', this)">🌿 Propoli</button>
       <button class="mag-tab" id="utilTabBtnTrattamenti" data-tab="trattamenti" onclick="showUtilTab('trattamenti', this)">💊 Trattamenti</button>
       <button class="mag-tab" id="utilTabBtnEtichette" data-tab="etichette" onclick="showUtilTab('etichette', this)">🏷️ Etichette</button>
     </div>
@@ -909,6 +910,387 @@
 
     </div><!-- fine utilTabCandito -->
 
+    <!-- SUB: PROPOLI -->
+    <div id="utilTabPropoli" style="display:none">
+      <p class="section-subtitle" style="margin-top:-1rem">Ricetta della tintura di propoli · Versione alcolica e analcolica · Calcolatore dosi</p>
+
+      <div class="mag-tabs">
+        <button class="mag-tab active" onclick="showPropoliTab('calcolatore', this)">🧮 Calcolatore</button>
+        <button class="mag-tab" onclick="showPropoliTab('procedimento', this)">📋 Procedimento</button>
+        <button class="mag-tab" onclick="showPropoliTab('conservazione', this)">🧊 Conservazione</button>
+        <button class="mag-tab" onclick="showPropoliTab('usi', this)">💊 Usi e dosi</button>
+      </div>
+
+      <!-- ============================================ -->
+      <!-- TAB CALCOLATORE -->
+      <!-- ============================================ -->
+      <div id="propTabCalcolatore">
+        <div class="sci-type-row">
+          <button class="sci-type-btn on-1to1" id="prop-btn-alcolica" onclick="propSetMode('alcolica')">
+            <strong>🍷 Alcolica</strong><small>Tintura tradizionale con alcool 70°</small>
+          </button>
+          <button class="sci-type-btn" id="prop-btn-analcolica" onclick="propSetMode('analcolica')">
+            <strong>💧 Analcolica</strong><small>Estratto glicerico (no alcool)</small>
+          </button>
+        </div>
+
+        <div class="sci-calc-card">
+          <div class="sci-calc-card-accent" id="propCalcAccent"></div>
+          <div class="sci-calc-card-body">
+            <div class="sci-calc-card-title">Calcolatore dosi tintura</div>
+
+            <div class="sci-slider-row">
+              <label>Grammi di propoli</label>
+              <input type="range" min="50" max="500" value="100" step="10" id="prop-sl-grams" oninput="propCalc()">
+              <span class="sci-slider-val" id="prop-out-grams">100 g</span>
+            </div>
+
+            <div class="sci-slider-row" id="prop-conc-row">
+              <label>Concentrazione</label>
+              <select id="prop-sl-conc" onchange="propCalc()" style="flex:1;padding:0.4rem 0.6rem;border:1px solid var(--cream-dark);border-radius:4px;font-family:inherit;font-size:0.95rem">
+                <option value="10">10% — Leggera (uso quotidiano)</option>
+                <option value="20" selected>20% — Standard ★</option>
+                <option value="30">30% — Concentrata (uso terapeutico)</option>
+              </select>
+            </div>
+
+            <!-- SELETTORE GRADAZIONE ALCOOL (solo per versione alcolica) -->
+            <div class="sci-slider-row" id="prop-grad-row">
+              <label>Alcool di partenza</label>
+              <select id="prop-sl-grad" onchange="propCalc()" style="flex:1;padding:0.4rem 0.6rem;border:1px solid var(--cream-dark);border-radius:4px;font-family:inherit;font-size:0.95rem">
+                <option value="90">90° (etanolo da 90°)</option>
+                <option value="95" selected>95° (più comune) ★</option>
+                <option value="96">96°</option>
+              </select>
+            </div>
+
+            <!-- Output ALCOLICA -->
+            <div id="prop-output-alcolica">
+              <div class="sci-metrics" style="margin-top:1rem">
+                <div class="sci-metric"><span class="sci-val" id="prop-r-propoli">—</span><span class="sci-lbl">Propoli (g)</span></div>
+                <div class="sci-metric"><span class="sci-val" id="prop-r-totale">—</span><span class="sci-lbl">Tintura finale (ml)</span></div>
+                <div class="sci-metric"><span class="sci-val" id="prop-r-conc">—</span><span class="sci-lbl">Concentrazione</span></div>
+              </div>
+
+              <div class="sci-acid-box" style="margin-top:1rem">
+                <div class="sci-acid-title">⚗️ Composizione dell'alcool 70° da preparare</div>
+                <div class="sci-acid-body">
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;margin-top:0.4rem">
+                    <div style="background:white;padding:0.6rem 0.8rem;border-radius:4px">
+                      <div style="font-size:0.78rem;color:var(--text-light);text-transform:uppercase">Alcool puro</div>
+                      <div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--brown);font-weight:700;margin-top:0.2rem"><span id="prop-r-alcool">—</span> ml</div>
+                    </div>
+                    <div style="background:white;padding:0.6rem 0.8rem;border-radius:4px">
+                      <div style="font-size:0.78rem;color:var(--text-light);text-transform:uppercase">Acqua distillata</div>
+                      <div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--brown);font-weight:700;margin-top:0.2rem"><span id="prop-r-acqua">—</span> ml</div>
+                    </div>
+                  </div>
+                  <div style="margin-top:0.6rem;font-size:0.85rem;color:var(--text-light)">
+                    💡 <strong>Per diluire:</strong> versa <strong>prima l'acqua</strong> distillata nel barattolo, poi aggiungi lentamente l'alcool. Mescola delicatamente.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Output ANALCOLICA -->
+            <div id="prop-output-analcolica" style="display:none">
+              <div class="sci-metrics" style="margin-top:1rem">
+                <div class="sci-metric"><span class="sci-val" id="prop-r-propoli-an">—</span><span class="sci-lbl">Propoli (g)</span></div>
+                <div class="sci-metric"><span class="sci-val" id="prop-r-totale-an">—</span><span class="sci-lbl">Estratto finale (ml)</span></div>
+                <div class="sci-metric"><span class="sci-val" id="prop-r-conc-an">—</span><span class="sci-lbl">Concentrazione</span></div>
+              </div>
+
+              <div class="sci-acid-box" style="margin-top:1rem">
+                <div class="sci-acid-title">💧 Composizione estratto glicerico (60:40)</div>
+                <div class="sci-acid-body">
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;margin-top:0.4rem">
+                    <div style="background:white;padding:0.6rem 0.8rem;border-radius:4px">
+                      <div style="font-size:0.78rem;color:var(--text-light);text-transform:uppercase">Glicerina vegetale</div>
+                      <div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--brown);font-weight:700;margin-top:0.2rem"><span id="prop-r-glicerina">—</span> ml</div>
+                    </div>
+                    <div style="background:white;padding:0.6rem 0.8rem;border-radius:4px">
+                      <div style="font-size:0.78rem;color:var(--text-light);text-transform:uppercase">Acqua distillata</div>
+                      <div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--brown);font-weight:700;margin-top:0.2rem"><span id="prop-r-acqua-an">—</span> ml</div>
+                    </div>
+                  </div>
+                  <div style="margin-top:0.6rem;font-size:0.85rem;color:var(--text-light)">
+                    💡 Usa <strong>glicerina vegetale alimentare</strong>. Riscalda la miscela a max 40°C prima di aggiungere la propoli.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="sci-metrics" style="margin-top:0.8rem;margin-bottom:0">
+              <div class="sci-metric"><span class="sci-val" id="prop-r-barattolo">—</span><span class="sci-lbl">Barattolo consigliato (ml)</span></div>
+              <div class="sci-metric"><span class="sci-val" id="prop-r-tempo">—</span><span class="sci-lbl">Tempo macerazione</span></div>
+              <div class="sci-metric"><span class="sci-val" id="prop-r-durata">—</span><span class="sci-lbl">Durata conservazione</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sci-note sci-note-tip" style="margin-top:1rem">
+          <strong>💡 Concentrazioni più diffuse</strong><br>
+          La <strong>20% standard</strong> è la più diffusa e equilibrata. La 10% leggera è ottima per uso quotidiano preventivo. La 30% concentrata serve per applicazioni terapeutiche intensive (sempre con parere medico).
+        </div>
+      </div>
+
+      <!-- ============================================ -->
+      <!-- TAB PROCEDIMENTO -->
+      <!-- ============================================ -->
+      <div id="propTabProcedimento" style="display:none">
+
+        <div class="sci-note sci-note-warn">
+          <strong>⚠️ Materie prime di qualità</strong><br>
+          Usa solo <strong>propoli del tuo apiario</strong> o di apicoltori di fiducia certificati. Mai propoli di origine ignota. Per l'alcool usa solo <strong>alcool etilico alimentare 90-96°</strong> — mai alcool denaturato (rosa) o isopropilico.
+        </div>
+
+        <div class="sci-steps" style="margin-top:1rem">
+
+          <div class="sci-step">
+            <div class="sci-step-left"><div class="sci-step-num">1</div><div class="sci-step-line"></div></div>
+            <div class="sci-step-body">
+              <h3>Pulizia e preparazione della propoli</h3>
+              <p>Pulisci grossolanamente la propoli grezza da eventuali residui evidenti (legno, api, cera in eccesso). Non pulire troppo: piccole impurità sono naturali e non disturbano l'estrazione.</p>
+              <div class="sci-note sci-note-tip"><strong>Trucco del congelamento</strong><br>Metti la propoli in freezer per <strong>almeno 24 ore</strong> prima dell'uso. A freddo diventa friabile e si rompe facilmente (a temperatura ambiente è gommosa e impossibile da macinare).</div>
+              <div class="sci-note sci-note-tip" style="margin-top:8px"><strong>Macinatura</strong><br>Macina la propoli congelata con: grattugia a maglie fini, robot da cucina (a impulsi brevi), o macinacaffè dedicato. Più è fine, migliore l'estrazione.</div>
+              <div class="sci-note sci-note-warn" style="margin-top:8px"><strong>Evita il calore</strong><br>Non scaldare mai la propoli sopra i 40°C: si degradano i flavonoidi e i principi attivi. Lavora sempre con propoli fredda.</div>
+            </div>
+          </div>
+
+          <div class="sci-step" id="propStepAlcool">
+            <div class="sci-step-left"><div class="sci-step-num">2</div><div class="sci-step-line"></div></div>
+            <div class="sci-step-body">
+              <h3>Diluizione dell'alcool (per versione alcolica)</h3>
+              <p>L'alcool target per la tintura è <strong>70°</strong>. Devi quindi diluire l'alcool puro che hai con acqua distillata. Usa il calcolatore per le proporzioni esatte.</p>
+
+              <div class="sci-note sci-note-tip"><strong>Formula generale</strong><br>
+              Volume_alcool_finale × 70 = Volume_alcool_puro × gradazione_iniziale<br><br>
+              Esempio: per 500 ml a 70° partendo da alcool 95°:<br>
+              500 × 70 = X × 95 → X = <strong>368 ml di alcool 95°</strong><br>
+              500 - 368 = <strong>132 ml di acqua distillata</strong>
+              </div>
+
+              <div class="sci-note sci-note-tip" style="margin-top:8px">
+                <strong>📊 Tabella rapida da alcool 95° a 70°</strong><br>
+                <table style="width:100%;border-collapse:collapse;font-size:0.85rem;margin-top:0.5rem">
+                  <thead>
+                    <tr style="border-bottom:1px solid var(--cream-dark)">
+                      <th style="text-align:left;padding:4px 8px;color:var(--brown)">Vuoi (ml)</th>
+                      <th style="text-align:right;padding:4px 8px;color:var(--brown)">Alcool 95°</th>
+                      <th style="text-align:right;padding:4px 8px;color:var(--brown)">Acqua dist.</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style="border-bottom:1px dotted var(--cream-dark)"><td style="padding:3px 8px">100</td><td style="padding:3px 8px;text-align:right">74 ml</td><td style="padding:3px 8px;text-align:right">26 ml</td></tr>
+                    <tr style="border-bottom:1px dotted var(--cream-dark)"><td style="padding:3px 8px">250</td><td style="padding:3px 8px;text-align:right">184 ml</td><td style="padding:3px 8px;text-align:right">66 ml</td></tr>
+                    <tr style="border-bottom:1px dotted var(--cream-dark);background:rgba(200,134,10,0.08)"><td style="padding:3px 8px"><strong>500</strong></td><td style="padding:3px 8px;text-align:right"><strong>368 ml</strong></td><td style="padding:3px 8px;text-align:right"><strong>132 ml</strong></td></tr>
+                    <tr style="border-bottom:1px dotted var(--cream-dark)"><td style="padding:3px 8px">750</td><td style="padding:3px 8px;text-align:right">553 ml</td><td style="padding:3px 8px;text-align:right">197 ml</td></tr>
+                    <tr><td style="padding:3px 8px">1000</td><td style="padding:3px 8px;text-align:right">737 ml</td><td style="padding:3px 8px;text-align:right">263 ml</td></tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="sci-note sci-note-warn" style="margin-top:8px">
+                <strong>🚰 Acqua: SOLO distillata</strong><br>
+                Usa solo <strong>acqua distillata</strong> (in farmacia/supermercato) o <strong>demineralizzata alimentare</strong>. L'acqua del rubinetto contiene cloro, calcare e minerali che alterano sapore e fanno precipitare componenti della propoli.
+              </div>
+
+              <div class="sci-note sci-note-tip" style="margin-top:8px">
+                <strong>⚠️ Ordine di miscelazione</strong><br>
+                Versa <strong>sempre prima l'acqua</strong> nel barattolo, poi aggiungi l'alcool lentamente. Mai il contrario: aggiungere acqua all'alcool genera calore localizzato.
+              </div>
+            </div>
+          </div>
+
+          <div class="sci-step">
+            <div class="sci-step-left"><div class="sci-step-num">3</div><div class="sci-step-line"></div></div>
+            <div class="sci-step-body">
+              <h3>Macerazione</h3>
+              <p>Versa la propoli macinata nel barattolo di vetro scuro. Aggiungi il solvente (alcool 70° diluito, o miscela glicerina-acqua). Chiudi ermeticamente.</p>
+              <div class="sci-note sci-note-tip"><strong>Barattolo</strong><br>Usa <strong>vetro scuro</strong> (ambra o verde) con tappo a vite. La luce degrada i flavonoidi. Se hai solo vetro chiaro, avvolgilo in carta stagnola o conserva al buio.</div>
+              <div class="sci-note sci-note-tip" style="margin-top:8px"><strong>Spazio nel barattolo</strong><br>Lascia almeno il <strong>20-30% di spazio libero</strong> sopra il liquido. La propoli assorbe alcool e si gonfia. Es. per 400 ml di liquido serve un barattolo da almeno 500 ml.</div>
+              <div class="sci-note sci-note-tip" style="margin-top:8px"><strong>Conservazione durante macerazione</strong><br>Luogo <strong>buio, fresco, asciutto</strong> (cantina, dispensa). Temperatura ottimale 15-22°C. Mai in frigo (rallenta troppo l'estrazione).</div>
+            </div>
+          </div>
+
+          <div class="sci-step">
+            <div class="sci-step-left"><div class="sci-step-num">4</div><div class="sci-step-line"></div></div>
+            <div class="sci-step-body">
+              <h3>Riposo e agitazione quotidiana</h3>
+              <p>Per la versione <strong>alcolica</strong>: 4 settimane. Per la versione <strong>glicerica</strong>: 6 settimane. Ogni giorno, agita il barattolo per 10-15 secondi (rovesciandolo o ruotandolo).</p>
+              <div class="sci-note sci-note-tip"><strong>Perché agitare</strong><br>L'agitazione tiene la propoli in sospensione e favorisce l'estrazione uniforme. Senza agitazione la propoli si compatta sul fondo e l'estrazione è incompleta.</div>
+              <div class="sci-note sci-note-tip" style="margin-top:8px"><strong>Bagnomaria settimanale (solo glicerica)</strong><br>Per la versione glicerica, una volta a settimana scalda il barattolo a bagnomaria a <strong>massimo 40°C per 30 minuti</strong>. Aiuta l'estrazione che altrimenti sarebbe troppo lenta.</div>
+              <div class="sci-note sci-note-tip" style="margin-top:8px"><strong>Colore della tintura</strong><br>Dopo 1 settimana la tintura sarà <strong>giallo-ambrata</strong>. Dopo 4 settimane sarà <strong>bruna scura</strong>, opaca e profumata. Se rimane chiara dopo 2 settimane: la propoli era poca o di scarsa qualità.</div>
+            </div>
+          </div>
+
+          <div class="sci-step">
+            <div class="sci-step-left"><div class="sci-step-num">5</div></div>
+            <div class="sci-step-body">
+              <h3>Filtraggio e imbottigliamento</h3>
+              <p>Dopo il periodo di macerazione, filtra la tintura in più passaggi per eliminare cere e residui solidi.</p>
+              <div class="sci-note sci-note-tip"><strong>Doppio filtraggio</strong><br>1️⃣ Prima filtra con <strong>garza a trama fine</strong> piegata in 4 strati (rimuove i residui grossi).<br>2️⃣ Poi filtra il liquido ottenuto con <strong>filtro per caffè in carta</strong> (rimuove le particelle fini). Sii paziente: il filtro carta è lento, può richiedere 1-2 ore.</div>
+              <div class="sci-note sci-note-tip" style="margin-top:8px"><strong>Bottigliette finali</strong><br>Travasa in piccole <strong>bottiglie di vetro scuro con contagocce</strong> (10-50 ml). Sono comode per dosare e proteggono dalla luce. Etichetta con: data preparazione + concentrazione + gradazione (es. "Propoli 20% · alcool 70° · 15/05/2026").</div>
+              <div class="sci-note sci-note-tip" style="margin-top:8px"><strong>Cosa fare con i residui</strong><br>La propoli filtrata può essere usata per: balsami a base di cera (sciogliere in olio e cera d'api), o gettata se molto esausta. Non riusarla per una seconda macerazione: i principi attivi sono già stati estratti.</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ============================================ -->
+      <!-- TAB CONSERVAZIONE -->
+      <!-- ============================================ -->
+      <div id="propTabConservazione" style="display:none">
+
+        <!-- TINTURA ALCOLICA -->
+        <div style="margin-bottom:1.5rem">
+          <h3 style="margin:0 0 0.6rem;color:var(--ink);font-size:1.05rem">🍷 Tintura alcolica</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.8rem">
+            <div class="sci-conserv-card">
+              <div class="sci-c-label">A temperatura ambiente</div>
+              <div class="sci-c-val">3–5 anni</div>
+              <p>In bottiglia di vetro scuro ben chiusa, luogo buio e fresco (cantina, dispensa). L'alcool è un conservante naturale eccellente.</p>
+            </div>
+            <div class="sci-conserv-card">
+              <div class="sci-c-label">Caratteristica</div>
+              <div class="sci-c-val">Migliora invecchiando</div>
+              <p>I primi 6 mesi il sapore è più "tagliente". Dopo 1 anno diventa più rotondo e amalgamato. È normale: i principi attivi si stabilizzano nel tempo.</p>
+            </div>
+          </div>
+          <div class="sci-note sci-note-tip" style="margin-bottom:0"><strong>Perché si conserva tanto</strong><br>L'alcool al 70° è autoconservante: nessun microrganismo può svilupparsi. Inoltre i flavonoidi della propoli stessi hanno attività antimicrobica.</div>
+        </div>
+
+        <!-- ESTRATTO ANALCOLICO -->
+        <div style="margin-bottom:1.5rem">
+          <h3 style="margin:0 0 0.6rem;color:var(--ink);font-size:1.05rem">💧 Estratto analcolico (glicerico)</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.8rem">
+            <div class="sci-conserv-card">
+              <div class="sci-c-label">A temperatura ambiente (chiuso)</div>
+              <div class="sci-c-val">12–18 mesi</div>
+              <p>In bottiglia scura ben sigillata. La glicerina vegetale ha proprietà conservanti naturali ma meno forti dell'alcool.</p>
+            </div>
+            <div class="sci-conserv-card">
+              <div class="sci-c-label">Dopo apertura (in frigo)</div>
+              <div class="sci-c-val">6 mesi</div>
+              <p>Dopo la prima apertura conserva in <strong>frigorifero (4°C)</strong>. La glicerina può attirare umidità a temperatura ambiente.</p>
+            </div>
+          </div>
+          <div class="sci-note sci-note-warn" style="margin-bottom:0"><strong>⚠️ Attenzione muffe</strong><br>L'estratto glicerico ha più acqua dell'alcolico (40% vs 30%) e può sviluppare muffe se contaminato. Usa sempre contagocce puliti e tappi ben chiusi. Se vedi puntini bianchi/grigi in superficie → scarta tutto.</div>
+        </div>
+
+        <!-- CONSIGLI PRATICI -->
+        <h3 style="margin:0 0 0.6rem;color:var(--ink);font-size:1.05rem">Consigli pratici</h3>
+        <div style="display:grid;grid-template-columns:1fr;gap:0.6rem;margin-bottom:1rem">
+          <div class="sci-note sci-note-tip" style="margin:0"><strong>📦 Bottigliette di servizio</strong><br>Travasa la tintura in <strong>bottigliette piccole (10-30 ml) con contagocce</strong>. Tieni una bottiglia "madre" più grande per la conservazione di riserva e bottigliette in uso. Le aperture frequenti favoriscono ossidazione e contaminazioni.</div>
+          <div class="sci-note sci-note-tip" style="margin:0"><strong>🌡️ Temperatura</strong><br>Idealmente 10-20°C, lontano da luce diretta. Evita sbalzi termici (es. vicino al frigo o ai termosifoni). Cantina fresca è perfetta.</div>
+          <div class="sci-note sci-note-tip" style="margin:0"><strong>🔍 Controllo periodico</strong><br>Ogni 6 mesi annusa e guarda: il colore deve essere bruno scuro uniforme. Sedimentazione sul fondo è normale dopo mesi. Cambio di colore evidente, odore strano o muffa → scartare.</div>
+          <div class="sci-note sci-note-tip" style="margin:0"><strong>🏷️ Etichetta</strong><br>Annota sempre: data preparazione, tipo (alcolica/analcolica), concentrazione, gradazione alcool. Comodo per ricordare.</div>
+        </div>
+
+        <div class="sci-note sci-note-err" style="margin:0"><strong>⚠️ Scartare se:</strong> compare muffa visibile (puntini bianchi/verdi in superficie), odore acetico o rancido, separazione netta e permanente in più strati che non si rimescolano dopo agitazione, colore alterato (es. virato al verde-grigiastro), torbidità lattiginosa improvvisa.</div>
+      </div>
+
+      <!-- ============================================ -->
+      <!-- TAB USI E DOSI -->
+      <!-- ============================================ -->
+      <div id="propTabUsi" style="display:none">
+
+        <div class="sci-note sci-note-warn">
+          <strong>⚠️ Disclaimer medico</strong><br>
+          Le informazioni che seguono sono di carattere generale, tratte dall'uso tradizionale della propoli. <strong>Non sostituiscono il parere di un medico o farmacista</strong>. In caso di patologie, gravidanza, allattamento, allergie note ai prodotti dell'alveare, o terapie in corso, consulta sempre un professionista prima dell'uso.
+        </div>
+
+        <h3 style="margin:1rem 0 0.8rem;color:var(--ink);font-size:1.05rem">💊 Usi tradizionali e dosaggi</h3>
+
+        <div class="sci-conserv-card" style="margin-bottom:1rem">
+          <div class="sci-c-label">🛡️ Prevenzione e rinforzo del sistema immunitario</div>
+          <div class="sci-c-val" style="font-size:1.05rem">10–15 gocce / giorno</div>
+          <p>1 volta al giorno, mattino a stomaco vuoto. Sciogli le gocce in <strong>poca acqua tiepida o miele</strong>. Cicli di 2-3 settimane (es. autunno-inverno), poi pausa di 1 settimana.</p>
+          <p style="font-size:0.85rem;color:var(--text-light);margin-top:0.4rem"><strong>Bambini >3 anni</strong>: usa la versione <strong>analcolica</strong>, 5-8 gocce/giorno.</p>
+        </div>
+
+        <div class="sci-conserv-card" style="margin-bottom:1rem">
+          <div class="sci-c-label">🤧 Mal di gola e tosse</div>
+          <div class="sci-c-val" style="font-size:1.05rem">20 gocce in mezzo bicchiere</div>
+          <p>Gargarismi 3 volte al giorno per 3-5 giorni. Tieni in bocca 30 secondi prima di sputare. Effetto antisettico locale immediato.</p>
+          <p style="font-size:0.85rem;color:var(--text-light);margin-top:0.4rem">Alternativa: <strong>spray oro-faringeo</strong> con propoli (in commercio o autoprodotto diluendo).</p>
+        </div>
+
+        <div class="sci-conserv-card" style="margin-bottom:1rem">
+          <div class="sci-c-label">🩹 Uso topico (piccole ferite, abrasioni)</div>
+          <div class="sci-c-val" style="font-size:1.05rem">Applicare puro 1-2 volte/giorno</div>
+          <p>Pulisci la zona, applica <strong>2-3 gocce</strong> di tintura direttamente con cotton fioc. Brucia un po' (alcool), ma disinfetta e accelera la guarigione. Per herpes labiale: applicare ai primi sintomi (prurito, bruciore).</p>
+          <p style="font-size:0.85rem;color:var(--text-light);margin-top:0.4rem"><strong>Non usare su</strong>: ustioni gravi, ferite profonde, mucose interne (sostituire con versione analcolica).</p>
+        </div>
+
+        <div class="sci-conserv-card" style="margin-bottom:1rem">
+          <div class="sci-c-label">😬 Igiene orale</div>
+          <div class="sci-c-val" style="font-size:1.05rem">5 gocce in bicchiere di acqua tiepida</div>
+          <p>Sciacqui dopo lavaggio denti, 2-3 volte/settimana. Effetto antibatterico e rinforzante delle gengive. Utile in caso di gengiviti, afte.</p>
+        </div>
+
+        <div class="sci-conserv-card" style="margin-bottom:1rem">
+          <div class="sci-c-label">🦶 Verruche e calli</div>
+          <div class="sci-c-val" style="font-size:1.05rem">Tampone di garza + 4-5 gocce</div>
+          <p>Imbevi una piccola garza, applica sulla zona e fissa con cerotto. Cambio ogni giorno per 2-3 settimane. Pazienza: i risultati sono lenti ma duraturi.</p>
+        </div>
+
+        <h3 style="margin:1.5rem 0 0.8rem;color:var(--ink);font-size:1.05rem">📅 Stagioni d'uso consigliate</h3>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;margin-bottom:1rem">
+          <div class="sci-conserv-card">
+            <div class="sci-c-label">🍂 Autunno · 🌨️ Inverno</div>
+            <div class="sci-c-val" style="font-size:1.05rem">Prevenzione</div>
+            <p>Cicli regolari di 2-3 settimane per rinforzare le difese. È il periodo di massimo uso.</p>
+          </div>
+          <div class="sci-conserv-card">
+            <div class="sci-c-label">🌿 Primavera · ☀️ Estate</div>
+            <div class="sci-c-val" style="font-size:1.05rem">Uso al bisogno</div>
+            <p>Tieni una bottiglietta in casa per piccole emergenze (mal di gola, ferite). Pochi cicli preventivi.</p>
+          </div>
+        </div>
+
+        <h3 style="margin:1.5rem 0 0.8rem;color:var(--ink);font-size:1.05rem">⚠️ Controindicazioni e attenzioni</h3>
+
+        <div class="sci-note sci-note-warn" style="margin-bottom:0.8rem">
+          <strong>Mai usare se:</strong>
+          <ul style="margin:0.4rem 0 0;padding-left:1.3rem">
+            <li><strong>Allergia ai prodotti dell'alveare</strong> (miele, polline, pappa reale): rischio di reazione anafilattica</li>
+            <li><strong>Asma allergica</strong> grave (test preliminare con 1 goccia su pelle del polso)</li>
+            <li>Gravidanza e allattamento: solo dopo parere medico</li>
+            <li>Bambini sotto i 3 anni: solo dopo parere pediatrico</li>
+            <li>Terapia con anticoagulanti orali: la propoli può potenziarne l'effetto</li>
+          </ul>
+        </div>
+
+        <h3 style="margin:1.5rem 0 0.8rem;color:var(--ink);font-size:1.05rem">💡 Confronto rapido: alcolica vs analcolica</h3>
+
+        <div style="overflow-x:auto;margin-bottom:1rem">
+          <table style="width:100%;border-collapse:collapse;font-size:0.88rem;background:white;border:1px solid var(--cream-dark);border-radius:6px;overflow:hidden">
+            <thead>
+              <tr style="background:var(--cream)">
+                <th style="padding:10px;text-align:left;border-bottom:1px solid var(--cream-dark);color:var(--brown)">Caratteristica</th>
+                <th style="padding:10px;text-align:left;border-bottom:1px solid var(--cream-dark);color:var(--brown)">🍷 Alcolica</th>
+                <th style="padding:10px;text-align:left;border-bottom:1px solid var(--cream-dark);color:var(--brown)">💧 Analcolica</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td style="padding:8px 10px;border-bottom:1px solid var(--cream-dark);font-weight:600">Resa estrazione</td><td style="padding:8px 10px;border-bottom:1px solid var(--cream-dark)">Molto alta (95%+)</td><td style="padding:8px 10px;border-bottom:1px solid var(--cream-dark)">Media (60-70%)</td></tr>
+              <tr><td style="padding:8px 10px;border-bottom:1px solid var(--cream-dark);font-weight:600">Conservazione</td><td style="padding:8px 10px;border-bottom:1px solid var(--cream-dark)">3-5 anni</td><td style="padding:8px 10px;border-bottom:1px solid var(--cream-dark)">12-18 mesi</td></tr>
+              <tr><td style="padding:8px 10px;border-bottom:1px solid var(--cream-dark);font-weight:600">Tempi preparazione</td><td style="padding:8px 10px;border-bottom:1px solid var(--cream-dark)">4 settimane</td><td style="padding:8px 10px;border-bottom:1px solid var(--cream-dark)">6 settimane</td></tr>
+              <tr><td style="padding:8px 10px;border-bottom:1px solid var(--cream-dark);font-weight:600">Sapore</td><td style="padding:8px 10px;border-bottom:1px solid var(--cream-dark)">Pungente, alcolico</td><td style="padding:8px 10px;border-bottom:1px solid var(--cream-dark)">Dolce, neutro</td></tr>
+              <tr><td style="padding:8px 10px;border-bottom:1px solid var(--cream-dark);font-weight:600">Bambini >3 anni</td><td style="padding:8px 10px;border-bottom:1px solid var(--cream-dark)">No</td><td style="padding:8px 10px;border-bottom:1px solid var(--cream-dark)">Sì</td></tr>
+              <tr><td style="padding:8px 10px;border-bottom:1px solid var(--cream-dark);font-weight:600">Uso esterno (ferite)</td><td style="padding:8px 10px;border-bottom:1px solid var(--cream-dark)">Ottimo (disinfettante)</td><td style="padding:8px 10px;border-bottom:1px solid var(--cream-dark)">Buono (più delicato)</td></tr>
+              <tr><td style="padding:8px 10px;font-weight:600">Costo materie prime</td><td style="padding:8px 10px">Basso</td><td style="padding:8px 10px">Medio-alto</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+    </div><!-- fine utilTabPropoli -->
+
     <!-- SUB: TRATTAMENTI -->
     <div id="utilTabTrattamenti" style="display:none">
       <p class="section-subtitle" style="margin-top:-1rem">Guida ai trattamenti antivarroa con i prodotti che usi</p>
@@ -1156,7 +1538,7 @@
         </div>
         <div class="form-row">
           <label>Arnia <span style="color:var(--red);font-size:0.8rem">* obbligatoria</span></label>
-          <select id="logArnia"><option value="">— Seleziona arnia —</option></select>
+          <select id="logArnia" onchange="onVisitaArniaChange()"><option value="">— Seleziona arnia —</option></select>
         </div>
         <div class="form-row">
           <label>Tipo di intervento <span style="font-weight:300;font-style:italic;text-transform:none">(anche più di uno)</span></label>
@@ -1259,6 +1641,14 @@
           </div>
           <div id="telainiMapForm"></div>
         </div>
+
+        <!-- ===== ACCESSORI PRODUTTIVI (Melari/Rete/Trappola) ===== -->
+        <div id="accessoriSection" style="background:var(--cream);padding:1rem;border-radius:6px;margin:1rem 0;display:none">
+          <div style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--brown);margin-bottom:0.6rem">🍯 Accessori produttivi</div>
+          <p style="font-size:0.82rem;color:var(--text-light);margin:0 0 0.8rem">Gestisci melari, rete propoli e trappola polline durante la visita.</p>
+          <div id="accessoriContent"></div>
+        </div>
+
         <button class="btn" onclick="addLogEntry()">Salva registrazione</button>
       </div>
       <div class="card">
@@ -1946,6 +2336,18 @@
       </div>
     </div>
 
+    <!-- RETE PROPOLI (max 1 per arnia) -->
+    <div style="border:1px solid var(--cream-dark);border-radius:4px;padding:1rem;margin-bottom:1rem">
+      <div style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--brown);margin-bottom:0.8rem;display:flex;align-items:center;gap:0.4rem">🌿 Rete propoli <span style="font-size:0.78rem;color:var(--text-light);font-weight:400;font-style:italic;font-family:'Crimson Pro',serif">— Max 1 per arnia</span></div>
+      <div id="retePropoliBox"></div>
+    </div>
+
+    <!-- TRAPPOLA POLLINE (max 1 per arnia) -->
+    <div style="border:1px solid var(--cream-dark);border-radius:4px;padding:1rem;margin-bottom:1rem">
+      <div style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--brown);margin-bottom:0.8rem;display:flex;align-items:center;gap:0.4rem">🌾 Trappola polline <span style="font-size:0.78rem;color:var(--text-light);font-weight:400;font-style:italic;font-family:'Crimson Pro',serif">— Max 1 per arnia</span></div>
+      <div id="trappolaPollineBox"></div>
+    </div>
+
     <div class="form-row">
       <label>Note generali</label>
       <textarea id="arniNote" placeholder="Posizione nell'apiario, caratteristiche particolari..."></textarea>
@@ -2006,18 +2408,19 @@
 </div><!-- fine appContent -->
 
 <!-- ===== JS MODULES — ordine importante! ===== -->
-<script src="js/state.js?v=20260519a"></script>
-<script src="js/nav.js?v=20260519a"></script>
-<script src="js/import-export.js?v=20260519a"></script>
-<script src="js/registro.js?v=20260519a"></script>
-<script src="js/arnie.js?v=20260519a"></script>
-<script src="js/magazzino.js?v=20260519a"></script>
-<script src="js/contabilita.js?v=20260519a"></script>
-<script src="js/obiettivi.js?v=20260519a"></script>
-<script src="js/sciroppo.js?v=20260519a"></script>
-<script src="js/candito.js?v=20260519a"></script>
-<script src="js/report.js?v=20260519a"></script>
-<script src="js/home.js?v=20260519a"></script>
+<script src="js/state.js?v=20260520b"></script>
+<script src="js/nav.js?v=20260520b"></script>
+<script src="js/import-export.js?v=20260520b"></script>
+<script src="js/registro.js?v=20260520b"></script>
+<script src="js/arnie.js?v=20260520b"></script>
+<script src="js/magazzino.js?v=20260520b"></script>
+<script src="js/contabilita.js?v=20260520b"></script>
+<script src="js/obiettivi.js?v=20260520b"></script>
+<script src="js/sciroppo.js?v=20260520b"></script>
+<script src="js/candito.js?v=20260520b"></script>
+<script src="js/propoli.js?v=20260520b"></script>
+<script src="js/report.js?v=20260520b"></script>
+<script src="js/home.js?v=20260520b"></script>
 <script src="js/drive-app.js"></script>
 
 </body>
