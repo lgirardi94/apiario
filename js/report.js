@@ -3,6 +3,7 @@
    =========================================================== */
 
 // Helper: ottiene tutte le visite di un'arnia in un anno
+
 function visitePerArniaAnno(arniaId, anno) {
   return logBook.filter(e => e.arniaId === arniaId && e.data && e.data.startsWith(String(anno)));
 }
