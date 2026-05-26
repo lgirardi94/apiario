@@ -2,7 +2,6 @@
    PROPOLI — Calcolatore tintura alcolica/analcolica
    =========================================================== */
 
-
 let propMode = 'alcolica'; // 'alcolica' | 'analcolica'
 
 
