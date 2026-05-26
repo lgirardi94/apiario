@@ -116,6 +116,7 @@ function renderHome() {
             ${isp?.ispezione?.covata?` · 🟤 ${isp.ispezione.covata}/5`:''}
             ${isp?.ispezione?.celleReali?` · 👑 ${CELLE_REALI_LABEL[isp.ispezione.celleReali]||''}`:``}
           </div>
+          ${getProduzioneBadges(a)}
           ${mappaHtml}
         </div>`;
       }).join('');

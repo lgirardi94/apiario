@@ -387,15 +387,13 @@ function renderArnie() {
       <div class="arnia-info">
         ${a.razza ? `🐝 <em>${a.razza}</em><br>` : ''}
         ${a.reginaAnno ? `${getReginaPallino(a.reginaAnno)}Regina <strong>${a.reginaAnno}</strong><br>` : ''}
-        ${melariAttivi ? `🍯 Melari attivi: <strong>${melariAttivi}</strong><br>` : ''}
-        ${reteAttiva ? `🌿 Rete propoli: <strong>attiva</strong><br>` : ''}
-        ${trappolaAttiva ? `🌾 Trappola polline: <strong>attiva</strong><br>` : ''}
         ${isp ? `📅 Ultima isp.: ${formatDate(isp.data)}<br>` : ''}
         ${isp?.ispezione?.telaini ? `📏 ${isp.ispezione.telaini} telaini` : ''}
         ${isp?.ispezione?.covata ? ` · 🟤 ${isp.ispezione.covata}/5` : ''}
         ${isp?.ispezione?.celleReali && typeof CELLE_REALI_LABEL !== 'undefined' ? ` · 👑 ${CELLE_REALI_LABEL[isp.ispezione.celleReali]||''}` : ''}
         ${a.temperamento ? `<br>😊 ${a.temperamento}` : ''}
       </div>
+      ${getProduzioneBadges(a)}
       ${mappaHtml}
       <div class="arnia-actions" style="margin-top:0.8rem">
         <button class="btn btn-secondary" style="padding:0.4rem 0.8rem;font-size:0.82rem" onclick="openDetail('${a.id}')">🔍 Dettaglio</button>
@@ -934,6 +932,7 @@ function renderScheda() {
   // Tab content
   let content = '';
   if(_currentSchedaTab === 'anagrafica')  content = renderSchedaAnagrafica(a);
+  if(_currentSchedaTab === 'produzioni')  content = renderSchedaProduzioni(a);
   if(_currentSchedaTab === 'timeline')    content = renderSchedaTimeline(a);
   if(_currentSchedaTab === 'stats')       content = renderSchedaStats(a);
   if(_currentSchedaTab === 'note')        content = renderSchedaNote(a);
@@ -1287,6 +1286,187 @@ function renderGenealogiaSection(a) {
 
   html += '</div></div>';
   return html;
+}
+
+// ============================================
+// TAB PRODUZIONI (melari + rete propoli + trappola polline + stats)
+// ============================================
+function renderSchedaProduzioni(a) {
+  const oggi = new Date();
+  const giorniDa = (dateStr) => {
+    if(!dateStr) return null;
+    const d = new Date(dateStr);
+    if(isNaN(d.getTime())) return null;
+    return Math.floor((oggi - d) / (1000 * 60 * 60 * 24));
+  };
+
+  // ===== STATISTICHE GLOBALI =====
+  const melari = a.melari || [];
+  const melariAttivi = melari.filter(m => m.status === 'posizionato');
+  const melariSmielati = melari.filter(m => m.status === 'produzione');
+  const melariRimossi = melari.filter(m => m.status === 'rimosso');
+  const reteAttiva = a.retePropoli && a.retePropoli.attiva !== false;
+  const reteStorico = a.retePropoli?.storico || [];
+  const trappolaAttiva = a.trappolaPolline && a.trappolaPolline.attiva !== false;
+  const trappolaStorico = a.trappolaPolline?.storico || [];
+  const kgAnno = computeMieleAnno(a.id);
+
+  // ===== SEZIONE 1: STATISTICHE PRODUZIONE =====
+  let statsHtml = `
+    <div class="scheda-stat-grid" style="margin-bottom:1.5rem">
+      <div class="scheda-anag-card" style="background:rgba(200,134,10,0.08)">
+        <div class="scheda-anag-label">🍯 Miele anno ${new Date().getFullYear()}</div>
+        <div class="scheda-anag-val">${kgAnno > 0 ? kgAnno.toFixed(1) + ' kg' : '—'}</div>
+      </div>
+      <div class="scheda-anag-card" style="background:rgba(200,134,10,0.08)">
+        <div class="scheda-anag-label">🍯 Cicli melari totali</div>
+        <div class="scheda-anag-val">${melariSmielati.length}</div>
+      </div>
+      <div class="scheda-anag-card" style="background:rgba(93,140,68,0.08)">
+        <div class="scheda-anag-label">🌿 Cicli rete propoli</div>
+        <div class="scheda-anag-val">${reteStorico.length}${reteAttiva ? ' + 1 in corso' : ''}</div>
+      </div>
+      <div class="scheda-anag-card" style="background:rgba(216,180,254,0.15)">
+        <div class="scheda-anag-label">🌾 Cicli trappola polline</div>
+        <div class="scheda-anag-val">${trappolaStorico.length}${trappolaAttiva ? ' + 1 in corso' : ''}</div>
+      </div>
+    </div>
+  `;
+
+  // ===== SEZIONE 2: MELARI =====
+  let melariHtml = `
+    <div class="scheda-section">
+      <h4>🍯 Melari</h4>
+      ${melari.length === 0 ? '<p style="margin:0;color:var(--text-light);font-style:italic;font-size:0.9rem">Nessun melario registrato. Aggiungi un melario dal modale "Modifica arnia".</p>' : ''}
+  `;
+
+  if(melariAttivi.length > 0) {
+    melariHtml += '<div style="margin-bottom:0.8rem"><strong style="color:var(--green);font-size:0.95rem">✓ In produzione:</strong></div>';
+    melariAttivi.forEach(m => {
+      const gg = giorniDa(m.data);
+      melariHtml += `
+        <div style="background:rgba(93,140,68,0.08);border-left:3px solid var(--green);padding:0.7rem 1rem;border-radius:4px;margin-bottom:0.5rem">
+          <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:0.5rem">
+            <strong>🍯 ${m.num} telaini</strong>
+            <span style="color:var(--text-light);font-size:0.85rem">${m.data ? formatDate(m.data) : '—'}${gg !== null ? ` · da ${gg} ${gg === 1 ? 'giorno' : 'giorni'}` : ''}</span>
+          </div>
+          ${m.note ? `<div style="font-size:0.85rem;color:var(--text-light);margin-top:0.2rem;font-style:italic">${m.note}</div>` : ''}
+        </div>
+      `;
+    });
+  }
+
+  if(melariSmielati.length > 0 || melariRimossi.length > 0) {
+    melariHtml += '<div style="margin:0.8rem 0 0.4rem"><strong style="color:var(--text-light);font-size:0.88rem">Storico melari:</strong></div>';
+    [...melariSmielati, ...melariRimossi].sort((a,b) => (b.data || '').localeCompare(a.data || '')).forEach(m => {
+      const statusLabel = m.status === 'produzione' ? '✓ Smielato' : '↩ Rimosso';
+      const statusColor = m.status === 'produzione' ? 'var(--amber)' : 'var(--text-light)';
+      melariHtml += `
+        <div style="background:rgba(0,0,0,0.02);border-left:3px solid ${statusColor};padding:0.5rem 0.8rem;border-radius:4px;margin-bottom:0.4rem;opacity:0.85">
+          <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;font-size:0.88rem">
+            <span><strong>🍯 ${m.num} telaini</strong> · ${statusLabel}</span>
+            <span style="color:var(--text-light);font-size:0.82rem">${m.data ? formatDate(m.data) : '—'}${m.dataFine ? ' → ' + formatDate(m.dataFine) : ''}</span>
+          </div>
+          ${m.note ? `<div style="font-size:0.82rem;color:var(--text-light);margin-top:0.2rem;font-style:italic">${m.note}</div>` : ''}
+        </div>
+      `;
+    });
+  }
+  melariHtml += '</div>';
+
+  // ===== SEZIONE 3: RETE PROPOLI =====
+  let reteHtml = `
+    <div class="scheda-section">
+      <h4>🌿 Rete propoli</h4>
+  `;
+
+  if(reteAttiva) {
+    const gg = giorniDa(a.retePropoli.data);
+    reteHtml += `
+      <div style="background:rgba(93,140,68,0.1);border-left:3px solid var(--green);padding:0.9rem 1.1rem;border-radius:6px;margin-bottom:0.8rem">
+        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;align-items:center">
+          <strong style="color:var(--green);font-size:1rem">✓ Attiva</strong>
+          <span style="color:var(--text-light);font-size:0.88rem">Dal ${a.retePropoli.data ? formatDate(a.retePropoli.data) : '—'}${gg !== null ? ` · ${gg} ${gg === 1 ? 'giorno' : 'giorni'}` : ''}</span>
+        </div>
+        ${a.retePropoli.note ? `<div style="font-size:0.88rem;color:var(--ink);margin-top:0.4rem;font-style:italic">${a.retePropoli.note}</div>` : ''}
+      </div>
+    `;
+  } else if(reteStorico.length === 0) {
+    reteHtml += '<p style="margin:0;color:var(--text-light);font-style:italic;font-size:0.9rem">Nessuna rete propoli attiva. Mai utilizzata su questa arnia.</p>';
+  } else {
+    reteHtml += '<p style="margin:0 0 0.5rem;color:var(--text-light);font-style:italic;font-size:0.9rem">Nessuna rete propoli attualmente attiva.</p>';
+  }
+
+  if(reteStorico.length > 0) {
+    reteHtml += '<div style="margin:0.8rem 0 0.4rem"><strong style="color:var(--text-light);font-size:0.88rem">Cicli passati (raschiati):</strong></div>';
+    [...reteStorico].reverse().forEach(s => {
+      const ggCiclo = (s.dataInizio && s.dataFine) ?
+        Math.floor((new Date(s.dataFine) - new Date(s.dataInizio)) / (1000 * 60 * 60 * 24)) : null;
+      reteHtml += `
+        <div style="background:rgba(0,0,0,0.02);border-left:3px solid var(--amber);padding:0.5rem 0.8rem;border-radius:4px;margin-bottom:0.4rem;opacity:0.9">
+          <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;font-size:0.88rem">
+            <span><strong>🌿 ${s.stato || 'raschiata'}</strong></span>
+            <span style="color:var(--text-light);font-size:0.82rem">${s.dataInizio ? formatDate(s.dataInizio) : '—'} → ${s.dataFine ? formatDate(s.dataFine) : '—'}${ggCiclo ? ` · ${ggCiclo} gg` : ''}</span>
+          </div>
+          ${s.note ? `<div style="font-size:0.82rem;color:var(--text-light);margin-top:0.2rem;font-style:italic">${s.note}</div>` : ''}
+        </div>
+      `;
+    });
+  }
+  reteHtml += '</div>';
+
+  // ===== SEZIONE 4: TRAPPOLA POLLINE =====
+  let trappolaHtml = `
+    <div class="scheda-section">
+      <h4>🌾 Trappola polline</h4>
+  `;
+
+  if(trappolaAttiva) {
+    const gg = giorniDa(a.trappolaPolline.data);
+    trappolaHtml += `
+      <div style="background:rgba(216,180,254,0.18);border-left:3px solid #8B6BB1;padding:0.9rem 1.1rem;border-radius:6px;margin-bottom:0.8rem">
+        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;align-items:center">
+          <div>
+            <strong style="color:#8B6BB1;font-size:1rem">✓ Attiva</strong>
+            <span style="margin-left:0.5rem;background:rgba(139,107,177,0.2);color:#8B6BB1;padding:2px 8px;border-radius:10px;font-size:0.78rem;font-weight:600">${a.trappolaPolline.posizione || 'Entrata'}</span>
+          </div>
+          <span style="color:var(--text-light);font-size:0.88rem">Dal ${a.trappolaPolline.data ? formatDate(a.trappolaPolline.data) : '—'}${gg !== null ? ` · ${gg} ${gg === 1 ? 'giorno' : 'giorni'}` : ''}</span>
+        </div>
+        ${a.trappolaPolline.note ? `<div style="font-size:0.88rem;color:var(--ink);margin-top:0.4rem;font-style:italic">${a.trappolaPolline.note}</div>` : ''}
+      </div>
+    `;
+  } else if(trappolaStorico.length === 0) {
+    trappolaHtml += '<p style="margin:0;color:var(--text-light);font-style:italic;font-size:0.9rem">Nessuna trappola polline attiva. Mai utilizzata su questa arnia.</p>';
+  } else {
+    trappolaHtml += '<p style="margin:0 0 0.5rem;color:var(--text-light);font-style:italic;font-size:0.9rem">Nessuna trappola polline attualmente attiva.</p>';
+  }
+
+  if(trappolaStorico.length > 0) {
+    trappolaHtml += '<div style="margin:0.8rem 0 0.4rem"><strong style="color:var(--text-light);font-size:0.88rem">Cicli passati (svuotati):</strong></div>';
+    [...trappolaStorico].reverse().forEach(s => {
+      const ggCiclo = (s.dataInizio && s.dataFine) ?
+        Math.floor((new Date(s.dataFine) - new Date(s.dataInizio)) / (1000 * 60 * 60 * 24)) : null;
+      trappolaHtml += `
+        <div style="background:rgba(0,0,0,0.02);border-left:3px solid #8B6BB1;padding:0.5rem 0.8rem;border-radius:4px;margin-bottom:0.4rem;opacity:0.9">
+          <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;font-size:0.88rem">
+            <span><strong>🌾 ${s.posizione || 'Trappola'}</strong> · svuotata</span>
+            <span style="color:var(--text-light);font-size:0.82rem">${s.dataInizio ? formatDate(s.dataInizio) : '—'} → ${s.dataFine ? formatDate(s.dataFine) : '—'}${ggCiclo ? ` · ${ggCiclo} gg` : ''}</span>
+          </div>
+          ${s.note ? `<div style="font-size:0.82rem;color:var(--text-light);margin-top:0.2rem;font-style:italic">${s.note}</div>` : ''}
+        </div>
+      `;
+    });
+  }
+  trappolaHtml += '</div>';
+
+  // Info finale
+  const infoFinale = `
+    <div style="background:rgba(200,134,10,0.06);border:1px solid rgba(200,134,10,0.2);border-radius:6px;padding:0.7rem 1rem;font-size:0.85rem;color:var(--text-light);margin-top:1rem">
+      💡 <strong>Per modificare</strong> melari, rete propoli o trappola polline usa il pulsante <strong>"✏️ Modifica"</strong> in basso, oppure registra una visita che li aggiorni automaticamente.
+    </div>
+  `;
+
+  return statsHtml + melariHtml + reteHtml + trappolaHtml + infoFinale;
 }
 
 // ============================================
