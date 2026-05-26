@@ -1,3 +1,4 @@
+
 // ===== NAVIGAZIONE =====
 
 function navigateTo(id) {
