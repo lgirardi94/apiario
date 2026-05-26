@@ -1,336 +1,364 @@
 # 🐝 Il Mio Apiario
 
-Web app completa per la gestione di un apiario amatoriale o semi-professionale: censimento arnie, registro visite con ispezione dettagliata, magazzino, contabilità, obiettivi, trattamenti antivarroa, calcolatore sciroppo e generatore di etichette per i vasi di miele. I dati sono sincronizzati automaticamente su **Google Drive** in una cartella privata.
+Web app completa per la gestione di un apiario amatoriale o semi-professionale: censimento arnie con genealogia, registro visite, magazzino, contabilità, obiettivi, trattamenti antivarroa, calcolatori di sciroppo/candito/propoli, generatore di etichette per i vasi di miele, schede dettagliate per arnia e report PDF annuali. I dati sono sincronizzati automaticamente su **Google Drive** in una cartella privata dell'utente.
 
 🔗 **Live**: https://lgirardi94.github.io/apiario/
 
 ---
 
-## ✨ Funzionalità
+## ✨ Funzionalità principali
 
 ### 🏡 Dashboard Home
-- KPI cliccabili: arnie attive, miele anno/totale, giorni di visita, saldo annuale e totale
+- KPI cliccabili: **famiglie attive** (con breakdown nuclei/fecondazione/sciami), miele anno/totale, giorni di visita, saldo annuale e totale
 - Banner stagionale con consigli del mese
-- Alert su problemi (scorte basse, arnie deboli, magazzino vuoto)
+- Alert intelligenti:
+  - Scorte magazzino basse / esaurite
+  - Arnie deboli o con problemi
+  - **Nuclei pronti per promozione a Famiglia** (≥7 favi nelle ultime 2 visite)
+  - **Sciami da valutare** (cattura recente, da classificare)
 - Grafici miele/anno, arnie attive/anno, contabilità entrate-uscite
-- Mappa visuale arnie con ultimo stato e ultima ispezione
+- Mappa visuale arnie con ultimo stato, ultima ispezione e composizione telaini
 - Link rapidi a "Vedi tutte le visite" e "Vedi tutti gli obiettivi"
 
 ### 🏠 Censimento Arnie
-- Schedario completo: numero, nome, status, regina (anno/razza/temperamento)
-- Storico melari per ogni arnia
-- Calcolo automatico produzione per anno (multi-prodotto)
-- Pannello dettaglio con ultima ispezione e mappa telaini grafica
+- **4 tipi di arnia** con distinzione grafica:
+  - 🏠 **Famiglia** (standard)
+  - 🍯 **Nucleo** (in sviluppo, bordo ambra tratteggiato)
+  - 👑 **Nucleo fecondazione** (mini-arnia per regine, viola)
+  - 🐝 **Sciame catturato** (verde con ombra)
+- **Numerazione automatica** progressiva univoca tra tutti i tipi (es. #1, #2, #3...)
+- Schedario completo: nome, status, regina (anno/razza/temperamento), produttività, sciamatura, anno introduzione, anno dismissione
+- **Mappa telaini** visualizzata sulla card + pulsante "🍯 Telaini" per modificarla
+- Visualizzazione automatica accessori attivi (melari / rete propoli / trappola polline)
 
-### 📖 Registro Visite
-- Tipi multipli per visita: ispezione, trattamento, nutrizione, raccolta, salute, altro
-- **Ispezione**: covata, scorte, celle reali, mappa telaini con tipologie colorate
-- **Trattamento**: dropdown con VarroMed/Api-Bioxal/Altro + campo dosaggio
-- **Raccolta**: multi-prodotto con auto-creazione movimenti magazzino
-- Precompilazione automatica dall'ultima ispezione dell'arnia
-- Conteggio "giorni di visita" (più arnie visitate lo stesso giorno = 1)
-- Filtri per tipo, arnia, ricerca testuale
-- Esportazione CSV
+### 🌳 Genealogia (per Nucleo/Sciame/Fecondazione)
+- **Data di costituzione/cattura**
+- **Composizione telaini**: tipo (covata/scorte/misto/foglio cereo) + arnia di provenienza + note
+- **Origine regina** in 3 varianti con date previste automatiche:
+  - 🥚 **Allevata sul posto** → calcola sfarfallamento (+16gg), voli fecondazione (+30gg), prima deposizione (+38gg)
+  - 👑 **Inserita** da altra arnia → date accettazione + primo controllo
+  - 📥 **Acquistata** da fornitore esterno → date accettazione + primo controllo
+- Per sciami: dimensione stimata + luogo di cattura
+- **Check evoluzione sciame** automatico alla prima visita successiva (promuovere a famiglia/nucleo, lasciare come sciame o segnare come perso)
+
+### 🔍 Scheda dettagliata arnia (full-screen, 4 tab)
+
+**📋 Anagrafica**
+- **Punteggio salute adattivo 0-10** calcolato sulle ultime 3 visite (5 componenti: sviluppo telaini, covata, scorte, celle reali, frequenza visite — pesi adattivi se mancano dati)
+- Card con dati base (regina, età colonia, razza, ultima visita, miele anno, melari, temperamento, sciamatura)
+- **Genealogia visiva**: arnie sorgenti, telaini ricevuti, origine regina, discendenti
+
+**📅 Timeline**
+- Storia cronologica colorata: ispezioni (verde), trattamenti (rosso), raccolte (giallo)
+- Dettagli per ogni evento (covata, scorte, kg raccolti, prodotto trattamento)
+
+**📊 Statistiche**
+- Grafici a barre: produzione/anno, visite/anno, trattamenti/anno
+- Giorni medi tra visite (ultimi 90 giorni)
+- **Insight automatici** ("Produzione in crescita", "Frequenza ottimale", "Salute critica", ecc.)
+- Tabella componenti del punteggio salute con scores e pesi
+
+**📝 Note**
+- Spazio libero per appunti personali, salvato su Drive
+
+**🏷️ Tag automatici** + custom personalizzati:
+- 🍯 Forte produttrice (≥25 kg) / Produttiva (≥15 kg)
+- 😊 Docile / 😡 Aggressiva
+- 👑 Regina giovane / 🌲 Colonia consolidata
+- ⚠️ Tendenza sciamatura / Debole / Problema
+
+### ⬆️ Promozione Nucleo → Famiglia
+- **Manuale**: pulsante "⬆️ Promuovi a Famiglia" nella scheda dettagliata
+- **Suggerimento automatico** in home quando ≥7 favi popolati nelle ultime 2 visite
+- Mantiene il numero progressivo originale (#3 nucleo → #3 famiglia)
+- Annotazione nelle note con data
+
+### 🍯 Accessori produttivi (Melari / Rete propoli / Trappola polline)
+
+**Melari** (multipli per arnia):
+- N° telaini, data posizionamento, stato (in produzione / smielato / rimosso)
+- Modifica diretta dalla card arnia o durante visita
+
+**Rete propoli** (max 1 per arnia):
+- Toggle attiva/disattiva con data di posizionamento
+- Storico delle attivazioni passate
+
+**Trappola polline** (max 1 per arnia):
+- Toggle attiva/disattiva
+- Posizione (Entrata / Fondo / Interna)
+- Storico delle attivazioni passate
+
+**Gestione durante visita** (sia normale che rapida):
+- Sezione "Accessori produttivi" attiva quando selezioni un'arnia
+- Aggiungi/rimuovi melari direttamente
+- Attiva/disattiva rete e trappola con un click
+- Le modifiche si applicano al salvataggio della visita
+
+### 📝 Registro Visite
+- Form unico per: ispezione, trattamento, nutrizione, raccolta, salute
+- **Ispezione dettagliata**:
+  - Covata 0-5, scorte 0-5, celle reali, regina vista, temperamento
+  - Telaini totali con **mappa visuale** (covata opercolata, aperta, scorte, foglio cereo, vuoto)
+  - Precompilazione automatica dall'ultima ispezione della stessa arnia
+- **Trattamenti antivarroa**: prodotto, principio attivo, dose, lotto, note
+- **Raccolta miele**: integrazione automatica con magazzino (entrata automatica)
+- Filtri: testo, tipo, arnia, anno
+- Modifica/cancellazione di entry esistenti
+
+### ⚡ Visita Rapida (mobile)
+- App separata ottimizzata per smartphone: wizard 4-step con haptic feedback
+- Selezione arnia con cards visuali
+- Tipo intervento con chip multi-select
+- Form compatto per ispezione/raccolta/trattamento
+- **Sezione accessori produttivi** integrata
+- Salvataggio sincronizzato su Drive
 
 ### 📦 Magazzino
-- Articoli divisi in categorie (prodotti finiti, consumabili, materiale, farmaci)
-- Movimentazioni multi-articolo (entrate/uscite)
-- Controlli automatici sui duplicati con algoritmo di similarità bigram
-- Merge bidirezionale degli articoli duplicati (sposta movimentazioni ed elimina)
-- Coppie "ignorate" salvate su Drive (no falsi positivi ricorrenti)
+- Articoli con: categoria (miele, vasetti, etichette, attrezzatura, prodotti vari), unità, soglia minima
+- Movimentazioni: entrate (acquisti, raccolte) e uscite (consumi, vendite)
+- **Giacenza automatica** con alert sotto soglia
+- **Controlli intelligenti**: duplicati, articoli simili (suggerimenti di merge)
+- 4 tab: Articoli, Movimentazioni, Categorie, Stats
 
 ### 💰 Contabilità
-- Entrate e uscite con categorie predefinite (a chip multipli)
-- Riepilogo annuale con grafici per categoria
-- Storico mensile e filtri anno
+- **Movimenti** con: data, tipo (entrata/uscita), categorie multiple, importo, descrizione, link a vendita/raccolta
+- **6 categorie entrate**: vendita miele, nuclei/regine, cera/propoli, contributi, altro
+- **7 categorie uscite**: farmaci, alimentazione, attrezzatura, arnie, trasporti, burocrazia, altro
+- **6 grafici avanzati**:
+  - Top dell'anno (entrata principale, uscita principale, mese migliore)
+  - Diamante mensile entrate vs uscite
+  - Saldo cumulativo SVG con area positiva/negativa
+  - Torte per categoria (entrate e uscite)
+  - Top 5 movimenti dell'anno
+  - Heatmap pluriennale mesi×anni
+- Filtri per anno (con anni futuri 2027-2029 disponibili)
+- Riepilogo entrate/uscite/saldo
 
 ### 🎯 Obiettivi
-- Stagionali (primavera/estate/autunno/inverno)
-- Annuali con target/attuale, unità di misura e barra di progresso
-- Storico obiettivi completati
+- Schede per stagione (primavera, estate, autunno, inverno) o annuali
+- Stati: pianificato, in corso, completato, sospeso
+- Anni futuri (fino a 3 anni) per pianificazione strategica
+- Visualizzazione progressi annuali
 
-### 📚 Utility (4 tab)
+### 🛠️ Utility — Sezioni multiple
 
-**📅 Calendario Lavori**
-Guida completa alle attività stagionali nell'apiario, mese per mese con accordion espandibile.
+**📅 Calendario lavori stagionale**
+- Attività mese per mese
+- Periodi di trattamento consigliati
+- Date chiave dell'anno apistico
 
-**🍬 Sciroppo**
-- Calcolatore con slider per numero di arnie e litri per arnia
-- Modalità 1:1 (primaverile) e 2:1 (autunnale)
-- Procedimento di preparazione, conservazione, integratori
+**🍬 Sciroppo zuccherino** (4 tab)
+- **Calcolatore**: slider alveari, scelta proporzione 1:1 o 2:1, dosi acido citrico (0.5 g/L)
+- **Procedimento**: step-by-step con bustine Dr.Oetker, temperature, miscelazione
+- **Conservazione**: in frigo / temperatura ambiente per 1:1 e 2:1
+- **Quando si usa**: stagioni e quantità per situazione
 
-**💊 Trattamenti**
-Guida ai trattamenti antivarroa con i due prodotti più usati:
-- **VarroMed** (primavera + fine estate): periodo, modalità, dosaggio 40-60 ml/arnia
-- **Api-Bioxal liquido** (inverno): pronto all'uso, 5 ml per favo
-- Tabella riassuntiva annuale e buone pratiche generali
-- Link alle linee guida ufficiali IZS Venezie/Ministero della Salute
+**🍯 Candito** (4 tab)
+- Calcolatore con toggle Classico (82% zucchero + 18% miele) / Con polline (75% + 15% + 10%)
+- Slider alveari (1-20) e grammi/alveare (250-2500)
+- Procedimento, conservazione, periodi d'uso
 
-**🏷️ Etichette**
-Card grafica con call-to-action per aprire il [Generatore etichette](#-generatore-etichette).
+**🌿 Propoli** (4 tab) — **NUOVO**
+- **Calcolatore tintura** alcolica/analcolica:
+  - Slider grammi propoli (50-500g)
+  - 3 concentrazioni: 10%, 20% (standard), 30%
+  - 3 gradazioni alcool di partenza: 90°, 95°, 96°
+  - Output: ml alcool puro + ml acqua distillata + barattolo consigliato
+- **Procedimento**: 5 step (pulizia con congelamento, diluizione con tabella di riferimento, macerazione, riposo, doppio filtraggio)
+- **Conservazione**: alcolica 3-5 anni, analcolica 12-18 mesi
+- **Usi e dosi**: prevenzione, mal di gola, ferite, igiene orale, verruche + controindicazioni e tabella comparativa
 
-### 📱 Pagine Mobile/Touch dedicate
+**💊 Trattamenti antivarroa**
+- Schede prodotti (Api-Bioxal, VarroMed, ApiGuard, ecc.)
+- Linee guida ministeriali IZS Venezie
+- Periodo di sospensione miele
 
-**`visita_rapida.html`** — Wizard mobile 4 step
-1. Selezione arnia (card grandi con stato e ultima visita)
-2. Data + tipo intervento (chip a griglia)
-3. Dettagli adattivi (ispezione, raccolta, trattamento)
-4. Note + riepilogo + salva
-- Pre-selezione automatica trattamento in base alla stagione
-- Suggerimenti note rapidi (chip cliccabili)
-- Validazione realtime tasto "Avanti"
-- Banner sticky con arnia selezionata negli step 2-4
-- Haptic feedback su mobile
-- Popup Google Calendar per programmare la prossima visita
+**🏷️ Etichette** (app separata)
+- Generatore etichette personalizzabili per vasetti
+- 8 stili predefiniti (Tondo classico, Hexagon, Linea moderna, ecc.)
+- Editor visuale con drag&drop di testi
+- Bordino nero personalizzabile (0-2pt) per stili tondi
+- Sincronizzazione default utente su Drive
+- Stampa PDF in formato A4 con multi-etichetta
 
-**`inserimento_rapido.html`** — Form contabilità/magazzino veloce
-- Tab Contabilità: importo, descrizione, categorie a chip
-- Tab Magazzino: filtro per categoria + ricerca, dropdown raggruppato, barra giacenza colorata
-- Suggerimenti note rapidi
-- Validazione realtime e haptic feedback
-- Riepilogo "movimenti oggi" in fondo alla home
+### 📄 Report PDF annuali (13 sezioni)
 
-### 🏷️ Generatore etichette
-Pagina dedicata `etichette.html` per creare e stampare etichette personalizzate per i vasi di miele:
-- Layout A4 con etichette **50×30 mm** (24 per foglio)
-- 3 stili pronti: **Rustico**, **Minimal**, **Vintage** — completamente personalizzabili
-- Tipi di prodotto custom (con colore personalizzato)
-- Personalizzazione completa: font, dimensioni, decorazioni, colori per ogni elemento
-- **Configurazioni salvate** (manuale con nome): salva e ricarica i tuoi standard ricorrenti
-- **Storico ultime 5 stampe** (automatico): ogni stampa salva uno snapshot ricaricabile
-- Stampa diretta o esportazione PDF
-- Tutti i dati sincronizzati su Drive
+**Report completo**:
+1. Panoramica generale (KPI)
+2. Produzione per varietà (con barre)
+3. Produzione per arnia
+4. Bilancio
+5. Trattamenti
+6. Obiettivi
+7. **Dettaglio per arnia** (tabella con punteggio salute colorato)
+8. **Contabilità dettagliata** (entrate/uscite per categoria, andamento mensile, top 5)
+9. **Inventario magazzino al 31/12** (con alert articoli sotto soglia)
+10. **Statistiche genealogia** (nuclei creati, sciami catturati, promozioni, origine regine)
+11. **Confronto con anni precedenti** (ultimi 3 anni)
+12. **Calendario attività mensile**
+13. **Riepilogo finale** (statistiche chiave + trend automatici)
 
----
+**Registro trattamenti**: formato ufficiale per ispezione veterinaria con firma apicoltore.
 
-## 🗂️ Struttura del repository
-
-```
-apiario/
-│
-├── index.html                  # App principale (desktop)
-├── visita_rapida.html          # Wizard mobile per visite
-├── inserimento_rapido.html     # Form mobile contabilità/magazzino
-├── etichette.html              # Generatore etichette
-│
-├── shared.js                   # Costanti e funzioni condivise tra tutte le pagine
-├── style-main.css              # Stili app desktop
-├── style-mobile.css            # Stili pagine mobile
-│
-└── js/                         # Moduli JavaScript dell'app principale
-    ├── state.js                # Variabili globali + save helpers + helper statistiche
-    ├── nav.js                  # Navigazione tra sezioni e tab Utility
-    ├── home.js                 # Dashboard
-    ├── arnie.js                # Censimento + dettaglio arnie
-    ├── registro.js             # Registro visite + ispezione + trattamenti
-    ├── magazzino.js            # Articoli + movimentazioni + controlli duplicati
-    ├── contabilita.js          # Riepilogo + movimenti contabili
-    ├── obiettivi.js            # Stagionali/annuali/storico
-    ├── sciroppo.js             # Calcolatore
-    ├── drive-app.js            # Login obbligatorio + auto-save Drive
-    └── import-export.js        # Backup JSON locale
-```
-
----
-
-## 📚 Spiegazione dei file
-
-### 🌐 Pagine HTML
-
-#### `index.html` (~1100 righe)
-App principale desktop. Contiene solo struttura HTML — la logica è tutta nei file in `js/`. Schermata di login Drive obbligatoria all'apertura.
-
-#### `visita_rapida.html`
-Wizard mobile a 4 step per registrare velocemente una visita. Sincronizzato con la stessa cartella Drive dell'app principale.
-
-#### `inserimento_rapido.html`
-Form mobile dedicato a contabilità e magazzino: 2 tab + home con riepilogo dei movimenti del giorno.
-
-#### `etichette.html`
-Generatore etichette completo con anteprima A4 live, 3 stili predefiniti, configurazioni salvate e storico. Salva tutto su `apiario_etichette.json` in Drive.
-
----
-
-### 📜 File JavaScript
-
-#### `shared.js` (~340 righe)
-Codice condiviso tra **tutte** le pagine HTML:
-
-- **Costanti**: `CLIENT_ID`, `SCOPES`, nomi file Drive, categorie contabili
-- **Costanti ispezione**: `TELAINO_OPZIONI` (con colori e label), `CELLE_REALI_LABEL`, `COVATA_LABEL`, `SCORTE_LABEL`
-- **Utility**: `fmt`, `formatDate`, `today`, `getGiacenza`, `similarity`, `getTipi`
-- **Drive API**: `initDrive`, `driveLogin`, `driveLogout`, `driveReadFile`, `driveWriteFile`, `driveLoadAll`, `driveSaveAll`
-- **Calendar**: `buildGCalLink`, `showCalendarPopup`
-- **Helper rendering**: `getTelainoInfo`, `renderTelainiVisualHTML`
-
-#### `js/state.js`
-Variabili globali e funzioni di salvataggio:
-
-```javascript
-let arnie, logBook, articoli, movimentazioni,
-    movimentiContabili, obiettivi, settings;
-
-// Helpers che salvano localStorage + push automatico su Drive
-saveDB() saveMagazzino() saveContabilita() saveObiettivi() saveSettings()
-
-// Helpers di calcolo riusabili
-getMieleStats()                 // { totale, perAnno: {...} }
-findUltimaIspezione(arniaId)    // ultima visita di tipo ispezione
-countGiorniVisita(annoFilter)   // giorni distinti con almeno una visita
-```
-
-#### `js/nav.js`
-- Navigazione tra sezioni (`navigateTo`, `showSection`)
-- Tab Utility (Calendario / Sciroppo / Trattamenti / Etichette)
-- Accordion calendario mensile
-
-#### `js/home.js`
-Render della dashboard: banner stagionale, KPI, alert, mappa arnie con telaini, ultime visite, obiettivi in corso, grafici.
-
-#### `js/arnie.js`
-Censimento arnie: lista, modal di creazione/modifica, pannello dettaglio con mappa telaini grafica, gestione melari.
-
-#### `js/registro.js`
-- Form di inserimento visita con campi adattivi al tipo
-- Sezione **trattamento** con dropdown prodotto + dosaggio
-- Sezione **ispezione** con mappa telaini interattiva
-- Multi-raccolta con auto-creazione movimenti magazzino
-- Precompilazione automatica dall'ultima ispezione
-- Lista visite con filtri ed esportazione CSV
-
-#### `js/magazzino.js`
-Articoli + movimentazioni + controlli duplicati (algoritmo similarità bigram, merge bidirezionale, ignore list su Drive).
-
-#### `js/contabilita.js`
-Modal multi-categoria, riepilogo per anno/mese, grafici.
-
-#### `js/obiettivi.js`
-3 tab stagionali/annuali/storico, modal di creazione, calcolo automatico del progresso.
-
-#### `js/sciroppo.js`
-Calcolatore proporzioni acqua/zucchero in base alla modalità (1:1 / 2:1).
-
-#### `js/drive-app.js`
-**Cuore della sincronizzazione**:
-
-- **Login obbligatorio**: schermata login full-screen, app nascosta finché non autenticati
-- **Auto-save con debounce 800ms**: aspetta il silenzio prima di salvare
-- **Coda di salvataggi**: se uno è in corso e arriva un altro, viene accodato (non scartato)
-- **Detect online/offline**: indicatore visibile, sospende salvataggi offline, sincronizza al ritorno della connessione
-- **Retry automatico** dopo 5 secondi in caso di errore di rete
-- **Beforeunload guard**: avvisa se chiudi la scheda con modifiche non salvate
-- **Logout pulito**: cancella timer pendenti, azzera stato, pulisce localStorage
-
-#### `js/import-export.js`
-Backup locale: esportazione JSON completo, importazione con sincronizzazione automatica su Drive.
-
----
-
-### 🎨 File CSS
-
-#### `style-main.css`
-Stili dell'app desktop. Tema "miele e legno" con palette ambra/marrone, font serif per titoli (Playfair Display) e sans per testo.
-
-#### `style-mobile.css`
-Stili condivisi tra `visita_rapida.html` e `inserimento_rapido.html`. Ottimizzato per touch (target ≥44px), card grandi, layout a colonna unica.
+Apertura in nuova finestra con tasto **🖨️ Stampa / Salva come PDF** del browser.
 
 ---
 
 ## ☁️ Sincronizzazione Google Drive
 
-L'app usa la API di Drive con scope `drive.appdata`: i file sono salvati in una **cartella nascosta privata** non visibile dall'utente in Drive (evita cancellazioni accidentali).
+I dati sono salvati automaticamente in una cartella **`appdata`** privata su Google Drive (invisibile all'utente, gestita solo dall'app).
 
-### File salvati su Drive
+**File salvati**:
+- `apiario_db.json` — Arnie + registro visite
+- `apiario_magazzino.json` — Articoli + movimentazioni
+- `apiario_contabilita.json` — Movimenti contabili
+- `apiario_obiettivi.json` — Obiettivi stagionali/annuali
+- `apiario_settings.json` — Preferenze utente
+- `apiario_etichette.json` — Template etichette + default utente
 
-| File | Contenuto |
-|------|-----------|
-| `apiario_db.json` | Arnie + registro visite |
-| `apiario_magazzino.json` | Articoli + movimentazioni |
-| `apiario_contabilita.json` | Movimenti contabili |
-| `apiario_obiettivi.json` | Obiettivi stagionali/annuali |
-| `apiario_settings.json` | Preferenze (es. duplicati ignorati) |
-| `apiario_etichette.json` | Tipi prodotto, righe, stili, configurazioni e storico stampe |
+**Flusso**:
+1. Click "🔐 Accedi con Google" → autorizza scope `drive.appdata`
+2. Caricamento automatico dei dati esistenti
+3. Salvataggio dopo ogni modifica
+4. Pulsante "💾 Salva ora" per forzare il sync
 
-Ogni file ha versione + timestamp salvataggio.
+---
 
-### Flusso di salvataggio
+## 🛠️ Architettura tecnica
 
+### Stack
+- **Frontend puro**: HTML5 + CSS3 + JavaScript ES6+ (no framework)
+- **No build step**: tutto il codice gira direttamente nel browser
+- **Hosting**: GitHub Pages
+- **Storage**: Google Drive API v3 (scope `appdata` privato)
+- **OAuth2**: Google Identity Services
+
+### Struttura file
 ```
-saveMagazzino()
-    ↓
-localStorage.setItem(...)        ← cache locale immediata
-    ↓
-pushToCloud(true)                ← debounce 800ms
-    ↓
-[se altro save arriva → si aggiunge alla coda]
-    ↓
-driveSaveAll(...)                ← push su Drive di TUTTI i file principali
-    ↓
-✅ "Salvato su Drive"
+apiario/
+├── index.html              # App principale
+├── visita_rapida.html      # Wizard mobile per visite
+├── inserimento_rapido.html # (legacy)
+├── etichette.html          # App generatore etichette
+├── shared.js               # Costanti e helper condivisi
+├── style-main.css          # Stili desktop
+├── style-mobile.css        # Stili mobile
+└── js/
+    ├── state.js            # Stato globale + storage
+    ├── nav.js              # Navigazione tab
+    ├── home.js             # Dashboard
+    ├── arnie.js            # Gestione arnie + scheda dettagliata
+    ├── registro.js         # Form visite
+    ├── magazzino.js        # Articoli + giacenze
+    ├── contabilita.js      # Movimenti + grafici
+    ├── obiettivi.js        # Obiettivi stagionali
+    ├── sciroppo.js         # Calcolatore sciroppo
+    ├── candito.js          # Calcolatore candito
+    ├── propoli.js          # Calcolatore propoli
+    ├── report.js           # Generazione PDF
+    ├── drive-app.js        # Integrazione Google Drive
+    └── import-export.js    # Backup/restore JSON
 ```
 
-La pagina `etichette.html` ha un flusso simile dedicato sul suo file.
+### Cache busting
+Tutti gli script JS hanno query string versione (`?v=YYYYMMDDx`) per forzare il reload dopo gli aggiornamenti.
 
 ---
 
-## 📅 Integrazione Google Calendar
+## 🚀 Installazione e uso
 
-Dopo il salvataggio di una visita (sia da `index.html` che da `visita_rapida.html`), appare un popup che propone di **schedulare la prossima visita**:
-- Suggerimento data automatico (+14 giorni)
-- Campo note opzionale per memo
-- Tasto **"Aggiungi al Calendario"** apre Google Calendar con evento precompilato (titolo, durata 1h, descrizione)
+### Per l'utente finale
+1. Apri https://lgirardi94.github.io/apiario/
+2. Click "🔐 Accedi con Google"
+3. Autorizza l'accesso a Drive (solo cartella `appdata` dell'app)
+4. Inizia a usare l'app — i dati si sincronizzano automaticamente
 
-Funziona via link URL `calendar.google.com/calendar/render` — zero configurazione, niente API aggiuntive.
+### Per modifiche / fork
 
----
+```bash
+# Clone
+git clone https://github.com/lgirardi94/apiario.git
+cd apiario
 
-## 🚀 Setup locale
+# Per testare in locale, serve un server HTTP (non file://)
+# Su macOS/Linux:
+python3 -m http.server 8000
 
-L'app è completamente **client-side**: niente backend, niente server.
+# Su Windows con Python:
+python -m http.server 8000
 
-1. Clona il repo
-2. Apri `index.html` in un browser
-3. Configura `CLIENT_ID` in `shared.js` con il tuo OAuth Client ID di Google Cloud Console
-4. Aggiungi l'origine del tuo deploy alle "Authorized JavaScript origins" su Google Cloud
-5. Push su GitHub → GitHub Pages serve automaticamente
+# Poi apri: http://localhost:8000
+```
 
-### Configurazione Google Cloud (una volta sola)
-
-1. Vai su https://console.cloud.google.com
-2. Crea un progetto
-3. Abilita **Google Drive API**
-4. Crea credenziali OAuth 2.0 Client ID (tipo: Web)
-5. Aggiungi l'URL del tuo sito alle "Authorized JavaScript origins"
-6. Copia il Client ID in `shared.js`
-
----
-
-## 🛠️ Tecnologie
-
-- **Vanilla JavaScript** (no framework, no build step)
-- **HTML5 + CSS3** con custom properties per il theming
-- **Google Identity Services** per OAuth
-- **Google Drive API v3** per la sincronizzazione (scope `drive.appdata`)
-- **GitHub Pages** per l'hosting
-
-Niente dipendenze npm, niente bundler, niente compilazione. Apri qualsiasi file `.js` o `.html` e leggi direttamente.
+**Configurazione Google Drive (solo per fork)**:
+1. Vai su Google Cloud Console → crea progetto
+2. Abilita Drive API
+3. Crea credenziali OAuth2 "Web application"
+4. Aggiungi origini autorizzate (es. `https://tuoutente.github.io`)
+5. Sostituisci il `CLIENT_ID` in `js/drive-app.js`
 
 ---
 
-## 🎯 Caratteristiche tecniche notevoli
+## 📱 PWA / Mobile
 
-- **Login obbligatorio** su tutte le pagine: Drive come fonte unica di verità, localStorage solo come cache
-- **Race condition resilient**: gestione coda salvataggi, retry, debounce 800ms
-- **Offline-aware**: detect connessione, indicatore visivo, retry automatico al ripristino
-- **Performance**: lookup `Map` per articoli/log con migliaia di entry, calcolo statistiche centralizzato
-- **Type safety**: `parseInt(x, 10)` ovunque, conversioni esplicite stringa/numero
-- **CSS modulare**: una sola fonte di verità per colori telaini (`TELAINO_OPZIONI` in `shared.js`)
-- **UX mobile**: haptic feedback, validazione realtime, suggerimenti note rapidi
+L'app è **responsive** e ottimizzata per smartphone:
+- Visita rapida con wizard a step
+- Haptic feedback su tap
+- Layout adattivo per schermi piccoli
+- Click su KPI per navigazione veloce
+
+Per usarla come **app mobile**:
+- iOS Safari: condividi → "Aggiungi alla schermata home"
+- Android Chrome: menu → "Installa app"
 
 ---
 
-## 🐝 Note finali
+## 📊 Modello dati (per sviluppatori)
 
-App pensata per uso personale. Tutti i dati sono salvati nella tua cartella Drive privata (`drive.appdata`) e **nessuno** (incluso lo sviluppatore) può accedervi.
+### Arnia
+```javascript
+{
+  id, num, tipo,                        // famiglia / nucleo / nucleo_fec / sciame
+  nome, status, reginaAnno,
+  razza, razzaOrigine, temperamento, sciamatura, produttivita,
+  annoIntroduzione, annoDismissione,
+  melari: [{ id, num, data, status, note }],
+  retePropoli: { data, note, attiva, storico: [{ dataInizio, dataFine, ... }] },
+  trappolaPolline: { posizione, data, note, attiva, storico: [...] },
+  // Genealogia
+  dataCostituzione,
+  telainiOrigine: [{ tipo, arniaSrcId, note }],
+  reginaOrigine,                        // allevata / inserita / acquistata
+  reginaArniaSrc, reginaFornitore,
+  sciameDim, sciameLuogo, sciameNeedsEvolutionCheck,
+  // Scheda
+  customTags: [],
+  notaLibera: ''
+}
+```
 
-In caso di problemi di accesso, usa **"⬇ Backup locale"** dalla barra in alto dell'app principale per scaricare un JSON con tutti i tuoi dati.
+### Visita (logBook entry)
+```javascript
+{
+  id, data, arniaId, arniaNome,
+  tipo: ['ispezione', 'raccolta', ...],
+  note, varroa,
+  ispezione: { covata, scorte, celleReali, telaini, mappa: [...] },
+  raccolta: [{ articoloId, qta }],
+  trattamento: { prodotto, principioAttivo, dose, lotto }
+}
+```
+
+---
+
+## 🐝 Crediti
+
+Sviluppato per **lgirardi94** (apicoltore in Ticino, Svizzera) con il supporto di Claude AI per il design e l'implementazione iterativa.
+
+Versione corrente: **maggio 2026**
+
+---
+
+## 📜 Licenza
+
+Codice rilasciato per uso personale dell'apicoltore. Per fork o uso commerciale, contattare l'autore.
