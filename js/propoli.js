@@ -4,14 +4,13 @@
 
 let propMode = 'alcolica'; // 'alcolica' | 'analcolica'
 
-
 function showPropoliTab(tab, btn) {
   const tabs = ['calcolatore', 'procedimento', 'conservazione', 'usi'];
   tabs.forEach(t => {
     const el = document.getElementById('propTab' + t.charAt(0).toUpperCase() + t.slice(1));
     if(el) el.style.display = (t === tab) ? 'block' : 'none';
   });
-  const parent = btn ? btn.closest('.mag-tabs') : null;
+  const parent = btn?.closest('.mag-tabs');
   if(parent) {
     parent.querySelectorAll('.mag-tab').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
@@ -34,10 +33,7 @@ function propSetMode(mode) {
 
 function propCalc() {
   const setText = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
-  const get = (id) => {
-  const el = document.getElementById(id);
-  return el ? el.value : null;
-};
+  const get = (id) => document.getElementById(id)?.value;
 
   const grams = parseInt(get('prop-sl-grams') || 100, 10);
   const concentrazione = parseFloat(get('prop-sl-conc') || 20);  // 10, 20, 30
