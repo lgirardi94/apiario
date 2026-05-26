@@ -110,6 +110,7 @@ function renderHome() {
           <span class="arnia-status ${statusCls[a.status]}">${statusLabel[a.status]}</span>
           <div class="arnia-info" style="font-size:0.85rem">
             ${a.razza?`🐝 <em>${a.razza}</em><br>`:''}
+            ${a.reginaAnno?`${getReginaPallino(a.reginaAnno)}Regina <strong>${a.reginaAnno}</strong><br>`:''}
             ${isp?`📅 Isp: ${formatDate(isp.data)}<br>`:''}
             ${isp?.ispezione?.telaini?`📏 ${isp.ispezione.telaini} telaini`:''}
             ${isp?.ispezione?.covata?` · 🟤 ${isp.ispezione.covata}/5`:''}
