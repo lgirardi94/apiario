@@ -1,4 +1,5 @@
 // ======= ARNIE =======
+
 let editingMelari = []; // temp melari list while modal is open
 let editingRetePropoli = null; // singolo oggetto (max 1 per arnia)
 let editingTrappolaPolline = null; // singolo oggetto (max 1 per arnia)
