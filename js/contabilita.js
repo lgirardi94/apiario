@@ -13,19 +13,20 @@ function showContTab(tab, btn) {
 
 // ======= RIEPILOGO =======
 function renderContRiepilogo() {
-  const anno = new Date().getFullYear();
-  const mesi = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
+  try {
+    const anno = new Date().getFullYear();
+    const mesi = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
 
-  // Totals all time
-  const totEntrate = movimentiContabili.filter(m=>m.tipo==='entrata').reduce((s,m)=>s+parseFloat(m.importo||0),0);
-  const totUscite = movimentiContabili.filter(m=>m.tipo==='uscita').reduce((s,m)=>s+parseFloat(m.importo||0),0);
-  const saldoTot = totEntrate - totUscite;
+    // Totals all time
+    const totEntrate = movimentiContabili.filter(m=>m.tipo==='entrata').reduce((s,m)=>s+parseFloat(m.importo||0),0);
+    const totUscite = movimentiContabili.filter(m=>m.tipo==='uscita').reduce((s,m)=>s+parseFloat(m.importo||0),0);
+    const saldoTot = totEntrate - totUscite;
 
-  // Totals current year
-  const annoCurr = movimentiContabili.filter(m=>m.data&&m.data.startsWith(String(anno)));
-  const entAnno = annoCurr.filter(m=>m.tipo==='entrata').reduce((s,m)=>s+parseFloat(m.importo||0),0);
-  const uscAnno = annoCurr.filter(m=>m.tipo==='uscita').reduce((s,m)=>s+parseFloat(m.importo||0),0);
-  const saldoAnno = entAnno - uscAnno;
+    // Totals current year
+    const annoCurr = movimentiContabili.filter(m=>m.data&&m.data.startsWith(String(anno)));
+    const entAnno = annoCurr.filter(m=>m.tipo==='entrata').reduce((s,m)=>s+parseFloat(m.importo||0),0);
+    const uscAnno = annoCurr.filter(m=>m.tipo==='uscita').reduce((s,m)=>s+parseFloat(m.importo||0),0);
+    const saldoAnno = entAnno - uscAnno;
 
   // KPI
   document.getElementById('contKpiGrid').innerHTML = `
@@ -152,6 +153,9 @@ function renderContRiepilogo() {
           const all=[...CAT_ENTRATA,...CAT_USCITA]; const found=all.find(x=>x.id===c); return found?found.label:c;
         }).join(', ')}</div></div>
       </div>`).join('');
+  } catch(err) {
+    console.error('[Contabilita] Errore in renderContRiepilogo:', err.message);
+  }
 }
 
 // ============================================

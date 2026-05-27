@@ -1,15 +1,20 @@
 // ======= EXPORT / IMPORT JSON =======
 function exportJSON() {
-  const payload = {
-    version: 1, exportedAt: new Date().toISOString(),
-    arnie, logBook, articoli, movimentazioni, movimentiContabili, obiettivi
-  };
-  const blob = new Blob([JSON.stringify(payload, null, 2)], {type: 'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `apiario_backup_${new Date().toISOString().slice(0,10)}.json`;
-  a.click();
-  URL.revokeObjectURL(a.href);
+  try {
+    const payload = {
+      version: 1, exportedAt: new Date().toISOString(),
+      arnie, logBook, articoli, movimentazioni, movimentiContabili, obiettivi
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], {type: 'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `apiario_backup_${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  } catch(err) {
+    console.error('[Import-Export] Errore in exportJSON:', err.message);
+    alert('Errore durante l\'esportazione: ' + err.message);
+  }
 }
 
 function importJSON(event) {
@@ -38,7 +43,10 @@ function importJSON(event) {
       saveObiettivi();
       renderArnie(); updateArniSelects(); renderLog(); renderStats(); renderMagArticoli();
       showImportToast(`✅ Importazione completata!`);
-    } catch(err) { alert('Errore nel file JSON: ' + err.message); }
+    } catch(err) {
+      console.error('[Import-Export] Errore nel parsing JSON:', err.message);
+      alert('Errore nel file JSON: ' + err.message);
+    }
     event.target.value = '';
   };
   reader.readAsText(file);

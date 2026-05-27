@@ -62,20 +62,29 @@ function nextArniaNumber() {
 
 // Aggiorna l'anteprima del colore regina nel modale
 function aggiornaReginaPreview() {
-  const anno = document.getElementById('arniReginaAnno')?.value;
-  const box = document.getElementById('arniReginaPreview');
-  if(!box) return;
-  if(!anno || anno.length < 4) {
-    box.style.display = 'none';
-    return;
+  try {
+    const anno = document.getElementById('arniReginaAnno')?.value;
+    const box = document.getElementById('arniReginaPreview');
+    if(!box) return;
+    if(!anno || anno.length < 4) {
+      box.style.display = 'none';
+      return;
+    }
+    if (typeof getReginaColorInfo !== 'function') {
+      console.warn('[Arnie] getReginaColorInfo non disponibile (shared.js non caricato?)');
+      box.style.display = 'none';
+      return;
+    }
+    const info = getReginaColorInfo(anno);
+    if(!info) {
+      box.style.display = 'none';
+      return;
+    }
+    box.style.display = 'flex';
+    box.innerHTML = `${getReginaPallino(anno, 14)}<span>Colore <strong style="color:${info.dark}">${info.name}</strong></span>`;
+  } catch(err) {
+    console.error('[Arnie] Errore in aggiornaReginaPreview:', err.message);
   }
-  const info = getReginaColorInfo(anno);
-  if(!info) {
-    box.style.display = 'none';
-    return;
-  }
-  box.style.display = 'flex';
-  box.innerHTML = `${getReginaPallino(anno, 14)}<span>Colore <strong style="color:${info.dark}">${info.name}</strong></span>`;
 }
 
 // Migrazione: aggiunge tipo='famiglia' alle arnie esistenti che non lo hanno
@@ -649,8 +658,16 @@ function disattivaTrappolaPolline() {
 
 function openArniModal(id) {
   const modal = document.getElementById('arniModal');
+  if(!modal) {
+    console.error('[Arnie] arniModal non trovato nel DOM');
+    return;
+  }
   if(id) {
     const a = arnie.find(x => x.id === id);
+    if(!a) {
+      console.warn('[Arnie] Arnia non trovata per modifica:', id);
+      return;
+    }
     document.getElementById('arniModalTitle').textContent = '✏️ Modifica Arnia';
     document.getElementById('editArniId').value = id;
     document.getElementById('arniNum').value = a.num;
@@ -881,14 +898,33 @@ function openDetail(id) {
 }
 
 function openSchedaDettagliata(arniaId) {
-  _currentSchedaArniaId = arniaId;
-  _currentSchedaTab = 'anagrafica';
-  renderScheda();
-  document.getElementById('schedaArniaModal').classList.add('open');
+  try {
+    if(!arniaId) {
+      console.warn('[Arnie] openSchedaDettagliata chiamata senza arniaId');
+      return;
+    }
+    const arnia = arnie.find(a => a.id === arniaId);
+    if(!arnia) {
+      console.warn('[Arnie] Arnia non trovata per scheda:', arniaId);
+      return;
+    }
+    _currentSchedaArniaId = arniaId;
+    _currentSchedaTab = 'anagrafica';
+    renderScheda();
+    const modal = document.getElementById('schedaArniaModal');
+    if(!modal) {
+      console.error('[Arnie] schedaArniaModal non trovato nel DOM');
+      return;
+    }
+    modal.classList.add('open');
+  } catch(err) {
+    console.error('[Arnie] Errore in openSchedaDettagliata:', err.message);
+  }
 }
 
 function closeSchedaDettagliata() {
-  document.getElementById('schedaArniaModal').classList.remove('open');
+  const modal = document.getElementById('schedaArniaModal');
+  if(modal) modal.classList.remove('open');
   _currentSchedaArniaId = null;
 }
 
@@ -898,17 +934,26 @@ function setSchedaTab(tab) {
 }
 
 function renderScheda() {
-  const a = arnie.find(x => x.id === _currentSchedaArniaId);
-  if(!a) return;
+  try {
+    const a = arnie.find(x => x.id === _currentSchedaArniaId);
+    if(!a) {
+      console.warn('[Arnie] renderScheda: arnia corrente non trovata', _currentSchedaArniaId);
+      return;
+    }
 
-  const tipoInfo = ARNIA_TIPI[a.tipo] || ARNIA_TIPI.famiglia;
-  const statusLabel = {attiva:'Attiva',debole:'Debole',problema:'Problema',invernata:'Invernata'}[a.status];
+    const tipoInfo = (typeof ARNIA_TIPI !== 'undefined' && ARNIA_TIPI[a.tipo]) ? ARNIA_TIPI[a.tipo] : (typeof ARNIA_TIPI !== 'undefined' ? ARNIA_TIPI.famiglia : { label: 'Famiglia', icon: '🏠', short: 'Famiglia' });
+    const statusLabel = {attiva:'Attiva',debole:'Debole',problema:'Problema',invernata:'Invernata'}[a.status] || a.status || '—';
 
-  // Header (sempre visibile)
-  const tags = computeArniaTags(a);
-  const customTags = a.customTags || [];
+    // Header (sempre visibile)
+    const tags = (typeof computeArniaTags === 'function') ? computeArniaTags(a) : [];
+    const customTags = a.customTags || [];
 
-  document.getElementById('schedaHeader').innerHTML = `
+    const headerEl = document.getElementById('schedaHeader');
+    if(!headerEl) {
+      console.warn('[Arnie] schedaHeader non trovato');
+      return;
+    }
+    headerEl.innerHTML = `
     <div class="scheda-num-badge">${tipoInfo.icon} #${a.num}</div>
     <div class="scheda-header-info">
       <h2 style="margin:0;font-family:'Playfair Display',serif">${a.nome || '— senza nome —'}</h2>
@@ -931,18 +976,27 @@ function renderScheda() {
 
   // Tab content
   let content = '';
-  if(_currentSchedaTab === 'anagrafica')  content = renderSchedaAnagrafica(a);
-  if(_currentSchedaTab === 'produzioni')  content = renderSchedaProduzioni(a);
-  if(_currentSchedaTab === 'timeline')    content = renderSchedaTimeline(a);
-  if(_currentSchedaTab === 'stats')       content = renderSchedaStats(a);
-  if(_currentSchedaTab === 'note')        content = renderSchedaNote(a);
+  try {
+    if(_currentSchedaTab === 'anagrafica')  content = renderSchedaAnagrafica(a);
+    if(_currentSchedaTab === 'produzioni')  content = renderSchedaProduzioni(a);
+    if(_currentSchedaTab === 'timeline')    content = renderSchedaTimeline(a);
+    if(_currentSchedaTab === 'stats')       content = renderSchedaStats(a);
+    if(_currentSchedaTab === 'note')        content = renderSchedaNote(a);
+  } catch(err) {
+    console.error('[Arnie] Errore rendering tab', _currentSchedaTab, ':', err.message);
+    content = `<div style="color:var(--red);padding:1rem;font-style:italic">Errore caricamento sezione. Apri F12 per dettagli.</div>`;
+  }
 
-  document.getElementById('schedaBody').innerHTML = content;
+  const bodyEl = document.getElementById('schedaBody');
+  if(bodyEl) bodyEl.innerHTML = content;
 
   // Promote button (solo nucleo)
   const promBtn = document.getElementById('schedaPromuoviBtn');
   if(promBtn) {
     promBtn.style.display = (a.tipo === 'nucleo') ? 'inline-block' : 'none';
+  }
+  } catch(err) {
+    console.error('[Arnie] Errore generale in renderScheda:', err.message);
   }
 }
 

@@ -2,14 +2,23 @@
 let sciMode = '1to1';
 
 function showSciroppoTab(tab, btn) {
-  ['Calcolatore','Procedimento','Conservazione','Integratori'].forEach(t => {
-    const el = document.getElementById(`sciTab${t}`);
-    if(el) el.style.display = 'none';
-  });
-  document.querySelectorAll('#utilTabSciroppo .mag-tabs .mag-tab').forEach(b => b.classList.remove('active'));
-  document.getElementById(`sciTab${tab.charAt(0).toUpperCase()+tab.slice(1)}`).style.display = 'block';
-  btn.classList.add('active');
-  if(tab === 'calcolatore') sciCalc();
+  try {
+    ['Calcolatore','Procedimento','Conservazione','Integratori'].forEach(t => {
+      const el = document.getElementById(`sciTab${t}`);
+      if(el) el.style.display = 'none';
+    });
+    document.querySelectorAll('#utilTabSciroppo .mag-tabs .mag-tab').forEach(b => b.classList.remove('active'));
+    const targetEl = document.getElementById(`sciTab${tab.charAt(0).toUpperCase()+tab.slice(1)}`);
+    if(!targetEl) {
+      console.warn('[Sciroppo] Tab non trovata:', tab);
+      return;
+    }
+    targetEl.style.display = 'block';
+    if(btn) btn.classList.add('active');
+    if(tab === 'calcolatore') sciCalc();
+  } catch(err) {
+    console.error('[Sciroppo] Errore in showSciroppoTab:', err.message);
+  }
 }
 
 function sciSetMode(m) {

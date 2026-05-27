@@ -51,23 +51,28 @@ function showObTab(tab, btn) {
 
 // ======= RENDER STAGIONALI =======
 function renderObStagionali() {
-  const filtroStagione = document.getElementById('obFiltroStagione')?.value || '';
-  const filtroAnno     = document.getElementById('obFiltroAnnoS')?.value || '';
-  const filtroStato    = document.getElementById('obFiltroStato')?.value || '';
+  try {
+    const filtroStagione = document.getElementById('obFiltroStagione')?.value || '';
+    const filtroAnno     = document.getElementById('obFiltroAnnoS')?.value || '';
+    const filtroStato    = document.getElementById('obFiltroStato')?.value || '';
 
-  let filtered = obiettivi
-    .filter(o => o.tipo === 'stagionale')
-    .filter(o => !filtroStagione || o.stagione === filtroStagione)
-    .filter(o => !filtroAnno    || String(o.anno) === filtroAnno)
-    .filter(o => !filtroStato   || o.stato === filtroStato)
-    .sort((a,b) => {
-      const ord = ['primavera','estate','autunno','inverno'];
-      const aSt = ord.indexOf(a.stagione); const bSt = ord.indexOf(b.stagione);
-      return b.anno - a.anno || aSt - bSt;
-    });
+    let filtered = obiettivi
+      .filter(o => o.tipo === 'stagionale')
+      .filter(o => !filtroStagione || o.stagione === filtroStagione)
+      .filter(o => !filtroAnno    || String(o.anno) === filtroAnno)
+      .filter(o => !filtroStato   || o.stato === filtroStato)
+      .sort((a,b) => {
+        const ord = ['primavera','estate','autunno','inverno'];
+        const aSt = ord.indexOf(a.stagione); const bSt = ord.indexOf(b.stagione);
+        return b.anno - a.anno || aSt - bSt;
+      });
 
-  const container = document.getElementById('obStagionaliList');
-  if(filtered.length === 0) {
+    const container = document.getElementById('obStagionaliList');
+    if(!container) {
+      console.warn('[Obiettivi] obStagionaliList non trovato nel DOM');
+      return;
+    }
+    if(filtered.length === 0) {
     container.innerHTML = `<div class="empty-state"><span class="big">🎯</span>Nessun obiettivo stagionale trovato.<br>Aggiungine uno!</div>`;
     return;
   }
@@ -95,14 +100,18 @@ function renderObStagionali() {
         ${group.items.map(o => renderObCard(o)).join('')}
       </div>`;
     }).join('');
+  } catch(err) {
+    console.error('[Obiettivi] Errore in renderObStagionali:', err.message);
+  }
 }
 
 // ======= RENDER ANNUALI =======
 function renderObAnnuali() {
-  const filtroAnno = document.getElementById('obFiltroAnnoA')?.value || '';
+  try {
+    const filtroAnno = document.getElementById('obFiltroAnnoA')?.value || '';
 
-  let filtered = obiettivi
-    .filter(o => o.tipo === 'annuale')
+    let filtered = obiettivi
+      .filter(o => o.tipo === 'annuale')
     .filter(o => !filtroAnno || String(o.anno) === filtroAnno)
     .sort((a,b) => b.anno - a.anno);
 
@@ -129,6 +138,9 @@ function renderObAnnuali() {
         </div>
         ${items.map(o => renderObCard(o)).join('')}
       </div>`).join('');
+  } catch(err) {
+    console.error('[Obiettivi] Errore in renderObAnnuali:', err.message);
+  }
 }
 
 function renderObCard(o) {
@@ -253,6 +265,10 @@ function toggleStorico(id) {
 // ======= MODAL OBIETTIVO =======
 function openObModal(tipo, editId) {
   const modal = document.getElementById('obModal');
+  if(!modal) {
+    console.error('[Obiettivi] obModal non trovato nel DOM');
+    return;
+  }
   const anno = new Date().getFullYear();
 
   // Popola select anno

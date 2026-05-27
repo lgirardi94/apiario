@@ -76,23 +76,32 @@ function initGoogleDrive() {
 }
 
 async function loadFromCloud() {
-  const { db, mag, cont, ob, settings: settingsData } = await driveLoadAll();
-  if(db && db.arnie && db.logBook) { arnie = db.arnie; logBook = db.logBook; }
-  if(mag && mag.articoli && mag.movimentazioni) { articoli = mag.articoli; movimentazioni = mag.movimentazioni; }
-  if(cont && cont.movimentiContabili) { movimentiContabili = cont.movimentiContabili; }
-  if(ob && ob.obiettivi) { obiettivi = ob.obiettivi; }
-  if(settingsData) {
-    // Riempie settings con le proprietà da Drive, mantenendo i default per quelle nuove
-    Object.assign(settings, settingsData);
-    delete settings.version;
-    delete settings.savedAt;
+  try {
+    const { db, mag, cont, ob, nec, settings: settingsData } = await driveLoadAll();
+    if(db && db.arnie && db.logBook) { arnie = db.arnie; logBook = db.logBook; }
+    if(mag && mag.articoli && mag.movimentazioni) { articoli = mag.articoli; movimentazioni = mag.movimentazioni; }
+    if(cont && cont.movimentiContabili) { movimentiContabili = cont.movimentiContabili; }
+    if(ob && ob.obiettivi) { obiettivi = ob.obiettivi; }
+    if(nec && nec.necessita) { necessita = nec.necessita; }
+    if(settingsData) {
+      // Riempie settings con le proprietà da Drive, mantenendo i default per quelle nuove
+      Object.assign(settings, settingsData);
+      delete settings.version;
+      delete settings.savedAt;
+    }
+  } catch(err) {
+    console.error('[Drive] Errore in loadFromCloud:', err.message, err);
+    throw err; // rilancia per gestione esterna
   }
 }
 
 function showApp() {
-  document.getElementById('loginGate').style.display = 'none';
-  document.getElementById('appContent').style.display = 'block';
-  updateDriveUI(true);
+  try {
+    const gate = document.getElementById('loginGate');
+    const app = document.getElementById('appContent');
+    if(gate) gate.style.display = 'none';
+    if(app) app.style.display = 'block';
+    updateDriveUI(true);
   // Setup form
   document.getElementById('logData').value = today();
   const artCat = document.getElementById('artCategoria');
@@ -111,6 +120,9 @@ function showApp() {
   renderMagArticoli();
   renderContRiepilogo();
   renderHome();
+  } catch(err) {
+    console.error('[Drive] Errore in showApp:', err.message);
+  }
 }
 
 /**
@@ -148,13 +160,14 @@ async function _doSave(silent) {
       { articoli, movimentazioni },
       { movimentiContabili },
       { obiettivi },
+      { necessita },
       settings
     );
     _hasUnsavedChanges = false;
     if(!silent) showImportToast('☁️ Salvato su Drive');
   } catch(e) {
     showImportToast('❌ Errore salvataggio: ' + e.message);
-    console.error('Errore pushToCloud:', e);
+    console.error('[Drive] Errore in pushToCloud:', e);
     // Riprova fra 5 secondi (nel caso di errore di rete temporaneo)
     setTimeout(() => pushToCloud(true), DRIVE_RETRY_MS);
   } finally {

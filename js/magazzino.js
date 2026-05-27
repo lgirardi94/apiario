@@ -256,8 +256,16 @@ function renderMagMovimentazioni() {
 // ======= ARTICOLO MODAL =======
 function openArticoloModal(id) {
   const modal = document.getElementById('articoloModal');
+  if(!modal) {
+    console.error('[Magazzino] articoloModal non trovato nel DOM');
+    return;
+  }
   if(id && typeof id === 'string' && articoli.find(a => a.id === id)) {
     const a = articoli.find(x => x.id === id);
+    if(!a) {
+      console.warn('[Magazzino] Articolo non trovato:', id);
+      return;
+    }
     document.getElementById('articoloModalTitle').textContent = '✏️ Modifica articolo';
     document.getElementById('editArticoloId').value = id;
     document.getElementById('artNome').value = a.nome;

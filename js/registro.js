@@ -1,5 +1,4 @@
 // ======= ISPEZIONE =======
-
 // (TELAINO_OPZIONI, CELLE_REALI_LABEL e renderTelainiVisual sono ora in shared.js)
 
 function precompilaDaUltimaIspezione() {
@@ -160,21 +159,22 @@ function onVisitaArniaChange() {
 }
 
 function renderAccessoriVisita() {
-  const section = document.getElementById('accessoriSection');
-  const content = document.getElementById('accessoriContent');
-  if(!section || !content) return;
+  try {
+    const section = document.getElementById('accessoriSection');
+    const content = document.getElementById('accessoriContent');
+    if(!section || !content) return;
 
-  const arniaId = document.getElementById('logArnia')?.value;
-  if(!arniaId) {
-    section.style.display = 'none';
-    return;
-  }
-  const a = arnie.find(x => x.id === arniaId);
-  if(!a) {
-    section.style.display = 'none';
-    return;
-  }
-  section.style.display = 'block';
+    const arniaId = document.getElementById('logArnia')?.value;
+    if(!arniaId) {
+      section.style.display = 'none';
+      return;
+    }
+    const a = arnie.find(x => x.id === arniaId);
+    if(!a) {
+      section.style.display = 'none';
+      return;
+    }
+    section.style.display = 'block';
 
   let html = '';
 
@@ -291,6 +291,9 @@ function renderAccessoriVisita() {
   }
 
   content.innerHTML = html;
+  } catch(err) {
+    console.error('[Registro] Errore in renderAccessoriVisita:', err.message);
+  }
 }
 
 let _melariAggiunti = []; // melari aggiunti in questa visita
@@ -402,16 +405,28 @@ function updateArniSelects() {
 }
 
 function addLogEntry() {
-  const data = document.getElementById('logData').value;
-  const note = document.getElementById('logNote').value.trim();
-  if(!data || !note) { alert('Compila almeno la data e le note'); return; }
-  const tipi = Array.from(document.querySelectorAll('#logTipo input:checked')).map(x => x.value);
-  if(tipi.length === 0) { alert('Seleziona almeno un tipo di intervento'); return; }
+  try {
+    const dataEl = document.getElementById('logData');
+    const noteEl = document.getElementById('logNote');
+    if(!dataEl || !noteEl) {
+      console.error('[Registro] Elementi form non trovati (logData/logNote)');
+      return;
+    }
+    const data = dataEl.value;
+    const note = noteEl.value.trim();
+    if(!data || !note) { alert('Compila almeno la data e le note'); return; }
+    const tipi = Array.from(document.querySelectorAll('#logTipo input:checked')).map(x => x.value);
+    if(tipi.length === 0) { alert('Seleziona almeno un tipo di intervento'); return; }
 
-  // Arnia obbligatoria
-  const arniaId = document.getElementById('logArnia').value;
-  if(!arniaId) { alert('Seleziona un\'arnia — è obbligatoria'); return; }
-  const arniaObj = arnie.find(a => a.id === arniaId);
+    // Arnia obbligatoria
+    const arniaId = document.getElementById('logArnia').value;
+    if(!arniaId) { alert('Seleziona un\'arnia — è obbligatoria'); return; }
+    const arniaObj = arnie.find(a => a.id === arniaId);
+    if(!arniaObj) {
+      console.warn('[Registro] Arnia non trovata:', arniaId);
+      alert('Arnia non valida. Ricarica la pagina e riprova.');
+      return;
+    }
 
   // Dati ispezione
   let ispezioneData = null;
@@ -515,6 +530,10 @@ function addLogEntry() {
   // Proponi di schedulare la prossima visita
   const arniaLabel = arniaObj ? `#${arniaObj.num}${arniaObj.nome?' — '+arniaObj.nome:''}` : '';
   setTimeout(() => showCalendarPopup(arniaLabel), 400);
+  } catch(err) {
+    console.error('[Registro] Errore in addLogEntry:', err.message, err);
+    alert('Errore durante il salvataggio. Apri F12 → Console per dettagli.');
+  }
 }
 
 function deleteLog(id) {

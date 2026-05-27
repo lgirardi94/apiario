@@ -11,6 +11,8 @@ let movimentiContabili = [];
 
 let obiettivi = [];
 
+let necessita = []; // Lista articoli da ordinare
+
 // Settings — preferenze e dati di servizio (es. duplicati ignorati)
 let settings = {
   duplicatiIgnorati: []
@@ -20,30 +22,59 @@ let settings = {
 // Ognuno aggiorna localStorage (cache) e spinge automaticamente su Drive
 
 function saveDB() {
-  localStorage.setItem('arnie', JSON.stringify(arnie));
-  localStorage.setItem('logBook', JSON.stringify(logBook));
-  pushToCloud(true);
+  try {
+    localStorage.setItem('arnie', JSON.stringify(arnie));
+    localStorage.setItem('logBook', JSON.stringify(logBook));
+    pushToCloud(true);
+  } catch(err) {
+    console.error('[State] Errore in saveDB:', err.message);
+  }
 }
 
 function saveMagazzino() {
-  localStorage.setItem('articoli', JSON.stringify(articoli));
-  localStorage.setItem('movimentazioni', JSON.stringify(movimentazioni));
-  pushToCloud(true);
+  try {
+    localStorage.setItem('articoli', JSON.stringify(articoli));
+    localStorage.setItem('movimentazioni', JSON.stringify(movimentazioni));
+    pushToCloud(true);
+  } catch(err) {
+    console.error('[State] Errore in saveMagazzino:', err.message);
+  }
 }
 
 function saveContabilita() {
-  localStorage.setItem('movimentiContabili', JSON.stringify(movimentiContabili));
-  pushToCloud(true);
+  try {
+    localStorage.setItem('movimentiContabili', JSON.stringify(movimentiContabili));
+    pushToCloud(true);
+  } catch(err) {
+    console.error('[State] Errore in saveContabilita:', err.message);
+  }
 }
 
 function saveObiettivi() {
-  localStorage.setItem('obiettivi', JSON.stringify(obiettivi));
-  pushToCloud(true);
+  try {
+    localStorage.setItem('obiettivi', JSON.stringify(obiettivi));
+    pushToCloud(true);
+  } catch(err) {
+    console.error('[State] Errore in saveObiettivi:', err.message);
+  }
+}
+
+function saveNecessita() {
+  try {
+    localStorage.setItem('necessita', JSON.stringify(necessita));
+    pushToCloud(true);
+  } catch(err) {
+    console.error('[State] Errore in saveNecessita:', err.message);
+  }
 }
 
 function saveSettings() {
-  localStorage.setItem('apiario_settings', JSON.stringify(settings));
-  pushToCloud(true);
+  try {
+    localStorage.setItem('apiario_settings', JSON.stringify(settings));
+    pushToCloud(true);
+  } catch(err) {
+    console.error('[State] Errore in saveSettings:', err.message);
+  }
 }
 
 // ===== HELPER STATISTICHE =====

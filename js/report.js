@@ -3,7 +3,6 @@
    =========================================================== */
 
 // Helper: ottiene tutte le visite di un'arnia in un anno
-
 function visitePerArniaAnno(arniaId, anno) {
   return logBook.filter(e => e.arniaId === arniaId && e.data && e.data.startsWith(String(anno)));
 }
@@ -35,20 +34,21 @@ function tuttiTrattamentiAnno(anno) {
 // REPORT COMPLETO
 // ============================================
 function generaReportCompleto() {
-  const anno = prompt('Per quale anno generare il report?', new Date().getFullYear());
-  if(!anno) return;
-  const annoNum = parseInt(anno, 10);
-  if(isNaN(annoNum)) { alert('Anno non valido'); return; }
+  try {
+    const anno = prompt('Per quale anno generare il report?', new Date().getFullYear());
+    if(!anno) return;
+    const annoNum = parseInt(anno, 10);
+    if(isNaN(annoNum)) { alert('Anno non valido'); return; }
 
-  const oggi = new Date();
-  const dataGenStr = oggi.toLocaleDateString('it-IT');
+    const oggi = new Date();
+    const dataGenStr = oggi.toLocaleDateString('it-IT');
 
-  // Calcoli generali
-  const arnieAttive = arnie.filter(a => !a.annoDismissione || a.annoDismissione > annoNum);
-  const famiglie    = arnieAttive.filter(a => a.tipo === 'famiglia' || !a.tipo);
-  const nuclei      = arnieAttive.filter(a => a.tipo === 'nucleo');
-  const nucleiFec   = arnieAttive.filter(a => a.tipo === 'nucleo_fec');
-  const sciami      = arnieAttive.filter(a => a.tipo === 'sciame');
+    // Calcoli generali
+    const arnieAttive = arnie.filter(a => !a.annoDismissione || a.annoDismissione > annoNum);
+    const famiglie    = arnieAttive.filter(a => a.tipo === 'famiglia' || !a.tipo);
+    const nuclei      = arnieAttive.filter(a => a.tipo === 'nucleo');
+    const nucleiFec   = arnieAttive.filter(a => a.tipo === 'nucleo_fec');
+    const sciami      = arnieAttive.filter(a => a.tipo === 'sciame');
 
   // Miele totale
   let mieleTotale = 0;
@@ -623,16 +623,21 @@ ${calendarioMensile.some(c => c.visite > 0 || c.kg > 0) ? `
   }
   win.document.write(html);
   win.document.close();
+  } catch(err) {
+    console.error('[Report] Errore in generaReportCompleto:', err.message, err);
+    alert('Errore durante la generazione del report. Apri F12 → Console per dettagli.');
+  }
 }
 
 // ============================================
 // REPORT TRATTAMENTI (registro ufficiale)
 // ============================================
 function generaReportTrattamenti() {
-  const anno = prompt('Per quale anno generare il registro?', new Date().getFullYear());
-  if(!anno) return;
-  const annoNum = parseInt(anno, 10);
-  if(isNaN(annoNum)) { alert('Anno non valido'); return; }
+  try {
+    const anno = prompt('Per quale anno generare il registro?', new Date().getFullYear());
+    if(!anno) return;
+    const annoNum = parseInt(anno, 10);
+    if(isNaN(annoNum)) { alert('Anno non valido'); return; }
 
   const oggi = new Date();
   const dataGenStr = oggi.toLocaleDateString('it-IT');
@@ -735,4 +740,8 @@ ${trattamenti.length === 0 ? '<p style="color:#8B6F4E;font-style:italic">Nessun 
   }
   win.document.write(html);
   win.document.close();
+  } catch(err) {
+    console.error('[Report] Errore in generaReportTrattamenti:', err.message);
+    alert('Errore durante la generazione del registro. Apri F12 → Console per dettagli.');
+  }
 }

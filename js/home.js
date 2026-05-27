@@ -15,17 +15,24 @@ function getStagioneCorrente() {
 }
 
 function renderHome() {
-  const anno = new Date().getFullYear();
-  const stagione = getStagioneCorrente();
-  const info = STAGIONI_INFO[stagione];
-  const giorniSettimana = ['domenica','lunedì','martedì','mercoledì','giovedì','venerdì','sabato'];
-  const mesiNome = ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
-  const oggi = new Date();
+  try {
+    const anno = new Date().getFullYear();
+    const stagione = getStagioneCorrente();
+    const info = STAGIONI_INFO?.[stagione];
+    if (!info) {
+      console.warn('[Home] STAGIONI_INFO non disponibile per stagione:', stagione);
+    }
+    const giorniSettimana = ['domenica','lunedì','martedì','mercoledì','giovedì','venerdì','sabato'];
+    const mesiNome = ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+    const oggi = new Date();
 
-  // Banner
-  document.getElementById('homeSeasonName').textContent = info.nome;
-  document.getElementById('homeSeasonSub').textContent  = info.sub;
-  document.getElementById('homeDate').textContent = `${giorniSettimana[oggi.getDay()]} ${oggi.getDate()} ${mesiNome[oggi.getMonth()]} ${oggi.getFullYear()}`;
+    // Banner (verifiche DOM difensive)
+    const seasonNameEl = document.getElementById('homeSeasonName');
+    const seasonSubEl  = document.getElementById('homeSeasonSub');
+    const dateEl       = document.getElementById('homeDate');
+    if (seasonNameEl && info) seasonNameEl.textContent = info.nome;
+    if (seasonSubEl && info)  seasonSubEl.textContent  = info.sub;
+    if (dateEl) dateEl.textContent = `${giorniSettimana[oggi.getDay()]} ${oggi.getDate()} ${mesiNome[oggi.getMonth()]} ${oggi.getFullYear()}`;
 
   // Alerts
   const alerts = [];
@@ -218,5 +225,8 @@ function renderHome() {
         <span style="display:flex;align-items:center;gap:3px"><span style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block"></span>Entrate</span>
         <span style="display:flex;align-items:center;gap:3px"><span style="width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block"></span>Uscite</span>
       </div>`;
+  } catch(err) {
+    console.error('[Home] Errore durante renderHome:', err.message, err);
+  }
 }
 
