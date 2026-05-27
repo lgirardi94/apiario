@@ -7,7 +7,7 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐝</text></svg>">
 <link rel="stylesheet" href="style-main.css">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="shared.js?v=20260522"></script>
+<script src="shared.js?v=20260523"></script>
 </head>
 <body>
 
@@ -1695,6 +1695,7 @@
     <div class="mag-tabs">
       <button class="mag-tab active" onclick="showMagTab('articoli', this)">📋 Articoli</button>
       <button class="mag-tab" onclick="showMagTab('movimentazioni', this)">🔄 Movimentazioni</button>
+      <button class="mag-tab" onclick="showMagTab('necessita', this)">🛒 Da ordinare</button>
       <button class="mag-tab" onclick="showMagTab('controlli', this)">🔍 Controlli</button>
     </div>
     <div id="magTabArticoli">
@@ -1724,6 +1725,44 @@
         </select>
       </div>
       <div class="mov-list" id="movList"></div>
+    </div>
+
+    <!-- TAB DA ORDINARE -->
+    <div id="magTabNecessita" style="display:none">
+      <p style="color:var(--text-light);font-size:0.95rem;font-style:italic;margin-bottom:1rem">Lista degli articoli da acquistare. Quando un articolo è ricevuto, viene rimosso dalla lista e (opzionalmente) caricato a magazzino.</p>
+
+      <div style="display:flex;gap:0.8rem;margin-bottom:1.2rem;flex-wrap:wrap;align-items:center">
+        <button class="btn" onclick="openNecessitaModal()">+ Aggiungi necessità</button>
+        <button class="btn btn-secondary" onclick="copiaListaNecessita()" title="Copia la lista negli appunti">📋 Copia lista</button>
+        <span style="margin-left:auto;font-size:0.85rem;color:var(--text-light)" id="necessitaCounter">0 voci</span>
+      </div>
+
+      <!-- Filtri -->
+      <div style="display:flex;gap:0.6rem;margin-bottom:1rem;flex-wrap:wrap">
+        <select id="necFiltroStato" onchange="renderNecessita()" style="padding:0.4rem 0.6rem;border:1px solid var(--cream-dark);border-radius:4px;font-family:inherit;font-size:0.88rem;background:white">
+          <option value="">Tutti gli stati</option>
+          <option value="da_ordinare">📝 Da ordinare</option>
+          <option value="ordinato">🚚 Ordinato (in arrivo)</option>
+        </select>
+        <select id="necFiltroPriorita" onchange="renderNecessita()" style="padding:0.4rem 0.6rem;border:1px solid var(--cream-dark);border-radius:4px;font-family:inherit;font-size:0.88rem;background:white">
+          <option value="">Tutte le priorità</option>
+          <option value="urgente">🔴 Urgente</option>
+          <option value="alta">🟠 Alta</option>
+          <option value="media">🟡 Media</option>
+          <option value="bassa">⚪ Bassa</option>
+        </select>
+        <select id="necFiltroFornitore" onchange="renderNecessita()" style="padding:0.4rem 0.6rem;border:1px solid var(--cream-dark);border-radius:4px;font-family:inherit;font-size:0.88rem;background:white">
+          <option value="">Tutti i fornitori</option>
+        </select>
+        <select id="necRaggruppa" onchange="renderNecessita()" style="padding:0.4rem 0.6rem;border:1px solid var(--cream-dark);border-radius:4px;font-family:inherit;font-size:0.88rem;background:white">
+          <option value="priorita">Raggruppa per priorità</option>
+          <option value="fornitore">Raggruppa per fornitore</option>
+          <option value="data">Raggruppa per data prevista</option>
+          <option value="none">Lista semplice</option>
+        </select>
+      </div>
+
+      <div id="necessitaList"></div>
     </div>
 
     <!-- TAB CONTROLLI -->
@@ -2110,6 +2149,74 @@
   </div>
 </div>
 
+<!-- MODAL NECESSITÀ (da ordinare) -->
+<div class="modal-overlay" id="necessitaModal">
+  <div class="modal" style="max-width:550px">
+    <h3 id="necessitaModalTitle">🛒 Nuova necessità</h3>
+    <input type="hidden" id="editNecessitaId">
+
+    <div class="form-row">
+      <label>Articolo</label>
+      <select id="necArticoloId" onchange="onNecArticoloChange()" style="margin-bottom:0.3rem">
+        <option value="">— Seleziona articolo dal magazzino —</option>
+      </select>
+      <div style="font-size:0.78rem;color:var(--text-light);font-style:italic;margin-top:0.2rem">Oppure scrivi sotto un articolo nuovo (verrà creato anche nel magazzino al salvataggio)</div>
+      <input type="text" id="necDescrizioneCustom" placeholder="Articolo nuovo / descrizione libera..." style="margin-top:0.3rem">
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+      <div class="form-row">
+        <label>Quantità</label>
+        <input type="number" id="necQuantita" min="0.01" step="0.01" placeholder="Es. 50">
+      </div>
+      <div class="form-row">
+        <label>Unità</label>
+        <input type="text" id="necUnita" placeholder="Es. pz, kg, L" list="necUnitaList">
+        <datalist id="necUnitaList">
+          <option value="pz"><option value="kg"><option value="L"><option value="g"><option value="ml"><option value="m"><option value="confezione">
+        </datalist>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label>Fornitore</label>
+      <input type="text" id="necFornitore" placeholder="Es. Apicoltura Nord" list="necFornitoreList">
+      <datalist id="necFornitoreList"></datalist>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+      <div class="form-row">
+        <label>Priorità</label>
+        <select id="necPriorita">
+          <option value="bassa">⚪ Bassa</option>
+          <option value="media" selected>🟡 Media</option>
+          <option value="alta">🟠 Alta</option>
+          <option value="urgente">🔴 Urgente</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Data prevista (opzionale)</label>
+        <input type="date" id="necDataPrevista">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label>Prezzo stimato (opzionale)</label>
+      <input type="number" id="necPrezzoStimato" min="0" step="0.01" placeholder="Es. 35.00">
+    </div>
+
+    <div class="form-row">
+      <label>Note</label>
+      <textarea id="necNote" rows="2" placeholder="Es. Preferire colore ambra scuro..."></textarea>
+    </div>
+
+    <div style="display:flex;gap:0.5rem;justify-content:flex-end;border-top:1px solid var(--cream-dark);padding-top:1rem;margin-top:0.5rem">
+      <button class="btn btn-secondary" onclick="closeNecessitaModal()">Annulla</button>
+      <button class="btn" onclick="saveNecessitaEntry()">💾 Salva</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL ARNIA -->
 <div class="modal-overlay" id="arniModal">
   <div class="modal" style="max-width:600px">
@@ -2412,19 +2519,19 @@
 </div><!-- fine appContent -->
 
 <!-- ===== JS MODULES — ordine importante! ===== -->
-<script src="js/state.js?v=20260522"></script>
-<script src="js/nav.js?v=20260522"></script>
-<script src="js/import-export.js?v=20260522"></script>
-<script src="js/registro.js?v=20260522"></script>
-<script src="js/arnie.js?v=20260522"></script>
-<script src="js/magazzino.js?v=20260522"></script>
-<script src="js/contabilita.js?v=20260522"></script>
-<script src="js/obiettivi.js?v=20260522"></script>
-<script src="js/sciroppo.js?v=20260522"></script>
-<script src="js/candito.js?v=20260522"></script>
-<script src="js/propoli.js?v=20260522"></script>
-<script src="js/report.js?v=20260522"></script>
-<script src="js/home.js?v=20260522"></script>
+<script src="js/state.js?v=20260523"></script>
+<script src="js/nav.js?v=20260523"></script>
+<script src="js/import-export.js?v=20260523"></script>
+<script src="js/registro.js?v=20260523"></script>
+<script src="js/arnie.js?v=20260523"></script>
+<script src="js/magazzino.js?v=20260523"></script>
+<script src="js/contabilita.js?v=20260523"></script>
+<script src="js/obiettivi.js?v=20260523"></script>
+<script src="js/sciroppo.js?v=20260523"></script>
+<script src="js/candito.js?v=20260523"></script>
+<script src="js/propoli.js?v=20260523"></script>
+<script src="js/report.js?v=20260523"></script>
+<script src="js/home.js?v=20260523"></script>
 <script src="js/drive-app.js"></script>
 
 </body>
