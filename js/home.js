@@ -58,7 +58,47 @@ function renderHome() {
   if(sciamiPending.length > 0)
     alerts.push({ msg: `${sciamiPending.length} sciam${sciamiPending.length>1?'i':'e'} da valutare: ${sciamiPending.map(a=>'#'+a.num).join(', ')}`, target: 'arnie', color: '#5D8C44', bg: '#EEF6E7', border: '#5D8C44' });
 
-  document.getElementById('homeAlerts').innerHTML = alerts.map(al => `
+  // 🛒 NECESSITÀ — Lista da ordinare
+  if(typeof getNecessitaAttive === 'function') {
+    const necAttive = getNecessitaAttive();
+    const necUrgenti = necAttive.filter(n => n.priorita === 'urgente');
+    const oggi = new Date();
+    const tra7gg = new Date(oggi.getTime() + 7*24*60*60*1000);
+    const necDataVicina = necAttive.filter(n => {
+      if(n.priorita === 'urgente') return false; // già conteggiati sopra
+      if(!n.dataPrevista) return false;
+      const dp = new Date(n.dataPrevista);
+      return !isNaN(dp.getTime()) && dp <= tra7gg;
+    });
+
+    // Alert 1: voci urgenti
+    if(necUrgenti.length > 0) {
+      alerts.push({
+        msg: `🔴 ${necUrgenti.length} ordin${necUrgenti.length>1?'i':'e'} URGENT${necUrgenti.length>1?'I':'E'} da effettuare`,
+        target: 'magazzino', color: '#8A2C2C', bg: '#fce8e8', border: '#C03030'
+      });
+    }
+    // Alert 2: data vicina entro 7gg
+    if(necDataVicina.length > 0) {
+      alerts.push({
+        msg: `📅 ${necDataVicina.length} ordin${necDataVicina.length>1?'i':'e'} con scadenza entro 7 giorni`,
+        target: 'magazzino', color: '#854F0B', bg: '#FAEEDA', border: '#EF9F27'
+      });
+    }
+    // Alert 3: totale voci attive (solo se non già evidenziato come urgente/vicino)
+    const giaEvidenziati = necUrgenti.length + necDataVicina.length;
+    const rimanenti = necAttive.length - giaEvidenziati;
+    if(rimanenti > 0 && giaEvidenziati === 0) {
+      // Mostro il totale solo se non ci sono già alert specifici
+      alerts.push({
+        msg: `🛒 ${necAttive.length} voc${necAttive.length>1?'i':'e'} in lista "Da ordinare"`,
+        target: 'magazzino', color: '#5C3A10', bg: 'rgba(200,134,10,0.10)', border: 'rgba(200,134,10,0.4)'
+      });
+    }
+  }
+
+  const homeAlertsEl = document.getElementById('homeAlerts');
+  if(homeAlertsEl) homeAlertsEl.innerHTML = alerts.map(al => `
     <div class="home-alert clickable" onclick="navigateTo('${al.target}')" style="background:${al.bg};border:1px solid ${al.border};border-radius:4px;padding:0.55rem 1rem;font-size:0.88rem;color:${al.color};margin-bottom:0.5rem;display:flex;align-items:center;gap:0.6rem">
       <span>⚠️</span><span style="flex:1">${al.msg}</span><span style="font-size:0.8rem;opacity:0.7">↗</span>
     </div>`).join('');

@@ -119,6 +119,7 @@ function showApp() {
   updateArniSelects();
   renderMagArticoli();
   renderContRiepilogo();
+  if(typeof renderNecessita === 'function') renderNecessita();
   renderHome();
   } catch(err) {
     console.error('[Drive] Errore in showApp:', err.message);

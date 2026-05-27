@@ -142,14 +142,30 @@ function ignoraDuplicato(idx, idA, idB) {
 
 // ======= MAGAZZINO NAV =======
 function showMagTab(tab, btn) {
-  document.getElementById('magTabArticoli').style.display       = tab === 'articoli'       ? 'block' : 'none';
-  document.getElementById('magTabMovimentazioni').style.display = tab === 'movimentazioni' ? 'block' : 'none';
-  document.getElementById('magTabControlli').style.display      = tab === 'controlli'      ? 'block' : 'none';
-  document.querySelectorAll('.mag-tab').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  if(tab === 'articoli') renderMagArticoli();
-  if(tab === 'movimentazioni') { renderMagMovimentazioni(); updateMovArticoloSelect(); }
-  if(tab === 'controlli') { document.getElementById('controlliResult').innerHTML = ''; }
+  try {
+    const ids = ['magTabArticoli','magTabMovimentazioni','magTabNecessita','magTabControlli'];
+    const mapping = {
+      articoli: 'magTabArticoli',
+      movimentazioni: 'magTabMovimentazioni',
+      necessita: 'magTabNecessita',
+      controlli: 'magTabControlli',
+    };
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.style.display = (mapping[tab] === id) ? 'block' : 'none';
+    });
+    document.querySelectorAll('.mag-tab').forEach(b => b.classList.remove('active'));
+    if(btn) btn.classList.add('active');
+    if(tab === 'articoli') renderMagArticoli();
+    if(tab === 'movimentazioni') { renderMagMovimentazioni(); updateMovArticoloSelect(); }
+    if(tab === 'necessita') { if(typeof renderNecessita === 'function') renderNecessita(); }
+    if(tab === 'controlli') {
+      const cr = document.getElementById('controlliResult');
+      if(cr) cr.innerHTML = '';
+    }
+  } catch(err) {
+    console.error('[Magazzino] Errore in showMagTab:', err.message);
+  }
 }
 
 // ======= GIACENZA (wrapper per shared.js) =======
@@ -205,6 +221,19 @@ function renderMagArticoli() {
       </div>
       ${sogliaAlert}
       ${scadenzaHtml}
+      ${(() => {
+        if(typeof getNecessitaPerArticolo !== 'function') return '';
+        const ordiniArt = getNecessitaPerArticolo(a.id);
+        if(ordiniArt.length === 0) return '';
+        const totaleOrd = ordiniArt.reduce((s,n) => s + (parseFloat(n.quantita)||0), 0);
+        const inArrivo = ordiniArt.filter(n => n.stato === 'ordinato').length;
+        const daOrd = ordiniArt.filter(n => n.stato === 'da_ordinare').length;
+        let label = '';
+        if(daOrd > 0 && inArrivo > 0) label = `${daOrd} da ordinare · ${inArrivo} in arrivo`;
+        else if(daOrd > 0) label = `${daOrd} da ordinare`;
+        else if(inArrivo > 0) label = `${inArrivo} in arrivo`;
+        return `<div onclick="navigateTo('magazzino');setTimeout(()=>{const b=document.querySelector('.mag-tab[onclick*=\\'necessita\\']');if(b)showMagTab('necessita',b);},50)" style="margin-top:0.4rem;background:rgba(200,134,10,0.12);color:var(--brown);padding:0.3rem 0.6rem;border-radius:4px;font-size:0.78rem;display:flex;align-items:center;gap:0.3rem;cursor:pointer;border:1px solid rgba(200,134,10,0.25)" title="Clicca per vedere la lista ordini">🛒 <strong>${totaleOrd % 1 === 0 ? totaleOrd : totaleOrd.toFixed(1)} ${a.unita}</strong> ${label}</div>`;
+      })()}
       <div class="mag-actions">
         <button class="btn" style="padding:0.35rem 0.8rem;font-size:0.82rem" onclick="openMovModal('${a.id}')">+ Mov.</button>
         <button class="btn btn-secondary" style="padding:0.35rem 0.7rem;font-size:0.82rem" onclick="openArticoloModal('${a.id}')">✏️</button>
