@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Inserimento rapido</title>
+<title>Apiario — Inserimento rapido</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐝</text></svg>">
 <link rel="stylesheet" href="style-mobile.css">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -44,6 +44,9 @@
     </button>
     <button class="tab-btn" onclick="showTab('magazzino', this)">
       <span class="tab-icon">📦</span>Magazzino
+    </button>
+    <button class="tab-btn" onclick="showTab('necessita', this)">
+      <span class="tab-icon">🛒</span>Da ordinare
     </button>
   </div>
 
@@ -163,6 +166,79 @@
       </div>
     </div>
 
+    <!-- NECESSITÀ (Da ordinare) -->
+    <div class="section" id="tabNecessita">
+      <h2 style="margin-top:0;color:var(--brown);font-family:'Playfair Display',serif">🛒 Da ordinare</h2>
+      <p style="color:var(--text-light);font-size:0.85rem;margin-bottom:1rem">Lista rapida degli articoli da acquistare. Spunta come ricevuto quando arriva.</p>
+
+      <div style="display:flex;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap">
+        <button class="btn-submit" style="flex:1;min-width:140px" onclick="openIRNecessitaForm()">+ Aggiungi</button>
+        <button class="btn-submit" style="flex:1;min-width:140px;background:var(--brown-light)" onclick="copiaListaNecessitaIR()">📋 Copia</button>
+      </div>
+
+      <!-- FORM RAPIDO INLINE -->
+      <div id="irNecForm" style="display:none;background:rgba(200,134,10,0.06);border:1px solid var(--cream-dark);border-radius:6px;padding:1rem;margin-bottom:1rem">
+        <input type="hidden" id="irNecEditId">
+        <div class="form-group">
+          <label>Articolo</label>
+          <select id="irNecArticoloId" onchange="onIRNecArticoloChange()">
+            <option value="">— Seleziona articolo —</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Oppure articolo nuovo (verrà creato a magazzino)</label>
+          <input type="text" id="irNecDescrizioneCustom" placeholder="Nome articolo nuovo...">
+        </div>
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap:0.5rem">
+          <div class="form-group">
+            <label>Quantità</label>
+            <input type="number" id="irNecQuantita" min="0.01" step="0.01" placeholder="Es. 50">
+          </div>
+          <div class="form-group">
+            <label>Unità</label>
+            <input type="text" id="irNecUnita" placeholder="pz, kg, L" list="irNecUnitaList">
+            <datalist id="irNecUnitaList">
+              <option value="pz"><option value="kg"><option value="L"><option value="g"><option value="ml"><option value="confezione">
+            </datalist>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Fornitore (opzionale)</label>
+          <input type="text" id="irNecFornitore" placeholder="Es. Apicoltura Nord">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem">
+          <div class="form-group">
+            <label>Priorità</label>
+            <select id="irNecPriorita">
+              <option value="bassa">⚪ Bassa</option>
+              <option value="media" selected>🟡 Media</option>
+              <option value="alta">🟠 Alta</option>
+              <option value="urgente">🔴 Urgente</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Data prevista</label>
+            <input type="date" id="irNecDataPrevista">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Prezzo stimato (opzionale)</label>
+          <input type="number" id="irNecPrezzoStimato" min="0" step="0.01" placeholder="Es. 35.00">
+        </div>
+        <div class="form-group">
+          <label>Note</label>
+          <textarea id="irNecNote" rows="2" placeholder="Note libere..."></textarea>
+        </div>
+        <div style="display:flex;gap:0.5rem">
+          <button class="btn-submit" style="flex:1;background:var(--text-light)" onclick="closeIRNecessitaForm()">Annulla</button>
+          <button class="btn-submit" style="flex:1" onclick="saveIRNecessita()">💾 Salva</button>
+        </div>
+      </div>
+
+      <!-- LISTA -->
+      <div id="irNecessitaList"></div>
+    </div>
+
   </div>
 </div>
 
@@ -173,6 +249,7 @@
 let dbData   = { arnie: [], logBook: [] };
 let magData  = { articoli: [], movimentazioni: [] };
 let contData = { movimentiContabili: [] };
+let necData  = { necessita: [] };
 let tipoContabile = 'entrata';
 let tipoMagazzino = 'entrata';
 let pendingMagMov = null;
@@ -252,11 +329,12 @@ window.addEventListener('load', () => {
       async () => {
         showLoadingScreen('🔄 Caricamento dati...');
         try {
-          const { db, mag, cont } = await driveLoadAll();
+          const { db, mag, cont, nec } = await driveLoadAll();
           if(db)   dbData   = db;
           if(mag)  magData  = mag;
           if(cont) contData = cont;
-        } catch(e) { console.error(e); }
+          if(nec)  necData  = nec;
+        } catch(e) { console.error('[Inserimento rapido] Errore loadAll:', e); }
         showApp();
       },
       () => showLoadingScreen('🔄 Caricamento dati...'),
@@ -297,12 +375,360 @@ function setupValidationListeners() {
 
 // ===== TABS =====
 function showTab(tab, btn) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
-  btn.classList.add('active');
-  if(tab === 'riepilogo') renderRiepilogo();
-  if(tab === 'magazzino') populateMagArticoli();
+  try {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    const target = document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1));
+    if(!target) {
+      console.warn('[Inserimento rapido] Tab non trovato:', tab);
+      return;
+    }
+    target.classList.add('active');
+    if(btn) btn.classList.add('active');
+    if(tab === 'riepilogo') renderRiepilogo();
+    if(tab === 'magazzino') populateMagArticoli();
+    if(tab === 'necessita') renderIRNecessita();
+  } catch(err) {
+    console.error('[Inserimento rapido] Errore in showTab:', err.message);
+  }
+}
+
+// ===== NECESSITÀ (Da ordinare) — versione mobile compatta =====
+function escapeHtmlIR(s) {
+  if(!s) return '';
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function getIRNecessitaAttive() {
+  return (necData.necessita || []).filter(n => n.stato !== 'ricevuto');
+}
+
+function renderIRNecessita() {
+  try {
+    const container = document.getElementById('irNecessitaList');
+    if(!container) return;
+
+    const attive = getIRNecessitaAttive();
+    if(attive.length === 0) {
+      container.innerHTML = '<div style="background:rgba(0,0,0,0.03);border-radius:6px;padding:1.5rem;text-align:center;color:var(--text-light);font-style:italic;font-size:0.9rem">🛒 Nessun articolo in lista.<br><span style="font-size:0.85rem">Aggiungi voci da ordinare con il pulsante "+ Aggiungi"</span></div>';
+      return;
+    }
+
+    // Ordina per priorità (urgente > alta > media > bassa)
+    const ordinePrior = { urgente: 0, alta: 1, media: 2, bassa: 3 };
+    const ordinata = [...attive].sort((a,b) => (ordinePrior[a.priorita]||4) - (ordinePrior[b.priorita]||4));
+
+    const priColor = { urgente: '#C04B3B', alta: '#E89488', media: '#C8860A', bassa: '#9CA3AF' };
+    const priIcon = { urgente: '🔴', alta: '🟠', media: '🟡', bassa: '⚪' };
+    const statoIcon = { da_ordinare: '📝', ordinato: '🚚' };
+    const statoLabel = { da_ordinare: 'Da ordinare', ordinato: 'Ordinato' };
+
+    container.innerHTML = ordinata.map(n => {
+      const art = n.articoloId ? (magData.articoli || []).find(a => a.id === n.articoloId) : null;
+      const desc = art ? art.nome : (n.descrizione || 'Articolo');
+      const unita = n.unita || (art && art.unita) || '';
+      const pColor = priColor[n.priorita] || '#C8860A';
+      const dataInfo = n.dataPrevista ? ` · 📅 ${formatDateIT(n.dataPrevista)}` : '';
+
+      return `
+        <div style="background:white;border:1px solid var(--cream-dark);border-left:4px solid ${pColor};border-radius:6px;padding:0.7rem 0.85rem;margin-bottom:0.5rem;${n.stato==='ordinato'?'opacity:0.85':''}">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.5rem">
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:600;color:var(--brown);font-size:0.95rem;margin-bottom:0.2rem">
+                ${priIcon[n.priorita]||''} ${escapeHtmlIR(desc)}
+              </div>
+              <div style="font-size:0.85rem;color:var(--text);margin-bottom:0.15rem">
+                <strong>${n.quantita || '?'}</strong> ${escapeHtmlIR(unita)}${n.fornitore ? ' · 🏪 '+escapeHtmlIR(n.fornitore) : ''}
+              </div>
+              <div style="font-size:0.78rem;color:var(--text-light)">
+                ${statoIcon[n.stato]||''} ${statoLabel[n.stato]||n.stato}${dataInfo}
+              </div>
+              ${n.note ? `<div style="font-size:0.78rem;color:var(--text-light);font-style:italic;margin-top:0.2rem">${escapeHtmlIR(n.note)}</div>` : ''}
+            </div>
+            <div style="display:flex;flex-direction:column;gap:0.3rem">
+              ${n.stato === 'da_ordinare' ? `<button onclick="markIRNecOrdinata('${n.id}')" title="Ordinato" style="background:rgba(93,140,68,0.15);color:var(--green);border:1px solid var(--green);border-radius:4px;padding:0.25rem 0.5rem;cursor:pointer;font-size:0.75rem">🚚</button>` : ''}
+              <button onclick="markIRNecRicevuta('${n.id}')" title="Ricevuto" style="background:var(--green);color:white;border:none;border-radius:4px;padding:0.25rem 0.5rem;cursor:pointer;font-size:0.75rem">✅</button>
+              <button onclick="openIRNecessitaForm('${n.id}')" title="Modifica" style="background:rgba(200,134,10,0.15);color:var(--brown);border:1px solid var(--cream-dark);border-radius:4px;padding:0.25rem 0.5rem;cursor:pointer;font-size:0.75rem">✏️</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  } catch(err) {
+    console.error('[Inserimento rapido] Errore in renderIRNecessita:', err.message);
+  }
+}
+
+function formatDateIT(d) {
+  if(!d) return '';
+  const parts = String(d).split('-');
+  if(parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  return d;
+}
+
+function openIRNecessitaForm(id) {
+  try {
+    const form = document.getElementById('irNecForm');
+    if(!form) return;
+    form.style.display = 'block';
+
+    // Popola select articoli
+    const sel = document.getElementById('irNecArticoloId');
+    if(sel) {
+      const arts = [...(magData.articoli || [])].sort((a,b) => a.nome.localeCompare(b.nome));
+      sel.innerHTML = '<option value="">— Articolo nuovo (scrivi sotto) —</option>' +
+        arts.map(a => `<option value="${a.id}">${escapeHtmlIR(a.nome)}${a.unita?' ('+a.unita+')':''}</option>`).join('');
+    }
+
+    if(id) {
+      const n = (necData.necessita || []).find(x => x.id === id);
+      if(!n) { console.warn('[Inserimento rapido] Necessità non trovata:', id); return; }
+      document.getElementById('irNecEditId').value = id;
+      if(sel) sel.value = n.articoloId || '';
+      document.getElementById('irNecDescrizioneCustom').value = n.descrizione || '';
+      document.getElementById('irNecQuantita').value = n.quantita || '';
+      document.getElementById('irNecUnita').value = n.unita || '';
+      document.getElementById('irNecFornitore').value = n.fornitore || '';
+      document.getElementById('irNecPriorita').value = n.priorita || 'media';
+      document.getElementById('irNecDataPrevista').value = n.dataPrevista || '';
+      document.getElementById('irNecPrezzoStimato').value = n.prezzoStimato || '';
+      document.getElementById('irNecNote').value = n.note || '';
+    } else {
+      document.getElementById('irNecEditId').value = '';
+      if(sel) sel.value = '';
+      document.getElementById('irNecDescrizioneCustom').value = '';
+      document.getElementById('irNecQuantita').value = '';
+      document.getElementById('irNecUnita').value = '';
+      document.getElementById('irNecFornitore').value = '';
+      document.getElementById('irNecPriorita').value = 'media';
+      document.getElementById('irNecDataPrevista').value = '';
+      document.getElementById('irNecPrezzoStimato').value = '';
+      document.getElementById('irNecNote').value = '';
+    }
+
+    // Scroll al form
+    form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch(err) {
+    console.error('[Inserimento rapido] Errore in openIRNecessitaForm:', err.message);
+  }
+}
+
+function closeIRNecessitaForm() {
+  const f = document.getElementById('irNecForm');
+  if(f) f.style.display = 'none';
+}
+
+function onIRNecArticoloChange() {
+  const artId = document.getElementById('irNecArticoloId')?.value;
+  if(!artId) return;
+  const art = (magData.articoli || []).find(a => a.id === artId);
+  if(art) {
+    const unitaEl = document.getElementById('irNecUnita');
+    if(unitaEl && !unitaEl.value) unitaEl.value = art.unita || '';
+  }
+}
+
+async function saveIRNecessita() {
+  try {
+    const editId = document.getElementById('irNecEditId').value;
+    const articoloId = document.getElementById('irNecArticoloId').value || null;
+    const descrizioneCustom = document.getElementById('irNecDescrizioneCustom').value.trim();
+    const quantita = parseFloat(document.getElementById('irNecQuantita').value);
+    const unita = document.getElementById('irNecUnita').value.trim();
+    const fornitore = document.getElementById('irNecFornitore').value.trim();
+    const priorita = document.getElementById('irNecPriorita').value;
+    const dataPrevista = document.getElementById('irNecDataPrevista').value;
+    const prezzoStimato = parseFloat(document.getElementById('irNecPrezzoStimato').value) || null;
+    const note = document.getElementById('irNecNote').value.trim();
+
+    if(!articoloId && !descrizioneCustom) {
+      alert('Seleziona un articolo o scrivi una descrizione');
+      return;
+    }
+    if(!quantita || quantita <= 0) {
+      alert('Inserisci una quantità valida');
+      return;
+    }
+
+    let finalArticoloId = articoloId;
+    let finalDescrizione = descrizioneCustom;
+
+    // Crea nuovo articolo nel magazzino se necessario
+    if(!articoloId && descrizioneCustom) {
+      const newArt = {
+        id: Date.now().toString() + Math.random().toString(36).slice(2),
+        nome: descrizioneCustom,
+        categoria: 'materiale',
+        unita: unita || 'pz',
+        scadenza: '',
+        lotto: '',
+        soglia: '',
+        note: ''
+      };
+      if(!magData.articoli) magData.articoli = [];
+      magData.articoli.push(newArt);
+      finalArticoloId = newArt.id;
+      finalDescrizione = '';
+      console.log('[Inserimento rapido] Creato nuovo articolo:', newArt.nome);
+    }
+
+    if(!necData.necessita) necData.necessita = [];
+
+    const existing = editId ? necData.necessita.find(x => x.id === editId) : null;
+    const entry = {
+      id: editId || (Date.now().toString() + Math.random().toString(36).slice(2)),
+      articoloId: finalArticoloId,
+      descrizione: finalDescrizione,
+      quantita,
+      unita,
+      fornitore,
+      priorita,
+      dataPrevista,
+      prezzoStimato,
+      note,
+      stato: existing?.stato || 'da_ordinare',
+      dataCreazione: existing?.dataCreazione || new Date().toISOString().slice(0,10),
+      dataOrdine: existing?.dataOrdine || null,
+    };
+
+    if(editId) {
+      necData.necessita = necData.necessita.map(n => n.id === editId ? entry : n);
+    } else {
+      necData.necessita.push(entry);
+    }
+
+    await saveAllToCloudIR();
+    closeIRNecessitaForm();
+    renderIRNecessita();
+    showToastIR('✅ Voce salvata');
+  } catch(err) {
+    console.error('[Inserimento rapido] Errore in saveIRNecessita:', err.message);
+    alert('Errore nel salvataggio: ' + err.message);
+  }
+}
+
+async function markIRNecOrdinata(id) {
+  const n = (necData.necessita || []).find(x => x.id === id);
+  if(!n) return;
+  n.stato = 'ordinato';
+  n.dataOrdine = new Date().toISOString().slice(0,10);
+  await saveAllToCloudIR();
+  renderIRNecessita();
+  showToastIR('🚚 Segnato come ordinato');
+}
+
+async function markIRNecRicevuta(id) {
+  const n = (necData.necessita || []).find(x => x.id === id);
+  if(!n) return;
+  const art = n.articoloId ? (magData.articoli || []).find(a => a.id === n.articoloId) : null;
+  const msg = `Confermi di aver ricevuto:\n\n${art ? art.nome : n.descrizione}\nQuantità: ${n.quantita} ${n.unita || ''}\n\n${art ? 'Verrà caricato a magazzino come entrata.' : 'La voce verrà rimossa.'}`;
+  if(!confirm(msg)) return;
+
+  // Se articolo collegato → crea movimentazione di carico
+  if(art) {
+    if(!magData.movimentazioni) magData.movimentazioni = [];
+    magData.movimentazioni.push({
+      id: Date.now().toString() + Math.random().toString(36).slice(2),
+      articoloId: art.id,
+      tipo: 'entrata',
+      qta: n.quantita,
+      data: new Date().toISOString().slice(0,10),
+      note: `Carico automatico da lista ordini${n.fornitore ? ' · '+n.fornitore : ''}`,
+    });
+  }
+
+  // Rimuovi dalla lista
+  necData.necessita = necData.necessita.filter(x => x.id !== id);
+
+  await saveAllToCloudIR();
+  renderIRNecessita();
+  showToastIR('✅ Ricevuto e rimosso dalla lista');
+}
+
+async function saveAllToCloudIR() {
+  try {
+    // Salva solo il file necessità (più il magazzino se ho creato articoli nuovi)
+    necData.savedAt = new Date().toISOString();
+    await driveWriteFile(FILENAME_NEC, necData);
+    // Se ho aggiunto articoli, salvo anche il magazzino
+    magData.savedAt = new Date().toISOString();
+    await driveWriteFile(FILENAME_MAG, magData);
+  } catch(err) {
+    console.error('[Inserimento rapido] Errore salvataggio Drive:', err.message);
+    alert('Errore salvataggio su Drive: ' + err.message);
+  }
+}
+
+function copiaListaNecessitaIR() {
+  try {
+    const attive = getIRNecessitaAttive();
+    if(attive.length === 0) {
+      alert('Nessuna voce in lista da copiare.');
+      return;
+    }
+
+    const priInfo = { urgente: { icon: '🔴', label: 'URGENTI' }, alta: { icon: '🟠', label: 'ALTA' }, media: { icon: '🟡', label: 'MEDIA' }, bassa: { icon: '⚪', label: 'BASSA' } };
+    const perPriorita = {};
+    attive.forEach(n => {
+      const k = n.priorita || 'media';
+      if(!perPriorita[k]) perPriorita[k] = [];
+      perPriorita[k].push(n);
+    });
+
+    let testo = `LISTA DA ORDINARE — ${new Date().toLocaleDateString('it-IT')}\n`;
+    testo += '═'.repeat(50) + '\n\n';
+
+    ['urgente','alta','media','bassa'].forEach(p => {
+      if(!perPriorita[p]) return;
+      testo += `${priInfo[p].icon} ${priInfo[p].label}:\n`;
+      perPriorita[p].forEach(n => {
+        const art = n.articoloId ? (magData.articoli || []).find(a => a.id === n.articoloId) : null;
+        const desc = art ? art.nome : (n.descrizione || 'Articolo');
+        const stato = n.stato === 'ordinato' ? ' [ORDINATO]' : '';
+        let linea = `  • ${n.quantita} ${n.unita || ''} — ${desc}${stato}`;
+        if(n.fornitore) linea += ` [${n.fornitore}]`;
+        if(n.dataPrevista) linea += ` entro ${formatDateIT(n.dataPrevista)}`;
+        if(n.note) linea += `\n    Note: ${n.note}`;
+        testo += linea + '\n';
+      });
+      testo += '\n';
+    });
+
+    const tot = attive.reduce((s,n) => s + (parseFloat(n.prezzoStimato) || 0), 0);
+    if(tot > 0) {
+      testo += '─'.repeat(50) + '\n';
+      testo += `TOTALE STIMATO: € ${tot.toFixed(2)}\n`;
+    }
+
+    if(navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(testo).then(() => {
+        showToastIR('📋 Lista copiata');
+      }).catch(() => {
+        // Fallback
+        const ta = document.createElement('textarea');
+        ta.value = testo; ta.style.position='fixed'; ta.style.left='-9999px';
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); showToastIR('📋 Lista copiata'); }
+        catch(e) { alert(testo); }
+        document.body.removeChild(ta);
+      });
+    }
+  } catch(err) {
+    console.error('[Inserimento rapido] Errore copia lista:', err.message);
+  }
+}
+
+function showToastIR(msg) {
+  let t = document.getElementById('toastIR');
+  if(!t) {
+    t = document.createElement('div');
+    t.id = 'toastIR';
+    t.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--brown);color:white;padding:0.7rem 1.3rem;border-radius:6px;font-size:0.9rem;z-index:9999;box-shadow:0 4px 14px rgba(0,0,0,0.3);transition:opacity 0.4s';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  setTimeout(() => { t.style.opacity = '0'; }, 2200);
 }
 
 // ===== RIEPILOGO =====

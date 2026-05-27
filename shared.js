@@ -10,6 +10,7 @@ const FILENAME_DB  = 'apiario_db.json';
 const FILENAME_MAG = 'apiario_magazzino.json';
 const FILENAME_CONT = 'apiario_contabilita.json';
 const FILENAME_OB  = 'apiario_obiettivi.json';
+const FILENAME_NEC = 'apiario_necessita.json';
 const FILENAME_SETTINGS = 'apiario_settings.json';
 
 // ===== CATEGORIE CONTABILI =====
@@ -377,17 +378,18 @@ async function driveWriteFile(name, payload) {
 
 /**
  * Carica tutti i file Drive in parallelo.
- * Restituisce { db, mag, cont, ob, settings } — null se il file non esiste ancora.
+ * Restituisce { db, mag, cont, ob, nec, settings } — null se il file non esiste ancora.
  */
 async function driveLoadAll() {
-  const [db, mag, cont, ob, settings] = await Promise.all([
+  const [db, mag, cont, ob, nec, settings] = await Promise.all([
     driveReadFile(FILENAME_DB),
     driveReadFile(FILENAME_MAG),
     driveReadFile(FILENAME_CONT),
     driveReadFile(FILENAME_OB),
+    driveReadFile(FILENAME_NEC),
     driveReadFile(FILENAME_SETTINGS)
   ]);
-  return { db, mag, cont, ob, settings };
+  return { db, mag, cont, ob, nec, settings };
 }
 
 /**
@@ -396,15 +398,17 @@ async function driveLoadAll() {
  * @param {Object} mag      - { articoli, movimentazioni }
  * @param {Object} cont     - { movimentiContabili }
  * @param {Object} ob       - { obiettivi }
+ * @param {Object} nec      - { necessita }
  * @param {Object} settings - { duplicatiIgnorati, ... }
  */
-async function driveSaveAll(db, mag, cont, ob, settings) {
+async function driveSaveAll(db, mag, cont, ob, nec, settings) {
   const ts = new Date().toISOString();
   await Promise.all([
     driveWriteFile(FILENAME_DB,       { version: 1, savedAt: ts, ...db }),
     driveWriteFile(FILENAME_MAG,      { version: 1, savedAt: ts, ...mag }),
     driveWriteFile(FILENAME_CONT,     { version: 1, savedAt: ts, ...cont }),
     driveWriteFile(FILENAME_OB,       { version: 1, savedAt: ts, ...ob }),
+    driveWriteFile(FILENAME_NEC,      { version: 1, savedAt: ts, ...nec }),
     driveWriteFile(FILENAME_SETTINGS, { version: 1, savedAt: ts, ...settings })
   ]);
 }
