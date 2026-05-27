@@ -265,8 +265,121 @@ function renderHome() {
         <span style="display:flex;align-items:center;gap:3px"><span style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block"></span>Entrate</span>
         <span style="display:flex;align-items:center;gap:3px"><span style="width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block"></span>Uscite</span>
       </div>`;
+
+    // 🛒 RIEPILOGO DA ORDINARE
+    renderHomeNecessitaBox();
   } catch(err) {
     console.error('[Home] Errore durante renderHome:', err.message, err);
   }
+}
+
+// ============================================
+// 🛒 BOX RIEPILOGO ORDINI DA FARE NELLA HOME
+// ============================================
+function renderHomeNecessitaBox() {
+  try {
+    const box = document.getElementById('homeNecessitaBox');
+    if(!box) return;
+
+    // Verifica che le funzioni del modulo necessita siano caricate
+    if(typeof getNecessitaAttive !== 'function') {
+      box.style.display = 'none';
+      return;
+    }
+
+    const attive = getNecessitaAttive();
+    if(attive.length === 0) {
+      box.style.display = 'none';
+      return;
+    }
+
+    // Conteggi per priorità + data vicina
+    const urgenti = attive.filter(n => n.priorita === 'urgente');
+    const alta = attive.filter(n => n.priorita === 'alta');
+    const oggi = new Date();
+    const tra7gg = new Date(oggi.getTime() + 7*24*60*60*1000);
+    const dataVicina = attive.filter(n => {
+      if(n.priorita === 'urgente') return false;
+      if(!n.dataPrevista) return false;
+      const dp = new Date(n.dataPrevista);
+      return !isNaN(dp.getTime()) && dp <= tra7gg;
+    });
+
+    // Top 3 voci per priorità
+    const ordinePrior = { urgente: 0, alta: 1, media: 2, bassa: 3 };
+    const top3 = [...attive]
+      .sort((a,b) => {
+        const pa = ordinePrior[a.priorita] ?? 4;
+        const pb = ordinePrior[b.priorita] ?? 4;
+        if(pa !== pb) return pa - pb;
+        // a parità di priorità, data prevista più vicina prima
+        if(a.dataPrevista && b.dataPrevista) return a.dataPrevista.localeCompare(b.dataPrevista);
+        if(a.dataPrevista) return -1;
+        if(b.dataPrevista) return 1;
+        return 0;
+      })
+      .slice(0, 3);
+
+    const priColor = { urgente: '#C04B3B', alta: '#E89488', media: '#C8860A', bassa: '#9CA3AF' };
+    const priIcon = { urgente: '🔴', alta: '🟠', media: '🟡', bassa: '⚪' };
+
+    // Totale stimato
+    const totStimato = attive.reduce((s, n) => s + (parseFloat(n.prezzoStimato) || 0), 0);
+
+    // Costruisco HTML
+    const chipStyle = 'display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:11px;font-size:0.82rem;font-weight:600';
+
+    box.style.display = 'block';
+    box.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem;flex-wrap:wrap;gap:0.5rem">
+        <div style="display:flex;align-items:center;gap:0.5rem">
+          <span style="font-size:1.1rem">🛒</span>
+          <span style="font-size:0.78rem;font-weight:600;color:var(--text-light);text-transform:uppercase;letter-spacing:0.08em">Da ordinare</span>
+        </div>
+        <a href="#" onclick="navigateTo('magazzino');setTimeout(()=>{const b=document.querySelector('.mag-tab[onclick*=necessita]');if(b)showMagTab('necessita',b);},80);return false" style="font-size:0.78rem;color:var(--amber);text-decoration:none;font-weight:600">Lista completa ↗</a>
+      </div>
+
+      <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.9rem">
+        ${urgenti.length > 0 ? `<span style="${chipStyle};background:${priColor.urgente}22;color:${priColor.urgente}">${priIcon.urgente} ${urgenti.length} urgent${urgenti.length>1?'i':'e'}</span>` : ''}
+        ${alta.length > 0 ? `<span style="${chipStyle};background:${priColor.alta}22;color:${priColor.alta}">${priIcon.alta} ${alta.length} alta priorità</span>` : ''}
+        ${dataVicina.length > 0 ? `<span style="${chipStyle};background:rgba(200,134,10,0.15);color:var(--brown)">📅 ${dataVicina.length} entro 7gg</span>` : ''}
+        ${(urgenti.length === 0 && alta.length === 0 && dataVicina.length === 0) ? `<span style="${chipStyle};background:rgba(0,0,0,0.04);color:var(--text-light)">Nessuna voce critica</span>` : ''}
+      </div>
+
+      <div style="font-size:0.72rem;font-weight:600;color:var(--text-light);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem">Prossime priorità</div>
+      <div style="display:flex;flex-direction:column;gap:0.4rem;margin-bottom:0.9rem">
+        ${top3.map(n => {
+          const art = n.articoloId ? articoli.find(a => a.id === n.articoloId) : null;
+          const desc = art ? art.nome : (n.descrizione || 'Articolo');
+          const unita = n.unita || (art && art.unita) || '';
+          const pCol = priColor[n.priorita] || '#C8860A';
+          const pIco = priIcon[n.priorita] || '⚪';
+          const fornitoreTxt = n.fornitore ? ` <span style="color:var(--text-light);font-size:0.82rem">[${escapeHomeHtml(n.fornitore)}]</span>` : '';
+          const dataTxt = n.dataPrevista ? ` <span style="color:var(--text-light);font-size:0.78rem">· 📅 ${formatDate(n.dataPrevista)}</span>` : '';
+          return `
+            <div style="display:flex;align-items:center;gap:0.5rem;padding:0.4rem 0.6rem;background:rgba(0,0,0,0.02);border-left:3px solid ${pCol};border-radius:4px;font-size:0.88rem">
+              <span title="${n.priorita}">${pIco}</span>
+              <span><strong>${n.quantita || '?'} ${escapeHomeHtml(unita)}</strong> · ${escapeHomeHtml(desc)}${fornitoreTxt}${dataTxt}</span>
+            </div>
+          `;
+        }).join('')}
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;border-top:1px solid var(--cream-dark);padding-top:0.6rem;font-size:0.82rem;color:var(--text-light)">
+        <span><strong style="color:var(--brown)">${attive.length}</strong> voc${attive.length>1?'i':'e'} totali${totStimato > 0 ? ` · Stima: <strong style="color:var(--brown)">€ ${totStimato.toFixed(2)}</strong>` : ''}</span>
+        <button onclick="copiaListaNecessita()" style="background:transparent;border:1px solid var(--cream-dark);color:var(--brown);padding:0.3rem 0.8rem;border-radius:4px;cursor:pointer;font-family:inherit;font-size:0.82rem">📋 Copia lista</button>
+      </div>
+    `;
+  } catch(err) {
+    console.error('[Home] Errore in renderHomeNecessitaBox:', err.message);
+    const box = document.getElementById('homeNecessitaBox');
+    if(box) box.style.display = 'none';
+  }
+}
+
+// Helper escape locale (per evitare XSS nei dati utente)
+function escapeHomeHtml(s) {
+  if(!s) return '';
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
