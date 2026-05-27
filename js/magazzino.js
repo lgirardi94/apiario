@@ -377,6 +377,16 @@ function deleteArticolo(id) {
   if(!confirm('Eliminare questo articolo e tutte le sue movimentazioni?')) return;
   articoli = articoli.filter(a => a.id !== id);
   movimentazioni = movimentazioni.filter(m => m.articoloId !== id);
+  // Pulisce anche le necessità collegate (orfani)
+  if(typeof necessita !== 'undefined' && Array.isArray(necessita)) {
+    const before = necessita.length;
+    necessita = necessita.filter(n => n.articoloId !== id);
+    if(necessita.length !== before) {
+      console.log('[Magazzino] Rimosse ' + (before - necessita.length) + ' necessità orfane dopo eliminazione articolo');
+      if(typeof saveNecessita === 'function') saveNecessita();
+      if(typeof renderNecessita === 'function') renderNecessita();
+    }
+  }
   saveMagazzino();
   renderMagArticoli();
 }

@@ -341,6 +341,7 @@ function saveNecessitaEntry() {
       console.log('[Necessita] Creato nuovo articolo nel magazzino:', newArt.nome);
     }
 
+    const existing = editId ? necessita.find(x => x.id === editId) : null;
     const entry = {
       id: editId || (Date.now().toString() + Math.random().toString(36).slice(2)),
       articoloId: finalArticoloId,
@@ -352,9 +353,9 @@ function saveNecessitaEntry() {
       dataPrevista,
       prezzoStimato,
       note,
-      stato: editId ? necessita.find(x => x.id === editId)?.stato || 'da_ordinare' : 'da_ordinare',
-      dataCreazione: editId ? necessita.find(x => x.id === editId)?.dataCreazione : new Date().toISOString().slice(0,10),
-      dataOrdine: editId ? necessita.find(x => x.id === editId)?.dataOrdine : null,
+      stato: existing?.stato || 'da_ordinare',
+      dataCreazione: existing?.dataCreazione || new Date().toISOString().slice(0,10),
+      dataOrdine: existing?.dataOrdine || null,
     };
 
     if(editId) {

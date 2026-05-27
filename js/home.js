@@ -44,13 +44,13 @@ function renderHome() {
     alerts.push({ msg: `${arnieProblema.length} arni${arnieProblema.length>1?'e':'a'} in stato problema: ${arnieProblema.map(a=>'#'+a.num).join(', ')}`, target: 'arnie', color: '#8A2C2C', bg: '#fce8e8', border: '#C03030' });
   const arnieDebole = arnie.filter(a => a.status === 'debole');
   if(arnieDebole.length > 0)
-    alerts.push({ msg: `${arnieDebole.length} arni${arnieDebole.length>1?'e':'a'} deboli: ${arnieDebole.map(a=>'#'+a.num).join(', ')}`, target: 'arnie', color: '#854F0B', bg: '#FAEEDA', border: '#EF9F27' });
+    alerts.push({ msg: `${arnieDebole.length} arni${arnieDebole.length>1?'e':'a'} debol${arnieDebole.length>1?'i':'e'}: ${arnieDebole.map(a=>'#'+a.num).join(', ')}`, target: 'arnie', color: '#854F0B', bg: '#FAEEDA', border: '#EF9F27' });
 
   // Nuclei pronti per promozione a famiglia
   if(typeof checkPromotionReady === 'function') {
     const nucleiProntiPromo = arnie.filter(a => a.tipo === 'nucleo' && checkPromotionReady(a.id));
     if(nucleiProntiPromo.length > 0)
-      alerts.push({ msg: `${nucleiProntiPromo.length} nucle${nucleiProntiPromo.length>1?'i':'o'} prone${nucleiProntiPromo.length>1?'i':'o'} per promozione a Famiglia: ${nucleiProntiPromo.map(a=>'#'+a.num).join(', ')}`, target: 'arnie', color: '#5D8C44', bg: '#EEF6E7', border: '#5D8C44' });
+      alerts.push({ msg: `${nucleiProntiPromo.length} nucle${nucleiProntiPromo.length>1?'i':'o'} pront${nucleiProntiPromo.length>1?'i':'o'} per promozione a Famiglia: ${nucleiProntiPromo.map(a=>'#'+a.num).join(', ')}`, target: 'arnie', color: '#5D8C44', bg: '#EEF6E7', border: '#5D8C44' });
   }
 
   // Sciami da valutare (con flag pending)

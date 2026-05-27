@@ -626,13 +626,14 @@ function renderStats() {
 }
 
 function exportCSV() {
-  if(logBook.length === 0) { alert('Nessun dato da esportare'); return; }
-  const headers = ['Data','Arnia','Tipo','Note','Varroa (cadute/g)','Raccolta'];
-  const artMap = new Map(articoli.map(a => [a.id, a]));
-  const rows = logBook.map(e => {
-    const tipi = getTipi(e).join(', ');
-    const raccoltaStr = (e.raccolta || []).map(r => {
-      const art = artMap.get(r.articoloId);
+  try {
+    if(logBook.length === 0) { alert('Nessun dato da esportare'); return; }
+    const headers = ['Data','Arnia','Tipo','Note','Varroa (cadute/g)','Raccolta'];
+    const artMap = new Map(articoli.map(a => [a.id, a]));
+    const rows = logBook.map(e => {
+      const tipi = getTipi(e).join(', ');
+      const raccoltaStr = (e.raccolta || []).map(r => {
+        const art = artMap.get(r.articoloId);
       return `${r.qta} ${art?.unita||''} ${art?.nome||''}`;
     }).join(' + ');
     return [e.data, e.arniaNome, tipi, `"${e.note.replace(/"/g,'""')}"`, e.varroa||'', `"${raccoltaStr}"`];
@@ -643,5 +644,10 @@ function exportCSV() {
   a.href = URL.createObjectURL(blob);
   a.download = `registro_apiario_${new Date().toISOString().slice(0,10)}.csv`;
   a.click();
+  URL.revokeObjectURL(a.href);
+  } catch(err) {
+    console.error('[Registro] Errore in exportCSV:', err.message);
+    alert('Errore durante l\'esportazione: ' + err.message);
+  }
 }
 

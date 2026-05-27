@@ -791,10 +791,20 @@ function saveArnia() {
 }
 
 function deleteArnia(id) {
-  if(!confirm('Eliminare questa arnia?')) return;
+  const arnia = arnie.find(a => a.id === id);
+  if(!arnia) { console.warn('[Arnie] Arnia non trovata:', id); return; }
+  const visiteCollegate = logBook.filter(e => e.arniaId === id).length;
+  let msg = `Eliminare l'arnia #${arnia.num}${arnia.nome ? ' — '+arnia.nome : ''}?`;
+  if(visiteCollegate > 0) {
+    msg += `\n\n⚠️ Ci sono ${visiteCollegate} visite registrate per questa arnia.\nVerranno mantenute nel registro come visite di un'arnia eliminata.`;
+  }
+  if(!confirm(msg)) return;
   arnie = arnie.filter(a => a.id !== id);
+  // Pulisce eventuali necessità orfane collegate ad articoli di questa arnia
+  // (non c'è collegamento diretto necessita→arnia, quindi non serve)
   saveDB();
   renderArnie();
+  if(typeof renderHome === 'function') renderHome();
 }
 
 // ======= DETAIL PANEL =======
@@ -1072,7 +1082,9 @@ function calcolaPunteggioSalute(arniaId) {
   // 5) Frequenza visite (negli ultimi 60 giorni)
   const visite60gg = logBook.filter(e => {
     if(e.arniaId !== arniaId) return false;
+    if(!e.data) return false;
     const d = new Date(e.data);
+    if(isNaN(d.getTime())) return false;
     const diff = (Date.now() - d.getTime()) / (1000*60*60*24);
     return diff <= 60;
   });
@@ -1108,7 +1120,7 @@ function computeArniaTags(a) {
   const tags = [];
 
   // Calcolo produzione anno corrente
-  const anno = new Date().getFullYear();
+  const anno = String(new Date().getFullYear());
   const melariRimossi = (a.melari||[]).filter(m => m.status === 'rimosso' || m.status === 'produzione');
   const visiteRaccolta = logBook.filter(e => e.arniaId === a.id && e.raccolta && e.raccolta.length > 0);
   const kgAnno = visiteRaccolta
@@ -1171,7 +1183,12 @@ function renderSchedaAnagrafica(a) {
   const tipoInfo = ARNIA_TIPI[a.tipo] || ARNIA_TIPI.famiglia;
   const meleAnno = computeMieleAnno(a.id);
   const ultimaVisita = logBook.filter(e => e.arniaId === a.id)[0];
-  const giorniDaUltima = ultimaVisita ? Math.floor((Date.now() - new Date(ultimaVisita.data).getTime()) / (1000*60*60*24)) : null;
+  const giorniDaUltima = (() => {
+    if(!ultimaVisita || !ultimaVisita.data) return null;
+    const d = new Date(ultimaVisita.data);
+    if(isNaN(d.getTime())) return null;
+    return Math.floor((Date.now() - d.getTime()) / (1000*60*60*24));
+  })();
   const melariAttivi = (a.melari||[]).filter(m=>m.status==='posizionato').length;
 
   // Health card
@@ -1243,7 +1260,7 @@ function renderSchedaAnagrafica(a) {
 function computeMieleAnno(arniaId) {
   const anno = new Date().getFullYear();
   return logBook
-    .filter(e => e.arniaId === arniaId && e.raccolta && e.data && e.data.startsWith(anno))
+    .filter(e => e.arniaId === arniaId && e.raccolta && e.data && e.data.startsWith(String(anno)))
     .reduce((sum, e) => sum + (e.raccolta || []).reduce((s, r) => s + (parseFloat(r.qta) || 0), 0), 0);
 }
 
@@ -1593,7 +1610,12 @@ function renderSchedaStats(a) {
   // Giorni medi tra visite (ultimi 90 gg)
   const visiteRecenti = logBook
     .filter(e => e.arniaId === a.id)
-    .filter(e => (Date.now() - new Date(e.data).getTime()) / (1000*60*60*24) <= 90)
+    .filter(e => {
+      if(!e.data) return false;
+      const t = new Date(e.data).getTime();
+      if(isNaN(t)) return false;
+      return (Date.now() - t) / (1000*60*60*24) <= 90;
+    })
     .map(e => new Date(e.data));
   let giorniMedi = null;
   if(visiteRecenti.length >= 2) {
