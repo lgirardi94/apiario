@@ -7,7 +7,7 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐝</text></svg>">
 <link rel="stylesheet" href="style-main.css">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="shared.js?v=20260525"></script>
+<script src="shared.js?v=20260526"></script>
 </head>
 <body>
 
@@ -1702,7 +1702,10 @@
       <button class="mag-tab" onclick="showMagTab('controlli', this)">🔍 Controlli</button>
     </div>
     <div id="magTabArticoli">
-      <div style="display:flex;gap:0.8rem;margin-bottom:1.2rem;flex-wrap:wrap;align-items:center">
+      <!-- KPI RIEPILOGO MAGAZZINO -->
+      <div id="magKpiBar" style="display:flex;gap:0.6rem;flex-wrap:wrap;margin-bottom:1rem"></div>
+
+      <div style="display:flex;gap:0.8rem;margin-bottom:0.8rem;flex-wrap:wrap;align-items:center">
         <button class="btn" onclick="openArticoloModal()">+ Nuovo articolo</button>
         <select id="magFiltroCategoria" onchange="renderMagArticoli()" style="padding:0.45rem 0.8rem;border:1px solid var(--cream-dark);border-radius:3px;font-family:'Crimson Pro',serif;font-size:0.95rem;background:white;color:var(--text)">
           <option value="">Tutte le categorie</option>
@@ -1710,8 +1713,25 @@
           <option value="consumabile">💊 Consumabili</option>
           <option value="prodotto">🍯 Prodotto finito</option>
         </select>
+        <select id="magOrdinamento" onchange="renderMagArticoli()" style="padding:0.45rem 0.8rem;border:1px solid var(--cream-dark);border-radius:3px;font-family:'Crimson Pro',serif;font-size:0.95rem;background:white;color:var(--text)">
+          <option value="nome">↕ Nome (A-Z)</option>
+          <option value="giacenza_asc">↕ Giacenza (crescente)</option>
+          <option value="giacenza_desc">↕ Giacenza (decrescente)</option>
+          <option value="scadenza">↕ Scadenza (più vicina)</option>
+          <option value="categoria">↕ Categoria</option>
+          <option value="valore_desc">↕ Valore (decrescente)</option>
+        </select>
         <input type="text" id="magFiltroSearch" placeholder="🔍 Cerca articolo..." oninput="renderMagArticoli()" style="padding:0.45rem 0.8rem;border:1px solid var(--cream-dark);border-radius:3px;font-family:'Crimson Pro',serif;font-size:0.95rem;background:white;flex:1;min-width:140px">
       </div>
+
+      <!-- Toggle sotto soglia + azione -->
+      <div style="display:flex;gap:0.8rem;margin-bottom:1.2rem;flex-wrap:wrap;align-items:center">
+        <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.88rem;cursor:pointer;color:var(--text)">
+          <input type="checkbox" id="magSoloSottoSoglia" onchange="renderMagArticoli()" style="width:auto;margin:0"> ⚠️ Mostra solo sotto soglia
+        </label>
+        <button id="magBtnOrdinaSottoSoglia" class="btn btn-secondary" style="padding:0.35rem 0.8rem;font-size:0.82rem;display:none" onclick="aggiungiSottoSogliaAOrdini()">🛒 Aggiungi tutti agli ordini</button>
+      </div>
+
       <div class="mag-grid" id="magGrid"></div>
     </div>
     <div id="magTabMovimentazioni" style="display:none">
@@ -2100,9 +2120,15 @@
         <input type="text" id="artLotto" placeholder="Es. AB123">
       </div>
     </div>
-    <div class="form-row">
-      <label>Soglia minima scorta (avviso)</label>
-      <input type="number" id="artSoglia" min="0" placeholder="Es. 10 — lascia vuoto per disabilitare">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+      <div class="form-row">
+        <label>Soglia minima scorta (avviso)</label>
+        <input type="number" id="artSoglia" min="0" placeholder="Es. 10">
+      </div>
+      <div class="form-row">
+        <label>Prezzo unitario (€)</label>
+        <input type="number" id="artPrezzoUnitario" min="0" step="0.01" placeholder="Es. 0.70">
+      </div>
     </div>
     <div class="form-row">
       <label>Note</label>
@@ -2522,20 +2548,20 @@
 </div><!-- fine appContent -->
 
 <!-- ===== JS MODULES — ordine importante! ===== -->
-<script src="js/state.js?v=20260525"></script>
-<script src="js/nav.js?v=20260525"></script>
-<script src="js/import-export.js?v=20260525"></script>
-<script src="js/registro.js?v=20260525"></script>
-<script src="js/arnie.js?v=20260525"></script>
-<script src="js/magazzino.js?v=20260525"></script>
-<script src="js/necessita.js?v=20260525"></script>
-<script src="js/contabilita.js?v=20260525"></script>
-<script src="js/obiettivi.js?v=20260525"></script>
-<script src="js/sciroppo.js?v=20260525"></script>
-<script src="js/candito.js?v=20260525"></script>
-<script src="js/propoli.js?v=20260525"></script>
-<script src="js/report.js?v=20260525"></script>
-<script src="js/home.js?v=20260525"></script>
+<script src="js/state.js?v=20260526"></script>
+<script src="js/nav.js?v=20260526"></script>
+<script src="js/import-export.js?v=20260526"></script>
+<script src="js/registro.js?v=20260526"></script>
+<script src="js/arnie.js?v=20260526"></script>
+<script src="js/magazzino.js?v=20260526"></script>
+<script src="js/necessita.js?v=20260526"></script>
+<script src="js/contabilita.js?v=20260526"></script>
+<script src="js/obiettivi.js?v=20260526"></script>
+<script src="js/sciroppo.js?v=20260526"></script>
+<script src="js/candito.js?v=20260526"></script>
+<script src="js/propoli.js?v=20260526"></script>
+<script src="js/report.js?v=20260526"></script>
+<script src="js/home.js?v=20260526"></script>
 <script src="js/drive-app.js"></script>
 
 </body>
