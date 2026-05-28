@@ -22,14 +22,47 @@ const CAT_ENTRATA = [
   { id: 'altro_ricavo',   label: '💰 Altro ricavo' },
 ];
 const CAT_USCITA = [
-  { id: 'farmaci',        label: '💊 Farmaci/trattamenti' },
+  { id: 'farmaci',        label: '💊 Farmaci/sanitari' },
   { id: 'alimentazione',  label: '🍬 Alimentazione' },
+  { id: 'telai_cera',     label: '🪵 Telai e cera' },
+  { id: 'arnie',          label: '📦 Arnie e componenti' },
   { id: 'attrezzatura',   label: '🔧 Attrezzatura' },
-  { id: 'arnie',          label: '🏠 Arnie e accessori' },
+  { id: 'confezionamento',label: '🫙 Confezionamento' },
   { id: 'trasporti',      label: '🚗 Carburante/trasporti' },
+  { id: 'spedizioni',     label: '📮 Spese di spedizione' },
   { id: 'burocrazia',     label: '📋 Costi burocratici' },
   { id: 'altro_costo',    label: '💡 Altro costo' },
 ];
+
+// ===== CATEGORIE MAGAZZINO (tipo articolo) =====
+// Ogni categoria magazzino mappa a una categoria di spesa contabile (per auto-spesa)
+const CAT_MAGAZZINO = [
+  { id: 'farmaci',        label: '💊 Farmaci/sanitari',     catSpesa: 'farmaci' },
+  { id: 'alimentazione',  label: '🍬 Alimentazione',         catSpesa: 'alimentazione' },
+  { id: 'telai_cera',     label: '🪵 Telai e cera',          catSpesa: 'telai_cera' },
+  { id: 'arnie',          label: '📦 Arnie e componenti',    catSpesa: 'arnie' },
+  { id: 'attrezzatura',   label: '🔧 Attrezzatura',          catSpesa: 'attrezzatura' },
+  { id: 'confezionamento',label: '🫙 Confezionamento',       catSpesa: 'confezionamento' },
+  { id: 'prodotto',       label: '🍯 Prodotti finiti',       catSpesa: null },
+  { id: 'altro',          label: '📋 Altro',                 catSpesa: 'altro_costo' },
+];
+
+// Mappa categoria magazzino → categoria spesa contabile
+function getCatSpesaPerMagazzino(catMag) {
+  const c = CAT_MAGAZZINO.find(x => x.id === catMag);
+  return c ? c.catSpesa : 'altro_costo';
+}
+
+// Helper retro-compatibilità: vecchie categorie magazzino (materiale/consumabile/prodotto)
+function normalizzaCatMagazzino(cat) {
+  if(!cat) return 'altro';
+  // Vecchie categorie → nuove
+  const legacy = { materiale: 'attrezzatura', consumabile: 'alimentazione', prodotto: 'prodotto' };
+  if(legacy[cat]) return legacy[cat];
+  // Se è già una categoria valida, la tengo
+  if(CAT_MAGAZZINO.some(c => c.id === cat)) return cat;
+  return 'altro';
+}
 
 // ===== ISPEZIONE — costanti condivise =====
 const TELAINO_OPZIONI = [
@@ -170,9 +203,9 @@ function showCalendarPopup(arniaNome, onClose) {
   const existing = document.getElementById('calendarPopupOverlay');
   if(existing) existing.remove();
 
-  // Data suggerita = oggi + 14 giorni
+  // Data suggerita = oggi + 5 giorni
   const suggested = new Date();
-  suggested.setDate(suggested.getDate() + 14);
+  suggested.setDate(suggested.getDate() + 5);
   const suggestedStr = suggested.toISOString().slice(0,10);
 
   const overlay = document.createElement('div');

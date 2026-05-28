@@ -938,6 +938,29 @@ function closeSchedaDettagliata() {
   _currentSchedaArniaId = null;
 }
 
+// Wrapper: modifica l'arnia attualmente aperta nella scheda dettagliata.
+// Serve perché _currentSchedaArniaId è interna al modulo e non accessibile
+// dall'onclick inline nell'HTML.
+function modificaArniaScheda() {
+  const id = _currentSchedaArniaId;
+  if(!id) {
+    console.warn('[Arnie] modificaArniaScheda: nessuna arnia corrente');
+    return;
+  }
+  closeSchedaDettagliata();
+  openArniModal(id);
+}
+
+// Wrapper: promuove l'arnia corrente (vedi nota su _currentSchedaArniaId sopra)
+function promuoviArniaScheda() {
+  const id = _currentSchedaArniaId;
+  if(!id) {
+    console.warn('[Arnie] promuoviArniaScheda: nessuna arnia corrente');
+    return;
+  }
+  promuoviNucleo(id);
+}
+
 function setSchedaTab(tab) {
   _currentSchedaTab = tab;
   renderScheda();

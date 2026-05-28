@@ -28,8 +28,8 @@ function showSection(id) { navigateTo(id); }
 // ===== UTILITY TABS (Calendario / Sciroppo / Trattamenti / Etichette) =====
 function showUtilTab(tab, btn) {
   try {
-    const ids = ['utilTabCalendario','utilTabSciroppo','utilTabCandito','utilTabPropoli','utilTabTrattamenti','utilTabEtichette'];
-    const mapping = { calendario: 'utilTabCalendario', sciroppo: 'utilTabSciroppo', candito: 'utilTabCandito', propoli: 'utilTabPropoli', trattamenti: 'utilTabTrattamenti', etichette: 'utilTabEtichette' };
+    const ids = ['utilTabCalendario','utilTabSciroppo','utilTabCandito','utilTabPropoli','utilTabTrattamenti','utilTabEtichette','utilTabAnalisi'];
+    const mapping = { calendario: 'utilTabCalendario', sciroppo: 'utilTabSciroppo', candito: 'utilTabCandito', propoli: 'utilTabPropoli', trattamenti: 'utilTabTrattamenti', etichette: 'utilTabEtichette', analisi: 'utilTabAnalisi' };
     ids.forEach(id => {
       const el = document.getElementById(id);
       if(el) el.style.display = (mapping[tab] === id) ? 'block' : 'none';
@@ -39,6 +39,7 @@ function showUtilTab(tab, btn) {
     if(tab === 'sciroppo') sciCalc();
     if(tab === 'candito')  candCalc();
     if(tab === 'propoli')  propCalc();
+    if(tab === 'analisi' && typeof renderAnalisi === 'function') renderAnalisi();
   } catch(err) {
     console.error('[Nav] Errore in showUtilTab:', err.message);
   }
