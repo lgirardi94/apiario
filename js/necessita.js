@@ -187,7 +187,7 @@ function renderNecessitaCard(n) {
           <div style="display:flex;flex-wrap:wrap;gap:0.4rem 1rem;font-size:0.88rem;color:var(--text);margin-bottom:0.3rem">
             <span><strong>${n.quantita || '?'}</strong> ${escapeHtmlAttr(unita)}</span>
             ${n.fornitore ? `<span style="color:var(--text-light)">🏪 ${escapeHtmlAttr(n.fornitore)}</span>` : ''}
-            ${n.prezzoStimato ? `<span style="color:var(--text-light)">💰 € ${parseFloat(n.prezzoStimato).toFixed(2)}</span>` : ''}
+            ${n.prezzoStimato ? `<span style="color:var(--text-light)">💰 € ${parseFloat(n.prezzoStimato).toFixed(2)}${(parseFloat(n.prezzoStimato)>0 && parseFloat(n.quantita)>0) ? ` <span style="opacity:0.7">(€ ${(parseFloat(n.prezzoStimato)/parseFloat(n.quantita)).toFixed(2)}/${escapeHtmlAttr(unita)})</span>` : ''}</span>` : ''}
             ${dataInfo}
           </div>
 
@@ -396,42 +396,64 @@ function annullaOrdineNecessita(id) {
 }
 
 function marcaNecessitaRicevuta(id) {
-  const n = necessita.find(x => x.id === id);
-  if(!n) return;
+  try {
+    const n = necessita.find(x => x.id === id);
+    if(!n) { console.warn('[Necessita] Necessità non trovata:', id); return; }
 
-  // Chiedi conferma + opzione di creare movimentazione
-  const art = n.articoloId ? articoli.find(a => a.id === n.articoloId) : null;
-  let msg = `Confermi di aver ricevuto:\n\n${art ? art.nome : n.descrizione}\nQuantità: ${n.quantita} ${n.unita || ''}\n\nLa voce verrà rimossa dalla lista.`;
-  if(art) {
-    msg += `\n\nVuoi anche caricare ${n.quantita} ${art.unita || ''} a magazzino come entrata?`;
-  }
+    const art = n.articoloId ? articoli.find(a => a.id === n.articoloId) : null;
+    const prezzoTot = parseFloat(n.prezzoStimato) || 0;
+    const qta = parseFloat(n.quantita) || 0;
+    const prezzoUnit = (prezzoTot > 0 && qta > 0) ? (prezzoTot / qta) : 0;
 
-  if(!confirm(msg)) return;
+    // Messaggio di conferma
+    let msg = `Confermi di aver ricevuto:\n\n${art ? art.nome : n.descrizione}\nQuantità: ${n.quantita} ${n.unita || ''}`;
+    if(prezzoTot > 0) {
+      msg += `\nControvalore: € ${prezzoTot.toFixed(2)}`;
+      if(prezzoUnit > 0) msg += ` (€ ${prezzoUnit.toFixed(2)}/${n.unita || 'unità'})`;
+    }
+    if(art) {
+      msg += `\n\n✅ Verrà caricato a magazzino come entrata`;
+      if(prezzoUnit > 0) msg += `\n💰 Il prezzo unitario sarà aggiornato a € ${prezzoUnit.toFixed(2)}`;
+    } else {
+      msg += `\n\nLa voce verrà rimossa dalla lista.`;
+    }
 
-  // Se collegata a un articolo, propone di creare movimentazione automatica
-  if(art) {
-    const creaCarico = confirm(`Crea movimentazione automatica di carico per ${n.quantita} ${art.unita || ''} di "${art.nome}"?`);
-    if(creaCarico) {
+    if(!confirm(msg)) return;
+
+    // Se collegata a un articolo: carica a magazzino + aggiorna prezzo unitario
+    if(art) {
       const movId = Date.now().toString() + Math.random().toString(36).slice(2);
       movimentazioni.push({
         id: movId,
         articoloId: art.id,
         tipo: 'entrata',
-        qta: n.quantita,
+        qta: qta,
         data: new Date().toISOString().slice(0,10),
-        note: `Carico automatico da lista ordini${n.fornitore ? ' · '+n.fornitore : ''}`,
+        note: `Carico da ordine ricevuto${n.fornitore ? ' · '+n.fornitore : ''}${prezzoTot > 0 ? ' · € '+prezzoTot.toFixed(2) : ''}`,
+        valore: prezzoTot > 0 ? prezzoTot : undefined,  // controvalore del carico
       });
+
+      // Aggiorna il prezzo unitario dell'articolo (ultimo prezzo pagato)
+      if(prezzoUnit > 0) {
+        articoli = articoli.map(a => a.id === art.id ? { ...a, prezzoUnitario: prezzoUnit.toFixed(4) } : a);
+        console.log('[Necessita] Prezzo unitario aggiornato per', art.nome, '→ €', prezzoUnit.toFixed(4));
+      }
       saveMagazzino();
     }
-  }
 
-  // Rimuovi dalla lista (richiesta utente: niente storico)
-  necessita = necessita.filter(x => x.id !== id);
-  saveNecessita();
-  renderNecessita();
-  if(typeof renderHome === 'function') renderHome();
-  if(typeof renderMagArticoli === 'function') renderMagArticoli();
-  if(typeof showImportToast === 'function') showImportToast('✅ Voce rimossa dalla lista');
+    // Rimuovi dalla lista (niente storico)
+    necessita = necessita.filter(x => x.id !== id);
+    saveNecessita();
+    renderNecessita();
+    if(typeof renderHome === 'function') renderHome();
+    if(typeof renderMagArticoli === 'function') renderMagArticoli();
+    if(typeof showImportToast === 'function') {
+      showImportToast(art ? `✅ ${art.nome} caricato a magazzino` : '✅ Voce rimossa dalla lista');
+    }
+  } catch(err) {
+    console.error('[Necessita] Errore in marcaNecessitaRicevuta:', err.message);
+    alert('Errore durante la ricezione. Apri F12 per dettagli.');
+  }
 }
 
 function deleteNecessita(id) {
