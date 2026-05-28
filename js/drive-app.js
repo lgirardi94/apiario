@@ -89,9 +89,66 @@ async function loadFromCloud() {
       delete settings.version;
       delete settings.savedAt;
     }
+    // Controlla se serve un backup automatico (dopo aver caricato i dati)
+    checkAutoBackup();
   } catch(err) {
     console.error('[Drive] Errore in loadFromCloud:', err.message, err);
     throw err; // rilancia per gestione esterna
+  }
+}
+
+// ============================================
+// BACKUP AUTOMATICO PERIODICO
+// Crea un backup datato su Drive ogni N giorni (default 7)
+// ============================================
+const AUTO_BACKUP_DAYS = 7;
+
+async function checkAutoBackup() {
+  try {
+    const last = settings.lastAutoBackup ? new Date(settings.lastAutoBackup) : null;
+    const oggi = new Date();
+    let serve = false;
+    if(!last || isNaN(last.getTime())) {
+      serve = true;
+    } else {
+      const giorni = (oggi - last) / (1000*60*60*24);
+      if(giorni >= AUTO_BACKUP_DAYS) serve = true;
+    }
+    if(!serve) {
+      console.log('[Drive] Backup automatico non necessario (ultimo:', settings.lastAutoBackup || 'mai', ')');
+      return;
+    }
+
+    console.log('[Drive] Creazione backup automatico...');
+    const fullData = { arnie, logBook, articoli, movimentazioni, movimentiContabili, obiettivi, necessita };
+    const nome = await driveCreateAutoBackup(fullData, 5);
+    settings.lastAutoBackup = oggi.toISOString();
+    // Salva settings aggiornati (silenzioso)
+    pushToCloud(true);
+    console.log('[Drive] Backup automatico creato:', nome);
+    if(typeof showImportToast === 'function') showImportToast('💾 Backup automatico settimanale creato');
+  } catch(err) {
+    console.error('[Drive] Errore in checkAutoBackup:', err.message);
+    // Non bloccante: l'app continua a funzionare
+  }
+}
+
+// Lista i backup disponibili (per ripristino manuale futuro)
+async function mostraBackupDisponibili() {
+  try {
+    const backups = await driveListBackups();
+    if(backups.length === 0) {
+      alert('Nessun backup automatico disponibile ancora.');
+      return;
+    }
+    const lista = backups.map(b => {
+      const dataParte = b.name.replace('apiario_autobackup_', '').replace('.json', '');
+      return `• ${dataParte}`;
+    }).join('\n');
+    alert(`📦 Backup automatici disponibili (${backups.length}):\n\n${lista}\n\nI backup vengono creati ogni ${AUTO_BACKUP_DAYS} giorni e ne vengono mantenuti gli ultimi 5.`);
+  } catch(err) {
+    console.error('[Drive] Errore in mostraBackupDisponibili:', err.message);
+    alert('Errore nel recupero dei backup.');
   }
 }
 
