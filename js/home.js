@@ -39,6 +39,33 @@ function renderHome() {
   const sottoSoglia = articoli.filter(a => a.soglia && getGiacenzaLocale(a.id) <= parseFloat(a.soglia));
   if(sottoSoglia.length > 0)
     alerts.push({ msg: `${sottoSoglia.length} articol${sottoSoglia.length>1?'i':'o'} sotto soglia: ${sottoSoglia.map(a=>a.nome).join(', ')}`, target: 'magazzino', color: '#854F0B', bg: '#FAEEDA', border: '#EF9F27' });
+
+  // Articoli in scadenza (entro 3 mesi) — utile per farmaci antivarroa
+  const oggiScad = Date.now();
+  const inScadenza = articoli.filter(a => {
+    if(!a.scadenza) return false;
+    const parts = a.scadenza.split('-');
+    if(parts.length < 2) return false;
+    const scadMs = new Date(parseInt(parts[0],10), parseInt(parts[1],10)-1, 1).getTime();
+    if(isNaN(scadMs)) return false;
+    const mesi = (scadMs - oggiScad) / (1000*60*60*24*30);
+    return mesi <= 3; // include già scadute (mesi negativi)
+  });
+  if(inScadenza.length > 0) {
+    // Separa scadute da in-scadenza
+    const scadute = inScadenza.filter(a => {
+      const parts = a.scadenza.split('-');
+      const scadMs = new Date(parseInt(parts[0],10), parseInt(parts[1],10), 0).getTime(); // ultimo giorno del mese
+      return scadMs < oggiScad;
+    });
+    if(scadute.length > 0) {
+      alerts.push({ msg: `🔴 ${scadute.length} articol${scadute.length>1?'i':'o'} SCADUT${scadute.length>1?'I':'O'}: ${scadute.map(a=>a.nome).join(', ')}`, target: 'magazzino', color: '#8A2C2C', bg: '#fce8e8', border: '#C03030' });
+    }
+    const inScadProssima = inScadenza.filter(a => !scadute.includes(a));
+    if(inScadProssima.length > 0) {
+      alerts.push({ msg: `⏰ ${inScadProssima.length} articol${inScadProssima.length>1?'i':'o'} in scadenza entro 3 mesi: ${inScadProssima.map(a=>a.nome+' ('+a.scadenza.split('-')[1]+'/'+a.scadenza.split('-')[0]+')').join(', ')}`, target: 'magazzino', color: '#854F0B', bg: '#FAEEDA', border: '#EF9F27' });
+    }
+  }
   const arnieProblema = arnie.filter(a => a.status === 'problema');
   if(arnieProblema.length > 0)
     alerts.push({ msg: `${arnieProblema.length} arni${arnieProblema.length>1?'e':'a'} in stato problema: ${arnieProblema.map(a=>'#'+a.num).join(', ')}`, target: 'arnie', color: '#8A2C2C', bg: '#fce8e8', border: '#C03030' });
@@ -60,7 +87,8 @@ function renderHome() {
 
   // 🛒 NECESSITÀ — Lista da ordinare
   if(typeof getNecessitaAttive === 'function') {
-    const necAttive = getNecessitaAttive();
+    // Solo voci ancora "da_ordinare" (escludo quelle già ordinate/in viaggio)
+    const necAttive = getNecessitaAttive().filter(n => n.stato === 'da_ordinare');
     const necUrgenti = necAttive.filter(n => n.priorita === 'urgente');
     const oggi = new Date();
     const tra7gg = new Date(oggi.getTime() + 7*24*60*60*1000);
@@ -93,6 +121,25 @@ function renderHome() {
       alerts.push({
         msg: `🛒 ${necAttive.length} voc${necAttive.length>1?'i':'e'} in lista "Da ordinare"`,
         target: 'magazzino', color: '#5C3A10', bg: 'rgba(200,134,10,0.10)', border: 'rgba(200,134,10,0.4)'
+      });
+    }
+  }
+
+  // 📉 ESAURIMENTO IMMINENTE — articoli con scorta < 1 mese (basato su consumo storico)
+  if(typeof getPrevisioneMesiResidui === 'function') {
+    const inEsaurimento = [];
+    articoli.forEach(a => {
+      const giac = getGiacenzaLocale(a.id);
+      if(giac <= 0) return; // già a zero, lo gestisce "sotto soglia"
+      const mesi = getPrevisioneMesiResidui(a.id, giac);
+      if(mesi !== null && mesi < 1) {
+        inEsaurimento.push(a.nome);
+      }
+    });
+    if(inEsaurimento.length > 0) {
+      alerts.push({
+        msg: `📉 ${inEsaurimento.length} articol${inEsaurimento.length>1?'i':'o'} in esaurimento (< 1 mese): ${inEsaurimento.join(', ')}`,
+        target: 'magazzino', color: '#854F0B', bg: '#FAEEDA', border: '#EF9F27'
       });
     }
   }
@@ -287,14 +334,29 @@ function renderHomeNecessitaBox() {
       return;
     }
 
-    const attive = getNecessitaAttive();
-    if(attive.length === 0) {
+    const attiveTutte = getNecessitaAttive();
+    // Nel box "Da ordinare" mostriamo solo ciò che richiede ancora azione (stato da_ordinare).
+    // Le voci già "ordinato" (in viaggio) non servono qui.
+    const attive = attiveTutte.filter(n => n.stato === 'da_ordinare');
+    const inViaggio = attiveTutte.filter(n => n.stato === 'ordinato');
+
+    if(attive.length === 0 && inViaggio.length === 0) {
       box.style.display = 'none';
       return;
     }
-
-    // Conteggi per priorità + data vicina
-    const urgenti = attive.filter(n => n.priorita === 'urgente');
+    // Se non c'è nulla da ordinare ma ci sono voci in viaggio, mostro solo un riepilogo minimale
+    if(attive.length === 0) {
+      box.style.display = 'block';
+      box.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem">
+          <div style="display:flex;align-items:center;gap:0.5rem">
+            <span style="font-size:1.1rem">🚚</span>
+            <span style="font-size:0.9rem;color:var(--text)">${inViaggio.length} ordin${inViaggio.length>1?'i':'e'} in arrivo · nulla da ordinare</span>
+          </div>
+          <a href="#" onclick="navigateTo('magazzino');setTimeout(()=>{const b=document.querySelector('.mag-tab[onclick*=necessita]');if(b)showMagTab('necessita',b);},80);return false" style="font-size:0.78rem;color:var(--amber);text-decoration:none;font-weight:600">Lista ↗</a>
+        </div>`;
+      return;
+    }
     const alta = attive.filter(n => n.priorita === 'alta');
     const oggi = new Date();
     const tra7gg = new Date(oggi.getTime() + 7*24*60*60*1000);
@@ -366,7 +428,7 @@ function renderHomeNecessitaBox() {
       </div>
 
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;border-top:1px solid var(--cream-dark);padding-top:0.6rem;font-size:0.82rem;color:var(--text-light)">
-        <span><strong style="color:var(--brown)">${attive.length}</strong> voc${attive.length>1?'i':'e'} totali${totStimato > 0 ? ` · Stima: <strong style="color:var(--brown)">€ ${totStimato.toFixed(2)}</strong>` : ''}</span>
+        <span><strong style="color:var(--brown)">${attive.length}</strong> da ordinare${inViaggio.length > 0 ? ` · 🚚 ${inViaggio.length} in arrivo` : ''}${totStimato > 0 ? ` · Stima: <strong style="color:var(--brown)">€ ${totStimato.toFixed(2)}</strong>` : ''}</span>
         <button onclick="copiaListaNecessita()" style="background:transparent;border:1px solid var(--cream-dark);color:var(--brown);padding:0.3rem 0.8rem;border-radius:4px;cursor:pointer;font-family:inherit;font-size:0.82rem">📋 Copia lista</button>
       </div>
     `;

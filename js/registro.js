@@ -86,15 +86,26 @@ function renderMultiArniaFields() {
       return;
     }
 
-    fieldsContainer.innerHTML = `<div style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--brown);margin:1rem 0 0.6rem">📝 Dettagli per arnia (${checks.length})</div>` +
+    fieldsContainer.innerHTML = `
+      <div style="background:rgba(200,134,10,0.08);border:1px solid rgba(200,134,10,0.25);border-radius:6px;padding:0.7rem 1rem;margin:1rem 0 0.8rem;font-size:0.9rem;color:var(--brown)">
+        📋 Stai per registrare <strong>${checks.length} visit${checks.length>1?'e':'a'}</strong> (una per arnia): ${checks.map(c=>{const a=arnie.find(x=>x.id===c.value);return a?'#'+a.num:'';}).filter(Boolean).join(', ')}
+      </div>
+      <div style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--brown);margin:0 0 0.6rem">📝 Dettagli per arnia</div>` +
       checks.map(chk => {
         const arnia = arnie.find(a => a.id === chk.value);
         if(!arnia) return '';
-        // Precompila note dall'ultima ispezione se disponibile
+        // Precompila ispezione dall'ultima visita di questa arnia
+        const ultimaIsp = findUltimaIspezione(arnia.id);
+        const ispPrev = ultimaIsp?.ispezione || {};
+        const covataVal = ispPrev.covata || '';
+        const scorteVal = ispPrev.scorte || '';
+        const telainiVal = ispPrev.telaini || '';
+        const celleVal = ispPrev.celleReali || '0';
         return `
         <div style="border:1px solid var(--cream-dark);border-radius:6px;padding:0.9rem;margin-bottom:0.8rem;background:white">
           <div style="font-weight:600;color:var(--brown);margin-bottom:0.6rem;display:flex;align-items:center;gap:0.4rem">
             🏠 #${arnia.num}${arnia.nome?' — '+arnia.nome:''}
+            ${ultimaIsp ? `<span style="font-size:0.72rem;color:var(--text-light);font-weight:400">· precompilato da ${formatDate(ultimaIsp.data)}</span>` : ''}
           </div>
           <div class="form-row" style="margin-bottom:0.6rem">
             <label style="font-size:0.82rem">Note / Osservazioni</label>
@@ -110,20 +121,20 @@ function renderMultiArniaFields() {
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem">
               <div class="form-row" style="margin:0">
                 <label style="font-size:0.78rem">Covata (0-5)</label>
-                <input type="number" id="multiCovata_${arnia.id}" min="0" max="5" placeholder="—">
+                <input type="number" id="multiCovata_${arnia.id}" min="0" max="5" placeholder="—" value="${covataVal}">
               </div>
               <div class="form-row" style="margin:0">
                 <label style="font-size:0.78rem">Scorte (0-5)</label>
-                <input type="number" id="multiScorte_${arnia.id}" min="0" max="5" placeholder="—">
+                <input type="number" id="multiScorte_${arnia.id}" min="0" max="5" placeholder="—" value="${scorteVal}">
               </div>
               <div class="form-row" style="margin:0">
                 <label style="font-size:0.78rem">Telaini occupati</label>
-                <input type="number" id="multiTelaini_${arnia.id}" min="0" max="20" placeholder="—">
+                <input type="number" id="multiTelaini_${arnia.id}" min="0" max="20" placeholder="—" value="${telainiVal}">
               </div>
               <div class="form-row" style="margin:0">
                 <label style="font-size:0.78rem">Celle reali</label>
                 <select id="multiCelleReali_${arnia.id}">
-                  ${CELLE_REALI_LABEL.map((l,i) => `<option value="${i}">${l}</option>`).join('')}
+                  ${CELLE_REALI_LABEL.map((l,i) => `<option value="${i}"${String(i)===String(celleVal)?' selected':''}>${l}</option>`).join('')}
                 </select>
               </div>
             </div>
