@@ -1,6 +1,140 @@
 // ======= ISPEZIONE =======
 // (TELAINO_OPZIONI, CELLE_REALI_LABEL e renderTelainiVisual sono ora in shared.js)
 
+// ============================================
+// VISITA MULTI-ARNIA
+// ============================================
+function toggleMultiArnia() {
+  try {
+    const isMulti = document.getElementById('logMultiArnia')?.checked;
+    const selector = document.getElementById('multiArniaSelector');
+    const singolaArniaRow = document.getElementById('logArnia')?.closest('.form-row');
+    const noteRow = document.getElementById('logNote')?.closest('.form-row');
+    const varroaRow = document.getElementById('logVarroa')?.closest('.form-row');
+    const ispezioneFields = document.getElementById('ispezioneFields');
+    const accessoriSection = document.getElementById('accessoriSection');
+    const multiFields = document.getElementById('multiArniaFields');
+
+    if(isMulti) {
+      // Mostra selettore multiplo, nascondi dropdown singolo
+      if(selector) selector.style.display = 'block';
+      if(singolaArniaRow) {
+        const sel = document.getElementById('logArnia');
+        if(sel) sel.style.display = 'none';
+        const lbl = singolaArniaRow.querySelector('label');
+        if(lbl) lbl.style.display = 'none';
+      }
+      // Nascondi i campi singoli (note/varroa/ispezione/accessori) — vanno per-arnia
+      if(noteRow) noteRow.style.display = 'none';
+      if(varroaRow) varroaRow.style.display = 'none';
+      if(ispezioneFields) ispezioneFields.style.display = 'none';
+      if(accessoriSection) accessoriSection.style.display = 'none';
+      if(multiFields) multiFields.style.display = 'block';
+
+      renderMultiArniaCheckboxes();
+    } else {
+      // Ripristina modalità singola
+      if(selector) selector.style.display = 'none';
+      if(singolaArniaRow) {
+        const sel = document.getElementById('logArnia');
+        if(sel) sel.style.display = '';
+        const lbl = singolaArniaRow.querySelector('label');
+        if(lbl) lbl.style.display = '';
+      }
+      if(noteRow) noteRow.style.display = '';
+      if(varroaRow) varroaRow.style.display = '';
+      if(multiFields) { multiFields.style.display = 'none'; multiFields.innerHTML = ''; }
+      // Re-applica visibilità ispezione in base ai tipi selezionati
+      toggleIspezioneFields();
+      onVisitaArniaChange();
+    }
+  } catch(err) {
+    console.error('[Registro] Errore in toggleMultiArnia:', err.message);
+  }
+}
+
+function renderMultiArniaCheckboxes() {
+  try {
+    const container = document.getElementById('multiArniaCheckboxes');
+    if(!container) return;
+    const arnieAttive = arnie.filter(a => a.status !== 'dismessa' && !a.annoDismissione);
+    if(arnieAttive.length === 0) {
+      container.innerHTML = '<span style="color:var(--text-light);font-style:italic;font-size:0.85rem">Nessuna arnia disponibile</span>';
+      return;
+    }
+    container.innerHTML = arnieAttive.map(a => `
+      <label class="tipo-chip" style="cursor:pointer">
+        <input type="checkbox" class="multiArniaCheck" value="${a.id}" onchange="renderMultiArniaFields()"> #${a.num}${a.nome?' '+a.nome:''}
+      </label>
+    `).join('');
+  } catch(err) {
+    console.error('[Registro] Errore in renderMultiArniaCheckboxes:', err.message);
+  }
+}
+
+function renderMultiArniaFields() {
+  try {
+    const checks = Array.from(document.querySelectorAll('.multiArniaCheck:checked'));
+    const fieldsContainer = document.getElementById('multiArniaFields');
+    if(!fieldsContainer) return;
+
+    const tipiSelezionati = Array.from(document.querySelectorAll('#logTipo input:checked')).map(x => x.value);
+    const conIspezione = tipiSelezionati.includes('ispezione');
+
+    if(checks.length === 0) {
+      fieldsContainer.innerHTML = '<div style="color:var(--text-light);font-style:italic;font-size:0.9rem;padding:1rem;text-align:center">Seleziona almeno un\'arnia sopra per inserire le note.</div>';
+      return;
+    }
+
+    fieldsContainer.innerHTML = `<div style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--brown);margin:1rem 0 0.6rem">📝 Dettagli per arnia (${checks.length})</div>` +
+      checks.map(chk => {
+        const arnia = arnie.find(a => a.id === chk.value);
+        if(!arnia) return '';
+        // Precompila note dall'ultima ispezione se disponibile
+        return `
+        <div style="border:1px solid var(--cream-dark);border-radius:6px;padding:0.9rem;margin-bottom:0.8rem;background:white">
+          <div style="font-weight:600;color:var(--brown);margin-bottom:0.6rem;display:flex;align-items:center;gap:0.4rem">
+            🏠 #${arnia.num}${arnia.nome?' — '+arnia.nome:''}
+          </div>
+          <div class="form-row" style="margin-bottom:0.6rem">
+            <label style="font-size:0.82rem">Note / Osservazioni</label>
+            <textarea id="multiNote_${arnia.id}" rows="2" placeholder="Note per questa arnia..." style="width:100%"></textarea>
+          </div>
+          <div class="form-row" style="margin-bottom:0">
+            <label style="font-size:0.82rem">Varroa (cadute/giorno)</label>
+            <input type="number" id="multiVarroa_${arnia.id}" min="0" placeholder="—" style="width:100%">
+          </div>
+          ${conIspezione ? `
+          <div style="margin-top:0.7rem;padding-top:0.7rem;border-top:1px dashed var(--cream-dark)">
+            <div style="font-size:0.82rem;color:var(--text-light);margin-bottom:0.5rem">🔍 Ispezione</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem">
+              <div class="form-row" style="margin:0">
+                <label style="font-size:0.78rem">Covata (0-5)</label>
+                <input type="number" id="multiCovata_${arnia.id}" min="0" max="5" placeholder="—">
+              </div>
+              <div class="form-row" style="margin:0">
+                <label style="font-size:0.78rem">Scorte (0-5)</label>
+                <input type="number" id="multiScorte_${arnia.id}" min="0" max="5" placeholder="—">
+              </div>
+              <div class="form-row" style="margin:0">
+                <label style="font-size:0.78rem">Telaini occupati</label>
+                <input type="number" id="multiTelaini_${arnia.id}" min="0" max="20" placeholder="—">
+              </div>
+              <div class="form-row" style="margin:0">
+                <label style="font-size:0.78rem">Celle reali</label>
+                <select id="multiCelleReali_${arnia.id}">
+                  ${CELLE_REALI_LABEL.map((l,i) => `<option value="${i}">${l}</option>`).join('')}
+                </select>
+              </div>
+            </div>
+          </div>` : ''}
+        </div>`;
+      }).join('');
+  } catch(err) {
+    console.error('[Registro] Errore in renderMultiArniaFields:', err.message);
+  }
+}
+
 function precompilaDaUltimaIspezione() {
   const arniaId = document.getElementById('logArnia').value;
   if(!arniaId) return;
@@ -28,6 +162,22 @@ function precompilaDaUltimaIspezione() {
 
 function toggleIspezioneFields() {
   const tipi = Array.from(document.querySelectorAll('#logTipo input:checked')).map(x => x.value);
+
+  // Se in modalità multi-arnia, rigenera i campi per-arnia e nascondi i campi singoli
+  const isMulti = document.getElementById('logMultiArnia')?.checked;
+  if(isMulti) {
+    if(typeof renderMultiArniaFields === 'function') renderMultiArniaFields();
+    // I campi singoli restano nascosti
+    const elIspM = document.getElementById('ispezioneFields');
+    if(elIspM) elIspM.style.display = 'none';
+    // Ma il trattamento (condiviso) deve restare visibile
+    const elTratM = document.getElementById('trattamentoFields');
+    if(elTratM) elTratM.style.display = tipi.includes('trattamento') ? 'block' : 'none';
+    const elRacM = document.getElementById('raccoltaFields');
+    if(elRacM) elRacM.style.display = 'none'; // raccolta non gestita in multi
+    return;
+  }
+
   const showIsp = tipi.includes('ispezione');
   const showRac = tipi.includes('produzione');
   const showTrat = tipi.includes('trattamento');
@@ -407,16 +557,28 @@ function updateArniSelects() {
 function addLogEntry() {
   try {
     const dataEl = document.getElementById('logData');
-    const noteEl = document.getElementById('logNote');
-    if(!dataEl || !noteEl) {
-      console.error('[Registro] Elementi form non trovati (logData/logNote)');
+    if(!dataEl) {
+      console.error('[Registro] Elemento logData non trovato');
       return;
     }
     const data = dataEl.value;
-    const note = noteEl.value.trim();
-    if(!data || !note) { alert('Compila almeno la data e le note'); return; }
+    if(!data) { alert('Inserisci la data'); return; }
     const tipi = Array.from(document.querySelectorAll('#logTipo input:checked')).map(x => x.value);
     if(tipi.length === 0) { alert('Seleziona almeno un tipo di intervento'); return; }
+
+    // ===== MODALITÀ MULTI-ARNIA =====
+    const isMulti = document.getElementById('logMultiArnia')?.checked;
+    if(isMulti) {
+      return addLogEntryMulti(data, tipi);
+    }
+
+    const noteEl = document.getElementById('logNote');
+    if(!noteEl) {
+      console.error('[Registro] Elemento logNote non trovato');
+      return;
+    }
+    const note = noteEl.value.trim();
+    if(!note) { alert('Compila le note'); return; }
 
     // Arnia obbligatoria
     const arniaId = document.getElementById('logArnia').value;
@@ -536,6 +698,97 @@ function addLogEntry() {
   }
 }
 
+// ============================================
+// SALVATAGGIO MULTI-ARNIA
+// Crea N visite distinte (una per arnia selezionata)
+// con campi comuni (data, tipi, trattamento) e campi separati (note, ispezione)
+// ============================================
+function addLogEntryMulti(data, tipi) {
+  try {
+    const checks = Array.from(document.querySelectorAll('.multiArniaCheck:checked'));
+    if(checks.length === 0) { alert('Seleziona almeno un\'arnia'); return; }
+
+    // Dati comuni trattamento (condivisi tra tutte le arnie)
+    let trattamentoData = null;
+    if(tipi.includes('trattamento')) {
+      trattamentoData = {
+        prodotto: document.getElementById('trattProdotto')?.value || '',
+        dosaggio: document.getElementById('trattDosaggio')?.value || '',
+      };
+    }
+
+    const conIspezione = tipi.includes('ispezione');
+    let creati = 0;
+    let almenoUnaNota = false;
+
+    // Verifica che almeno una arnia abbia una nota
+    checks.forEach(chk => {
+      const note = document.getElementById('multiNote_' + chk.value)?.value.trim();
+      if(note) almenoUnaNota = true;
+    });
+    if(!almenoUnaNota) {
+      alert('Inserisci le note per almeno un\'arnia');
+      return;
+    }
+
+    checks.forEach(chk => {
+      const arnia = arnie.find(a => a.id === chk.value);
+      if(!arnia) { console.warn('[Registro] Arnia non trovata in multi:', chk.value); return; }
+
+      const note = document.getElementById('multiNote_' + arnia.id)?.value.trim() || '';
+      // Salta arnie senza note (l'utente potrebbe aver selezionato ma non compilato)
+      if(!note) return;
+
+      const varroa = document.getElementById('multiVarroa_' + arnia.id)?.value || '';
+
+      let ispezioneData = null;
+      if(conIspezione) {
+        const covata = document.getElementById('multiCovata_' + arnia.id)?.value || '';
+        const scorte = document.getElementById('multiScorte_' + arnia.id)?.value || '';
+        const telaini = document.getElementById('multiTelaini_' + arnia.id)?.value || '';
+        const celleReali = document.getElementById('multiCelleReali_' + arnia.id)?.value || '0';
+        ispezioneData = { covata, scorte, telaini, celleReali, mappa: [] };
+      }
+
+      const entry = {
+        id: Date.now().toString() + Math.random().toString(36).slice(2),
+        data,
+        arniaId: arnia.id,
+        arniaNome: `#${arnia.num}${arnia.nome ? ' — ' + arnia.nome : ''}`,
+        tipo: tipi,
+        note,
+        varroa,
+        ispezione: ispezioneData,
+        trattamento: trattamentoData,
+        raccolta: [],
+      };
+      logBook.unshift(entry);
+      creati++;
+    });
+
+    if(creati === 0) {
+      alert('Nessuna visita creata (compila le note delle arnie selezionate)');
+      return;
+    }
+
+    saveDB();
+
+    // Reset form
+    document.getElementById('logMultiArnia').checked = false;
+    toggleMultiArnia();
+    document.querySelectorAll('#logTipo input:checked').forEach(c => c.checked = false);
+    const trattF = document.getElementById('trattamentoFields');
+    if(trattF) trattF.style.display = 'none';
+
+    renderLog();
+    renderStats();
+    showImportToast(`✅ ${creati} visite salvate (${creati} arnie)`);
+  } catch(err) {
+    console.error('[Registro] Errore in addLogEntryMulti:', err.message, err);
+    alert('Errore durante il salvataggio multiplo. Apri F12 per dettagli.');
+  }
+}
+
 function deleteLog(id) {
   if(!confirm('Eliminare questa registrazione?')) return;
   logBook = logBook.filter(e => e.id !== id);
@@ -545,22 +798,40 @@ function deleteLog(id) {
 }
 
 function renderLog() {
+  try {
   const search = (document.getElementById('filterSearch')?.value||'').toLowerCase();
   const tipo = document.getElementById('filterTipo')?.value||'';
   const arniaF = document.getElementById('filterArnia')?.value||'';
+  const dataDa = document.getElementById('filterDataDa')?.value||'';
+  const dataA = document.getElementById('filterDataA')?.value||'';
   let filtered = logBook.filter(e => {
     if(tipo && !getTipi(e).includes(tipo)) return false;
     if(arniaF && e.arniaId !== arniaF) return false;
     if(search && !e.note.toLowerCase().includes(search) && !e.arniaNome.toLowerCase().includes(search)) return false;
+    // Filtro intervallo date (e.data è formato YYYY-MM-DD, confronto stringa funziona)
+    if(dataDa && e.data && e.data < dataDa) return false;
+    if(dataA && e.data && e.data > dataA) return false;
     return true;
   });
+
+  // Info intervallo date
+  const dateInfoEl = document.getElementById('filterDateInfo');
+  if(dateInfoEl) {
+    if(dataDa || dataA) {
+      dateInfoEl.textContent = `${filtered.length} visite nel periodo`;
+    } else {
+      dateInfoEl.textContent = '';
+    }
+  }
+
   const tipoLabel = {ispezione:'Ispezione',trattamento:'Trattamento',nutrizione:'Nutrizione',produzione:'Produzione',salute:'Salute',altro:'Altro'};
   const tipoEmoji = {ispezione:'🔍',trattamento:'💊',nutrizione:'🍬',produzione:'🍯',salute:'⚕️',altro:'📌'};
   // Map per lookup veloce articoli — evita N find() in loop
   const artMap = new Map(articoli.map(a => [a.id, a]));
   const container = document.getElementById('logEntries');
+  if(!container) { console.warn('[Registro] logEntries non trovato'); return; }
   if(filtered.length === 0) {
-    container.innerHTML = `<div class="empty-state"><span class="big">📖</span>Nessuna registrazione trovata.</div>`;
+    container.innerHTML = `<div class="empty-state"><span class="big">📖</span>Nessuna registrazione trovata${(dataDa||dataA)?' nel periodo selezionato':''}.</div>`;
     return;
   }
   container.innerHTML = filtered.map(e => {
@@ -602,6 +873,17 @@ function renderLog() {
       ` : ''}
     </div>`;
   }).join('');
+  } catch(err) {
+    console.error('[Registro] Errore in renderLog:', err.message);
+  }
+}
+
+function resetFiltroDate() {
+  const da = document.getElementById('filterDataDa');
+  const a = document.getElementById('filterDataA');
+  if(da) da.value = '';
+  if(a) a.value = '';
+  renderLog();
 }
 
 function renderStats() {
