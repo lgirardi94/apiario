@@ -256,6 +256,8 @@ function openNecessitaModal(id) {
       document.getElementById('necPriorita').value = n.priorita || 'media';
       document.getElementById('necDataPrevista').value = n.dataPrevista || '';
       document.getElementById('necPrezzoStimato').value = n.prezzoStimato || '';
+      const spedEl = document.getElementById('necSpedizione');
+      if(spedEl) spedEl.value = n.spedizione || '';
       document.getElementById('necNote').value = n.note || '';
     } else {
       document.getElementById('necessitaModalTitle').textContent = '🛒 Nuova necessità';
@@ -268,6 +270,8 @@ function openNecessitaModal(id) {
       document.getElementById('necPriorita').value = 'media';
       document.getElementById('necDataPrevista').value = '';
       document.getElementById('necPrezzoStimato').value = '';
+      const spedEl2 = document.getElementById('necSpedizione');
+      if(spedEl2) spedEl2.value = '';
       document.getElementById('necNote').value = '';
     }
 
@@ -307,6 +311,7 @@ function saveNecessitaEntry() {
     const priorita = document.getElementById('necPriorita').value;
     const dataPrevista = document.getElementById('necDataPrevista').value;
     const prezzoStimato = parseFloat(document.getElementById('necPrezzoStimato').value) || null;
+    const spedizione = parseFloat(document.getElementById('necSpedizione')?.value) || null;
     const note = document.getElementById('necNote').value.trim();
 
     // Validazione
@@ -327,11 +332,12 @@ function saveNecessitaEntry() {
       const newArt = {
         id: Date.now().toString() + Math.random().toString(36).slice(2),
         nome: descrizioneCustom,
-        categoria: 'materiale',
+        categoria: 'altro',
         unita: unita || 'pz',
         scadenza: '',
         lotto: '',
         soglia: '',
+        prezzoUnitario: '',
         note: ''
       };
       articoli.push(newArt);
@@ -352,6 +358,7 @@ function saveNecessitaEntry() {
       priorita,
       dataPrevista,
       prezzoStimato,
+      spedizione,
       note,
       stato: existing?.stato || 'da_ordinare',
       dataCreazione: existing?.dataCreazione || new Date().toISOString().slice(0,10),
@@ -402,19 +409,26 @@ function marcaNecessitaRicevuta(id) {
 
     const art = n.articoloId ? articoli.find(a => a.id === n.articoloId) : null;
     const prezzoTot = parseFloat(n.prezzoStimato) || 0;
+    const spedizione = parseFloat(n.spedizione) || 0;
     const qta = parseFloat(n.quantita) || 0;
     const prezzoUnit = (prezzoTot > 0 && qta > 0) ? (prezzoTot / qta) : 0;
+    const dataOggi = new Date().toISOString().slice(0,10);
 
     // Messaggio di conferma
     let msg = `Confermi di aver ricevuto:\n\n${art ? art.nome : n.descrizione}\nQuantità: ${n.quantita} ${n.unita || ''}`;
     if(prezzoTot > 0) {
-      msg += `\nControvalore: € ${prezzoTot.toFixed(2)}`;
+      msg += `\nMerce: € ${prezzoTot.toFixed(2)}`;
       if(prezzoUnit > 0) msg += ` (€ ${prezzoUnit.toFixed(2)}/${n.unita || 'unità'})`;
     }
+    if(spedizione > 0) msg += `\nSpedizione: € ${spedizione.toFixed(2)}`;
     if(art) {
-      msg += `\n\n✅ Verrà caricato a magazzino come entrata`;
-      if(prezzoUnit > 0) msg += `\n💰 Il prezzo unitario sarà aggiornato a € ${prezzoUnit.toFixed(2)}`;
-    } else {
+      msg += `\n\n✅ Caricato a magazzino`;
+      if(prezzoUnit > 0) msg += `\n💰 Prezzo unitario → € ${prezzoUnit.toFixed(2)}`;
+    }
+    if(prezzoTot > 0 || spedizione > 0) {
+      msg += `\n📒 Registrato in contabilità come spesa`;
+    }
+    if(!art && prezzoTot === 0 && spedizione === 0) {
       msg += `\n\nLa voce verrà rimossa dalla lista.`;
     }
 
@@ -428,17 +442,53 @@ function marcaNecessitaRicevuta(id) {
         articoloId: art.id,
         tipo: 'entrata',
         qta: qta,
-        data: new Date().toISOString().slice(0,10),
+        data: dataOggi,
         note: `Carico da ordine ricevuto${n.fornitore ? ' · '+n.fornitore : ''}${prezzoTot > 0 ? ' · € '+prezzoTot.toFixed(2) : ''}`,
-        valore: prezzoTot > 0 ? prezzoTot : undefined,  // controvalore del carico
+        valore: prezzoTot > 0 ? prezzoTot : undefined,
       });
-
-      // Aggiorna il prezzo unitario dell'articolo (ultimo prezzo pagato)
       if(prezzoUnit > 0) {
         articoli = articoli.map(a => a.id === art.id ? { ...a, prezzoUnitario: prezzoUnit.toFixed(4) } : a);
         console.log('[Necessita] Prezzo unitario aggiornato per', art.nome, '→ €', prezzoUnit.toFixed(4));
       }
       saveMagazzino();
+    }
+
+    // ===== AUTO-SPESA IN CONTABILITÀ =====
+    const descrArticolo = art ? art.nome : (n.descrizione || 'Articolo');
+    // Categoria spesa dedotta dalla categoria magazzino dell'articolo
+    let catSpesa = 'altro_costo';
+    if(art && typeof getCatSpesaPerMagazzino === 'function') {
+      const c = getCatSpesaPerMagazzino(normalizzaCatMagazzino(art.categoria));
+      if(c) catSpesa = c;
+    }
+
+    if(prezzoTot > 0) {
+      movimentiContabili.unshift({
+        id: Date.now().toString() + Math.random().toString(36).slice(2),
+        data: dataOggi,
+        tipo: 'uscita',
+        importo: prezzoTot,
+        categorie: [catSpesa],
+        descrizione: `${descrArticolo}${n.fornitore ? ' · '+n.fornitore : ''} (${qta} ${n.unita||''})`,
+        origine: 'ordine',          // tag movimento auto-generato
+        origineId: id,
+      });
+    }
+    if(spedizione > 0) {
+      movimentiContabili.unshift({
+        id: Date.now().toString() + Math.random().toString(36).slice(2) + 's',
+        data: dataOggi,
+        tipo: 'uscita',
+        importo: spedizione,
+        categorie: ['spedizioni'],
+        descrizione: `Spedizione ${descrArticolo}${n.fornitore ? ' · '+n.fornitore : ''}`,
+        origine: 'ordine',
+        origineId: id,
+      });
+    }
+    if(prezzoTot > 0 || spedizione > 0) {
+      if(typeof saveContabilita === 'function') saveContabilita();
+      else if(typeof saveCont === 'function') saveCont();
     }
 
     // Rimuovi dalla lista (niente storico)
@@ -447,8 +497,12 @@ function marcaNecessitaRicevuta(id) {
     renderNecessita();
     if(typeof renderHome === 'function') renderHome();
     if(typeof renderMagArticoli === 'function') renderMagArticoli();
+    if(typeof renderContRiepilogo === 'function') renderContRiepilogo();
     if(typeof showImportToast === 'function') {
-      showImportToast(art ? `✅ ${art.nome} caricato a magazzino` : '✅ Voce rimossa dalla lista');
+      const parts = [];
+      if(art) parts.push('caricato a magazzino');
+      if(prezzoTot > 0 || spedizione > 0) parts.push('spesa registrata');
+      showImportToast(`✅ ${descrArticolo}${parts.length?' · '+parts.join(' · '):''}`);
     }
   } catch(err) {
     console.error('[Necessita] Errore in marcaNecessitaRicevuta:', err.message);

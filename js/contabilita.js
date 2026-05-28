@@ -148,7 +148,7 @@ function renderContRiepilogo() {
       <div class="mov-cont-item ${m.tipo}">
         <span class="mov-date">${formatDate(m.data)}</span>
         <span class="mov-cont-importo ${m.tipo}">${m.tipo==='entrata'?'+':'-'}€ ${fmt(m.importo)}</span>
-        <div style="flex:1"><div style="font-weight:600;color:var(--brown)">${m.descrizione||'—'}</div>
+        <div style="flex:1"><div style="font-weight:600;color:var(--brown)">${m.descrizione||'—'} ${m.origine ? '<span title="Generato automaticamente da '+(m.origine==='ordine'?'un ordine ricevuto':'una vendita')+'" style="font-size:0.7rem;background:rgba(55,138,221,0.12);color:#185FA5;padding:1px 6px;border-radius:8px;font-weight:600;vertical-align:middle">🔗 auto</span>' : ''}</div>
         <div style="font-size:0.82rem;color:var(--text-light)">${(Array.isArray(m.categorie)?m.categorie:[]).map(c=>{
           const all=[...CAT_ENTRATA,...CAT_USCITA]; const found=all.find(x=>x.id===c); return found?found.label:c;
         }).join(', ')}</div></div>
@@ -714,13 +714,15 @@ function renderContMovimenti() {
 
   el.innerHTML = filtered.map(m=>{
     const cats = (Array.isArray(m.categorie)?m.categorie:[]).map(c=>{const f=all.find(x=>x.id===c);return f?f.label:c;}).join(', ');
+    const autoBadge = m.origine ? ` <span title="Generato automaticamente da ${m.origine==='ordine'?'un ordine ricevuto':'una vendita'} — puoi comunque modificarlo" style="font-size:0.7rem;background:rgba(55,138,221,0.12);color:#185FA5;padding:1px 6px;border-radius:8px;font-weight:600;vertical-align:middle">🔗 auto</span>` : '';
     return `<div class="mov-cont-item ${m.tipo}">
       <span class="mov-date">${formatDate(m.data)}</span>
       <span class="mov-cont-importo ${m.tipo}">${m.tipo==='entrata'?'+':'-'}€ ${fmt(m.importo)}</span>
       <div style="flex:1">
-        <div style="font-weight:600;color:var(--brown)">${m.descrizione||'—'}</div>
+        <div style="font-weight:600;color:var(--brown)">${m.descrizione||'—'}${autoBadge}</div>
         <div style="font-size:0.82rem;color:var(--text-light)">${cats}${m.note?' · '+m.note:''}</div>
       </div>
+      <button class="btn-icon" onclick="openContMovModal('${m.id}')" title="Modifica">✏️</button>
       <button class="btn-icon del" onclick="deleteContMov('${m.id}')" title="Elimina">🗑</button>
     </div>`;
   }).join('');
@@ -744,15 +746,36 @@ function renderCatChips() {
   `).join('');
 }
 
-function openContMovModal() {
-  document.getElementById('contMovModalTitle').textContent = '💰 Nuovo movimento';
-  document.getElementById('editContMovId').value = '';
-  document.getElementById('contMovData').value = new Date().toISOString().slice(0,10);
-  document.getElementById('contMovTipo').value = 'entrata';
-  document.getElementById('contMovDesc').value = '';
-  document.getElementById('contMovImporto').value = '';
-  document.getElementById('contMovNote').value = '';
-  renderCatChips();
+function openContMovModal(id) {
+  const editIdEl = document.getElementById('editContMovId');
+  if(id) {
+    const m = movimentiContabili.find(x => x.id === id);
+    if(!m) { console.warn('[Contabilita] Movimento non trovato:', id); return; }
+    document.getElementById('contMovModalTitle').textContent = m.origine ? '✏️ Modifica movimento 🔗' : '✏️ Modifica movimento';
+    editIdEl.value = id;
+    document.getElementById('contMovData').value = m.data;
+    document.getElementById('contMovTipo').value = m.tipo;
+    document.getElementById('contMovDesc').value = m.descrizione || '';
+    document.getElementById('contMovImporto').value = m.importo;
+    document.getElementById('contMovNote').value = m.note || '';
+    renderCatChips();
+    // Pre-seleziona le categorie
+    setTimeout(() => {
+      (Array.isArray(m.categorie)?m.categorie:[]).forEach(c => {
+        const chk = document.querySelector(`#contCatChips input[value="${c}"]`);
+        if(chk) chk.checked = true;
+      });
+    }, 30);
+  } else {
+    document.getElementById('contMovModalTitle').textContent = '💰 Nuovo movimento';
+    editIdEl.value = '';
+    document.getElementById('contMovData').value = new Date().toISOString().slice(0,10);
+    document.getElementById('contMovTipo').value = 'entrata';
+    document.getElementById('contMovDesc').value = '';
+    document.getElementById('contMovImporto').value = '';
+    document.getElementById('contMovNote').value = '';
+    renderCatChips();
+  }
   document.getElementById('contMovModal').classList.add('open');
 }
 
@@ -764,18 +787,34 @@ function saveContMov() {
   const descrizione = document.getElementById('contMovDesc').value.trim();
   if(!data||!importo||!descrizione){ alert('Compila data, importo e descrizione'); return; }
   const categorie = Array.from(document.querySelectorAll('#contCatChips input:checked')).map(x=>x.value);
-  const mov = {
-    id: Date.now().toString(), data,
-    tipo: document.getElementById('contMovTipo').value,
-    descrizione, importo: parseFloat(importo), categorie,
-    note: document.getElementById('contMovNote').value.trim()
-  };
-  movimentiContabili.unshift(mov);
+  const editId = document.getElementById('editContMovId').value;
+
+  if(editId) {
+    // Modifica: preserva id, origine e origineId
+    const esistente = movimentiContabili.find(x => x.id === editId);
+    movimentiContabili = movimentiContabili.map(x => x.id === editId ? {
+      ...x,
+      data,
+      tipo: document.getElementById('contMovTipo').value,
+      descrizione,
+      importo: parseFloat(importo),
+      categorie,
+      note: document.getElementById('contMovNote').value.trim(),
+    } : x);
+  } else {
+    const mov = {
+      id: Date.now().toString(), data,
+      tipo: document.getElementById('contMovTipo').value,
+      descrizione, importo: parseFloat(importo), categorie,
+      note: document.getElementById('contMovNote').value.trim()
+    };
+    movimentiContabili.unshift(mov);
+  }
   saveContabilita();
   closeContMovModal();
   populateContAnnoFilter();
   renderContMovimenti();
   renderContRiepilogo();
-  showImportToast('✅ Movimento salvato!');
+  showImportToast(editId ? '✅ Movimento aggiornato!' : '✅ Movimento salvato!');
 }
 

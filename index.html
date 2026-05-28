@@ -7,7 +7,7 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐝</text></svg>">
 <link rel="stylesheet" href="style-main.css">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="shared.js?v=20260532"></script>
+<script src="shared.js?v=20260533"></script>
 </head>
 <body>
 
@@ -1809,11 +1809,17 @@
 
       <div style="display:flex;gap:0.8rem;margin-bottom:0.8rem;flex-wrap:wrap;align-items:center">
         <button class="btn" onclick="openArticoloModal()">+ Nuovo articolo</button>
+        <button class="btn btn-secondary" onclick="openVenditaModal()" style="background:var(--green);color:white;border-color:var(--green)">💰 Registra vendita</button>
         <select id="magFiltroCategoria" onchange="renderMagArticoli()" style="padding:0.45rem 0.8rem;border:1px solid var(--cream-dark);border-radius:3px;font-family:'Crimson Pro',serif;font-size:0.95rem;background:white;color:var(--text)">
           <option value="">Tutte le categorie</option>
-          <option value="materiale">🔧 Materiale apistico</option>
-          <option value="consumabile">💊 Consumabili</option>
-          <option value="prodotto">🍯 Prodotto finito</option>
+          <option value="farmaci">💊 Farmaci/sanitari</option>
+          <option value="alimentazione">🍬 Alimentazione</option>
+          <option value="telai_cera">🪵 Telai e cera</option>
+          <option value="arnie">📦 Arnie e componenti</option>
+          <option value="attrezzatura">🔧 Attrezzatura</option>
+          <option value="confezionamento">🫙 Confezionamento</option>
+          <option value="prodotto">🍯 Prodotti finiti</option>
+          <option value="altro">📋 Altro</option>
         </select>
         <select id="magOrdinamento" onchange="renderMagArticoli()" style="padding:0.45rem 0.8rem;border:1px solid var(--cream-dark);border-radius:3px;font-family:'Crimson Pro',serif;font-size:0.95rem;background:white;color:var(--text)">
           <option value="nome">↕ Nome (A-Z)</option>
@@ -2042,6 +2048,7 @@
     <div id="contTabMovimenti" style="display:none">
       <div style="display:flex;gap:0.8rem;margin-bottom:1.2rem;flex-wrap:wrap;align-items:center">
         <button class="btn" onclick="openContMovModal()">+ Nuovo movimento</button>
+        <button class="btn btn-secondary" onclick="openVenditaModal()" style="background:var(--green);color:white;border-color:var(--green)">💰 Registra vendita</button>
         <select id="contFiltroTipo" onchange="renderContMovimenti()" style="padding:0.45rem 0.8rem;border:1px solid var(--cream-dark);border-radius:3px;font-family:'Crimson Pro',serif;font-size:0.95rem;background:white;color:var(--text)">
           <option value="">Tutti i tipi</option>
           <option value="entrata">🟢 Entrate</option>
@@ -2285,6 +2292,63 @@
   </div>
 </div>
 
+<!-- MODAL VENDITA RAPIDA -->
+<div class="modal-overlay" id="venditaModal">
+  <div class="modal" style="max-width:480px">
+    <h3>💰 Registra vendita</h3>
+    <p style="font-size:0.85rem;color:var(--text-light);margin:-0.4rem 0 1rem">Scarica il prodotto dal magazzino e registra l'entrata in contabilità, in un colpo solo.</p>
+    <div class="form-row">
+      <label>Prodotto venduto</label>
+      <select id="vendArticolo" onchange="onVenditaArticoloChange()">
+        <option value="">— Seleziona prodotto —</option>
+      </select>
+      <div style="font-size:0.76rem;color:var(--text-light);font-style:italic;margin-top:0.2rem">Mostra i prodotti finiti. Per vendere altro, scegli "Voce libera" sotto.</div>
+    </div>
+    <div class="form-row">
+      <label><input type="checkbox" id="vendLibera" onchange="onVenditaLiberaToggle()" style="width:auto;margin-right:0.4rem">Voce libera (non scala il magazzino)</label>
+      <input type="text" id="vendDescLibera" placeholder="Es. Vendita nuclei, cera..." style="display:none;margin-top:0.3rem">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+      <div class="form-row">
+        <label>Quantità</label>
+        <input type="number" id="vendQuantita" min="0.01" step="0.01" placeholder="Es. 20" oninput="updateVenditaTotale()">
+      </div>
+      <div class="form-row">
+        <label>Prezzo unitario (€)</label>
+        <input type="number" id="vendPrezzoUnit" min="0" step="0.01" placeholder="Es. 7.00" oninput="updateVenditaTotale()">
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+      <div class="form-row">
+        <label>Data</label>
+        <input type="date" id="vendData">
+      </div>
+      <div class="form-row">
+        <label>Categoria entrata</label>
+        <select id="vendCategoria">
+          <option value="vendita_miele">🍯 Vendita miele</option>
+          <option value="vendita_nuclei">🐝 Vendita nuclei/regine</option>
+          <option value="vendita_cera">🌿 Vendita cera/propoli</option>
+          <option value="altro_ricavo">💰 Altro ricavo</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Cliente / Note (opzionale)</label>
+      <input type="text" id="vendNote" placeholder="Es. Mercato di paese, cliente Rossi...">
+    </div>
+    <div style="background:var(--amber-pale);border-radius:6px;padding:0.7rem 1rem;margin-bottom:1rem;display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:0.9rem;color:var(--brown)">Totale incasso</span>
+      <span id="vendTotale" style="font-size:1.3rem;font-weight:700;color:var(--brown)">€ 0,00</span>
+    </div>
+    <div id="vendGiacenzaWarn" style="display:none;font-size:0.82rem;color:var(--red);margin-bottom:0.8rem"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeVenditaModal()">Annulla</button>
+      <button class="btn" onclick="salvaVendita()">💰 Registra vendita</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL NECESSITÀ (da ordinare) -->
 <div class="modal-overlay" id="necessitaModal">
   <div class="modal" style="max-width:550px">
@@ -2336,10 +2400,17 @@
       </div>
     </div>
 
-    <div class="form-row">
-      <label>Controvalore totale (€) — opzionale</label>
-      <input type="number" id="necPrezzoStimato" min="0" step="0.01" placeholder="Es. 35.00 (totale ordine)">
-      <div style="font-size:0.76rem;color:var(--text-light);font-style:italic;margin-top:0.2rem">Alla ricezione aggiornerà il prezzo unitario dell'articolo (totale ÷ quantità)</div>    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+      <div class="form-row">
+        <label>Controvalore merce (€)</label>
+        <input type="number" id="necPrezzoStimato" min="0" step="0.01" placeholder="Es. 35.00">
+      </div>
+      <div class="form-row">
+        <label>Spese spedizione (€)</label>
+        <input type="number" id="necSpedizione" min="0" step="0.01" placeholder="Es. 7.50">
+      </div>
+    </div>
+    <div style="font-size:0.76rem;color:var(--text-light);font-style:italic;margin:-0.3rem 0 0.6rem">Alla ricezione: la merce aggiorna il prezzo unitario, la spedizione viene registrata come spesa a parte.</div>
 
     <div class="form-row">
       <label>Note</label>
@@ -2655,22 +2726,22 @@
 </div><!-- fine appContent -->
 
 <!-- ===== JS MODULES — ordine importante! ===== -->
-<script src="js/state.js?v=20260532"></script>
-<script src="js/nav.js?v=20260532"></script>
-<script src="js/import-export.js?v=20260532"></script>
-<script src="js/registro.js?v=20260532"></script>
-<script src="js/arnie.js?v=20260532"></script>
-<script src="js/magazzino.js?v=20260532"></script>
-<script src="js/necessita.js?v=20260532"></script>
-<script src="js/ricerca.js?v=20260532"></script>
-<script src="js/insights.js?v=20260532"></script>
-<script src="js/contabilita.js?v=20260532"></script>
-<script src="js/obiettivi.js?v=20260532"></script>
-<script src="js/sciroppo.js?v=20260532"></script>
-<script src="js/candito.js?v=20260532"></script>
-<script src="js/propoli.js?v=20260532"></script>
-<script src="js/report.js?v=20260532"></script>
-<script src="js/home.js?v=20260532"></script>
+<script src="js/state.js?v=20260533"></script>
+<script src="js/nav.js?v=20260533"></script>
+<script src="js/import-export.js?v=20260533"></script>
+<script src="js/registro.js?v=20260533"></script>
+<script src="js/arnie.js?v=20260533"></script>
+<script src="js/magazzino.js?v=20260533"></script>
+<script src="js/necessita.js?v=20260533"></script>
+<script src="js/ricerca.js?v=20260533"></script>
+<script src="js/insights.js?v=20260533"></script>
+<script src="js/contabilita.js?v=20260533"></script>
+<script src="js/obiettivi.js?v=20260533"></script>
+<script src="js/sciroppo.js?v=20260533"></script>
+<script src="js/candito.js?v=20260533"></script>
+<script src="js/propoli.js?v=20260533"></script>
+<script src="js/report.js?v=20260533"></script>
+<script src="js/home.js?v=20260533"></script>
 <script src="js/drive-app.js"></script>
 
 </body>

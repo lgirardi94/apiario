@@ -515,6 +515,38 @@ function esportaReportAnnuale() {
       <div class="kpi"><div class="kpi-num">€ ${(entrate-uscite).toFixed(0)}</div><div class="kpi-lbl">Saldo</div></div>
     </div>`;
 
+    // Valore di magazzino (patrimonio attuale)
+    let valoreMag = 0;
+    (articoli||[]).forEach(a => {
+      const giac = typeof getGiacenzaLocale === 'function' ? getGiacenzaLocale(a.id) : 0;
+      valoreMag += giac * (parseFloat(a.prezzoUnitario) || 0);
+    });
+    if(valoreMag > 0) {
+      html += `<p class="sub">Valore stimato del magazzino a oggi: <strong>€ ${valoreMag.toFixed(2)}</strong> (giacenze × prezzo unitario)</p>`;
+    }
+
+    // Ripartizione spese per categoria
+    const spesePerCat = {};
+    (movimentiContabili||[]).forEach(m => {
+      if(!m.data || !m.data.startsWith(anno) || m.tipo !== 'uscita') return;
+      const cats = Array.isArray(m.categorie) && m.categorie.length ? m.categorie : ['altro_costo'];
+      // Attribuisco l'intero importo alla prima categoria
+      const cat = cats[0];
+      spesePerCat[cat] = (spesePerCat[cat] || 0) + (parseFloat(m.importo)||0);
+    });
+    const catKeys = Object.keys(spesePerCat).sort((a,b)=>spesePerCat[b]-spesePerCat[a]);
+    if(catKeys.length > 0) {
+      const catLabelMap = {};
+      [...CAT_ENTRATA, ...CAT_USCITA].forEach(c => catLabelMap[c.id] = c.label);
+      html += `<h3>Dove vanno le spese</h3><table><tr><th>Categoria</th><th>Importo</th><th>%</th></tr>`;
+      catKeys.forEach(c => {
+        const imp = spesePerCat[c];
+        const pct = uscite > 0 ? Math.round(imp/uscite*100) : 0;
+        html += `<tr><td>${catLabelMap[c]||c}</td><td>€ ${imp.toFixed(2)}</td><td>${pct}%</td></tr>`;
+      });
+      html += `</table>`;
+    }
+
     // SEZIONE 2: Costo del miele
     html += `<h2>🍯 Costo di produzione del miele</h2>
     <div class="kpi-row">

@@ -183,8 +183,19 @@ function renderMagArticoli() {
     const filtroSearch = (document.getElementById('magFiltroSearch')?.value || '').toLowerCase();
     const ordinamento = document.getElementById('magOrdinamento')?.value || 'nome';
     const soloSottoSoglia = document.getElementById('magSoloSottoSoglia')?.checked || false;
-    const catLabel = { materiale: '🔧 Materiale', consumabile: '💊 Consumabile', prodotto: '🍯 Prodotto finito' };
-    const catColor = { materiale: 'var(--brown-light)', consumabile: 'var(--blue)', prodotto: 'var(--amber)' };
+    const catLabel = {
+      farmaci: '💊 Farmaci/sanitari', alimentazione: '🍬 Alimentazione', telai_cera: '🪵 Telai e cera',
+      arnie: '📦 Arnie e componenti', attrezzatura: '🔧 Attrezzatura', confezionamento: '🫙 Confezionamento',
+      prodotto: '🍯 Prodotti finiti', altro: '📋 Altro',
+      // legacy
+      materiale: '🔧 Attrezzatura', consumabile: '🍬 Alimentazione',
+    };
+    const catColor = {
+      farmaci: 'var(--red)', alimentazione: 'var(--amber)', telai_cera: 'var(--brown-light)',
+      arnie: 'var(--brown)', attrezzatura: 'var(--blue)', confezionamento: 'var(--green)',
+      prodotto: 'var(--amber)', altro: 'var(--text-light)',
+      materiale: 'var(--blue)', consumabile: 'var(--amber)',
+    };
 
     // ===== KPI BAR =====
     renderMagKpi();
@@ -196,7 +207,7 @@ function renderMagArticoli() {
     };
 
     let filtered = articoli.filter(a => {
-      if(filtroCategoria && a.categoria !== filtroCategoria) return false;
+      if(filtroCategoria && normalizzaCatMagazzino(a.categoria) !== filtroCategoria) return false;
       if(filtroSearch && !a.nome.toLowerCase().includes(filtroSearch)) return false;
       if(soloSottoSoglia && !isSottoSoglia(a)) return false;
       return true;
@@ -354,8 +365,9 @@ function renderMagKpi() {
 }
 
 // ======= PREVISIONE CONSUMO =======
-// Calcola consumo medio mensile dagli ultimi 6 mesi di uscite
-function getPrevisioneConsumo(articoloId, giacenzaAttuale) {
+// Calcola i mesi residui di scorta basandosi sul consumo degli ultimi 6 mesi.
+// Ritorna null se non ci sono abbastanza dati.
+function getPrevisioneMesiResidui(articoloId, giacenzaAttuale) {
   try {
     const oggi = new Date();
     const seiMesiFa = new Date(oggi.getTime() - 180*24*60*60*1000);
@@ -366,18 +378,38 @@ function getPrevisioneConsumo(articoloId, giacenzaAttuale) {
       const d = new Date(m.data);
       return !isNaN(d.getTime()) && d >= seiMesiFa;
     });
-    if(uscite.length < 2) return ''; // troppi pochi dati
+    if(uscite.length < 2) return null; // troppi pochi dati
 
     const totaleConsumato = uscite.reduce((s, m) => s + (parseFloat(m.qta) || 0), 0);
-    if(totaleConsumato <= 0) return '';
+    if(totaleConsumato <= 0) return null;
 
-    // Mesi effettivi tra prima uscita e oggi
     const date = uscite.map(m => new Date(m.data).getTime()).sort((a,b) => a-b);
     const mesiSpan = Math.max(1, (oggi.getTime() - date[0]) / (1000*60*60*24*30));
     const consumoMensile = totaleConsumato / mesiSpan;
-    if(consumoMensile <= 0) return '';
+    if(consumoMensile <= 0) return null;
 
-    const mesiResidui = giacenzaAttuale / consumoMensile;
+    return giacenzaAttuale / consumoMensile;
+  } catch(err) {
+    console.error('[Magazzino] Errore in getPrevisioneMesiResidui:', err.message);
+    return null;
+  }
+}
+
+// Versione HTML per la card articolo
+function getPrevisioneConsumo(articoloId, giacenzaAttuale) {
+  try {
+    const mesiResidui = getPrevisioneMesiResidui(articoloId, giacenzaAttuale);
+    if(mesiResidui === null) return '';
+
+    // Recupera consumo mensile per il tooltip
+    const oggi = new Date();
+    const seiMesiFa = new Date(oggi.getTime() - 180*24*60*60*1000);
+    const uscite = movimentazioni.filter(m => m.articoloId === articoloId && m.tipo === 'uscita' && m.data && new Date(m.data) >= seiMesiFa);
+    const totaleConsumato = uscite.reduce((s, m) => s + (parseFloat(m.qta) || 0), 0);
+    const date = uscite.map(m => new Date(m.data).getTime()).sort((a,b) => a-b);
+    const mesiSpan = Math.max(1, (oggi.getTime() - date[0]) / (1000*60*60*24*30));
+    const consumoMensile = totaleConsumato / mesiSpan;
+
     let txt, color;
     if(mesiResidui < 1) { txt = 'meno di 1 mese'; color = 'var(--red)'; }
     else if(mesiResidui < 2) { txt = `~${Math.round(mesiResidui)} mese`; color = 'var(--amber)'; }
@@ -387,6 +419,159 @@ function getPrevisioneConsumo(articoloId, giacenzaAttuale) {
   } catch(err) {
     console.error('[Magazzino] Errore in getPrevisioneConsumo:', err.message);
     return '';
+  }
+}
+
+// ======= VENDITA RAPIDA =======
+// Apre il modale vendita. Se articoloId è passato, lo preseleziona.
+function openVenditaModal(articoloId) {
+  try {
+    const modal = document.getElementById('venditaModal');
+    if(!modal) return;
+
+    // Popola dropdown prodotti finiti
+    const sel = document.getElementById('vendArticolo');
+    if(sel) {
+      const prodotti = articoli.filter(a => normalizzaCatMagazzino(a.categoria) === 'prodotto')
+        .sort((a,b) => a.nome.localeCompare(b.nome));
+      // Se non ci sono prodotti finiti, mostra tutti gli articoli
+      const lista = prodotti.length > 0 ? prodotti : [...articoli].sort((a,b)=>a.nome.localeCompare(b.nome));
+      sel.innerHTML = '<option value="">— Seleziona prodotto —</option>' +
+        lista.map(a => `<option value="${a.id}">${a.nome} (${getGiacenzaLocale(a.id)} ${a.unita})</option>`).join('');
+    }
+
+    // Reset campi
+    document.getElementById('editMovId') && (document.getElementById('vendData').value = new Date().toISOString().slice(0,10));
+    document.getElementById('vendQuantita').value = '';
+    document.getElementById('vendPrezzoUnit').value = '';
+    document.getElementById('vendNote').value = '';
+    document.getElementById('vendLibera').checked = false;
+    document.getElementById('vendDescLibera').style.display = 'none';
+    document.getElementById('vendDescLibera').value = '';
+    document.getElementById('vendCategoria').value = 'vendita_miele';
+    if(articoloId && sel) {
+      sel.value = articoloId;
+      onVenditaArticoloChange();
+    }
+    updateVenditaTotale();
+    modal.classList.add('open');
+  } catch(err) {
+    console.error('[Magazzino] Errore in openVenditaModal:', err.message);
+  }
+}
+
+function closeVenditaModal() {
+  const m = document.getElementById('venditaModal');
+  if(m) m.classList.remove('open');
+}
+
+function onVenditaArticoloChange() {
+  // Precompila prezzo unitario suggerito dal prezzo articolo (se presente)
+  const artId = document.getElementById('vendArticolo')?.value;
+  const art = articoli.find(a => a.id === artId);
+  // Suggerisci categoria in base al nome
+  if(art) {
+    const nome = art.nome.toLowerCase();
+    const catSel = document.getElementById('vendCategoria');
+    if(catSel) {
+      if(nome.includes('cera') || nome.includes('propoli') || nome.includes('polline')) catSel.value = 'vendita_cera';
+      else if(nome.includes('nucleo') || nome.includes('regina') || nome.includes('sciame')) catSel.value = 'vendita_nuclei';
+      else catSel.value = 'vendita_miele';
+    }
+  }
+  updateVenditaTotale();
+}
+
+function onVenditaLiberaToggle() {
+  const libera = document.getElementById('vendLibera').checked;
+  document.getElementById('vendDescLibera').style.display = libera ? 'block' : 'none';
+  const sel = document.getElementById('vendArticolo');
+  if(sel) sel.disabled = libera;
+}
+
+function updateVenditaTotale() {
+  const q = parseFloat(document.getElementById('vendQuantita')?.value) || 0;
+  const p = parseFloat(document.getElementById('vendPrezzoUnit')?.value) || 0;
+  const tot = q * p;
+  const el = document.getElementById('vendTotale');
+  if(el) el.textContent = '€ ' + tot.toFixed(2).replace('.', ',');
+
+  // Avviso giacenza insufficiente
+  const warn = document.getElementById('vendGiacenzaWarn');
+  const libera = document.getElementById('vendLibera')?.checked;
+  if(warn && !libera) {
+    const artId = document.getElementById('vendArticolo')?.value;
+    if(artId && q > 0) {
+      const giac = getGiacenzaLocale(artId);
+      if(q > giac) {
+        warn.style.display = 'block';
+        warn.textContent = `⚠️ Giacenza disponibile: ${giac}. Vendi più di quanto hai in magazzino.`;
+      } else {
+        warn.style.display = 'none';
+      }
+    } else {
+      warn.style.display = 'none';
+    }
+  }
+}
+
+function salvaVendita() {
+  try {
+    const libera = document.getElementById('vendLibera').checked;
+    const artId = document.getElementById('vendArticolo').value;
+    const descLibera = document.getElementById('vendDescLibera').value.trim();
+    const q = parseFloat(document.getElementById('vendQuantita').value);
+    const p = parseFloat(document.getElementById('vendPrezzoUnit').value);
+    const data = document.getElementById('vendData').value;
+    const categoria = document.getElementById('vendCategoria').value;
+    const note = document.getElementById('vendNote').value.trim();
+
+    if(!libera && !artId) { alert('Seleziona un prodotto o scegli "Voce libera"'); return; }
+    if(libera && !descLibera) { alert('Inserisci una descrizione per la voce libera'); return; }
+    if(!q || q <= 0) { alert('Inserisci una quantità valida'); return; }
+    if(!p || p < 0) { alert('Inserisci un prezzo valido'); return; }
+    if(!data) { alert('Inserisci la data'); return; }
+
+    const totale = q * p;
+    const art = artId ? articoli.find(a => a.id === artId) : null;
+    const descrizione = libera ? descLibera : (art ? art.nome : 'Vendita');
+
+    // 1. Scarico magazzino (solo se non è voce libera e c'è articolo)
+    if(!libera && art) {
+      movimentazioni.push({
+        id: Date.now().toString() + Math.random().toString(36).slice(2),
+        articoloId: art.id,
+        tipo: 'uscita',
+        qta: q,
+        data,
+        note: `Vendita${note ? ' · '+note : ''}`,
+        valore: totale,
+      });
+      saveMagazzino();
+    }
+
+    // 2. Entrata in contabilità (auto-generata, editabile)
+    movimentiContabili.unshift({
+      id: Date.now().toString() + Math.random().toString(36).slice(2),
+      data,
+      tipo: 'entrata',
+      importo: totale,
+      categorie: [categoria],
+      descrizione: `${descrizione} (${q}${art ? ' '+art.unita : ' pz'} × € ${p.toFixed(2)})${note ? ' · '+note : ''}`,
+      origine: 'vendita',
+      origineArticoloId: art ? art.id : null,
+    });
+    if(typeof saveContabilita === 'function') saveContabilita();
+
+    closeVenditaModal();
+    renderMagArticoli();
+    if(typeof renderContRiepilogo === 'function') renderContRiepilogo();
+    if(typeof renderContMovimenti === 'function') renderContMovimenti();
+    if(typeof renderHome === 'function') renderHome();
+    if(typeof showImportToast === 'function') showImportToast(`💰 Vendita registrata: € ${totale.toFixed(2)}`);
+  } catch(err) {
+    console.error('[Magazzino] Errore in salvaVendita:', err.message);
+    alert('Errore durante la registrazione della vendita: ' + err.message);
   }
 }
 
