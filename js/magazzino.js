@@ -176,52 +176,95 @@ function getGiacenzaLocale(articoloId) {
 }
 
 // ======= RENDER ARTICOLI =======
+// ======= RENDER ARTICOLI =======
 function renderMagArticoli() {
-  const filtroCategoria = document.getElementById('magFiltroCategoria')?.value || '';
-  const filtroSearch = (document.getElementById('magFiltroSearch')?.value || '').toLowerCase();
-  const catLabel = { materiale: '🔧 Materiale', consumabile: '💊 Consumabile', prodotto: '🍯 Prodotto finito' };
-  const catColor = { materiale: 'var(--brown-light)', consumabile: 'var(--blue)', prodotto: 'var(--amber)' };
+  try {
+    const filtroCategoria = document.getElementById('magFiltroCategoria')?.value || '';
+    const filtroSearch = (document.getElementById('magFiltroSearch')?.value || '').toLowerCase();
+    const ordinamento = document.getElementById('magOrdinamento')?.value || 'nome';
+    const soloSottoSoglia = document.getElementById('magSoloSottoSoglia')?.checked || false;
+    const catLabel = { materiale: '🔧 Materiale', consumabile: '💊 Consumabile', prodotto: '🍯 Prodotto finito' };
+    const catColor = { materiale: 'var(--brown-light)', consumabile: 'var(--blue)', prodotto: 'var(--amber)' };
 
-  let filtered = articoli.filter(a => {
-    if(filtroCategoria && a.categoria !== filtroCategoria) return false;
-    if(filtroSearch && !a.nome.toLowerCase().includes(filtroSearch)) return false;
-    return true;
-  });
+    // ===== KPI BAR =====
+    renderMagKpi();
 
-  const grid = document.getElementById('magGrid');
-  if(!grid) return;
+    // Helper: è sotto soglia?
+    const isSottoSoglia = (a) => {
+      const g = getGiacenzaLocale(a.id);
+      return a.soglia && g <= parseFloat(a.soglia);
+    };
 
-  if(filtered.length === 0) {
-    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><span class="big">📦</span>${articoli.length === 0 ? 'Nessun articolo. Aggiungine uno!' : 'Nessun articolo trovato.'}</div>`;
-    return;
-  }
+    let filtered = articoli.filter(a => {
+      if(filtroCategoria && a.categoria !== filtroCategoria) return false;
+      if(filtroSearch && !a.nome.toLowerCase().includes(filtroSearch)) return false;
+      if(soloSottoSoglia && !isSottoSoglia(a)) return false;
+      return true;
+    });
 
-  grid.innerHTML = filtered.map(a => {
-    const giac = getGiacenzaLocale(a.id);
-    const giacClass = giac === 0 ? 'zero' : (a.soglia && giac <= parseFloat(a.soglia) ? 'bassa' : '');
-    const sogliaAlert = a.soglia && giac <= parseFloat(a.soglia) && giac > 0
-      ? `<div style="font-size:0.78rem;color:var(--red);margin-top:0.2rem">⚠️ Sotto soglia minima (${a.soglia} ${a.unita})</div>` : '';
-    const scadenzaHtml = a.scadenza ? (() => {
-      const [y, m] = a.scadenza.split('-');
-      const scadMs = new Date(parseInt(y, 10), parseInt(m, 10)-1, 1).getTime();
-      const oggi = Date.now();
-      const mesiAllaScad = Math.round((scadMs - oggi) / (1000 * 60 * 60 * 24 * 30));
-      const cls = mesiAllaScad <= 3 ? 'vicina' : '';
-      return `<div class="mag-scadenza ${cls}">Scad: ${m}/${y}${a.lotto ? ' · Lotto: '+a.lotto : ''}</div>`;
-    })() : '';
+    // ===== ORDINAMENTO =====
+    filtered = [...filtered].sort((a, b) => {
+      switch(ordinamento) {
+        case 'giacenza_asc':  return getGiacenzaLocale(a.id) - getGiacenzaLocale(b.id);
+        case 'giacenza_desc': return getGiacenzaLocale(b.id) - getGiacenzaLocale(a.id);
+        case 'scadenza': {
+          if(!a.scadenza && !b.scadenza) return 0;
+          if(!a.scadenza) return 1;
+          if(!b.scadenza) return -1;
+          return a.scadenza.localeCompare(b.scadenza);
+        }
+        case 'categoria': return (a.categoria||'').localeCompare(b.categoria||'') || a.nome.localeCompare(b.nome);
+        case 'valore_desc': {
+          const va = getGiacenzaLocale(a.id) * (parseFloat(a.prezzoUnitario)||0);
+          const vb = getGiacenzaLocale(b.id) * (parseFloat(b.prezzoUnitario)||0);
+          return vb - va;
+        }
+        case 'nome':
+        default: return a.nome.localeCompare(b.nome);
+      }
+    });
 
-    return `
-    <div class="mag-card">
-      <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:${catColor[a.categoria]||'var(--brown-light)'};margin-bottom:0.4rem">${catLabel[a.categoria]||a.categoria}</div>
-      <div class="mag-card-nome">${a.nome}</div>
-      ${a.note ? `<div style="font-size:0.82rem;color:var(--text-light);margin-bottom:0.5rem">${a.note}</div>` : ''}
-      <div style="margin-top:0.5rem">
-        <span class="mag-giacenza ${giacClass}">${giac % 1 === 0 ? giac : giac.toFixed(1)}</span>
-        <span class="mag-unita">${a.unita}</span>
-      </div>
-      ${sogliaAlert}
-      ${scadenzaHtml}
-      ${(() => {
+    // Pulsante "aggiungi sotto soglia agli ordini": visibile solo se ci sono sotto-soglia
+    const btnOrdina = document.getElementById('magBtnOrdinaSottoSoglia');
+    if(btnOrdina) {
+      const countSotto = articoli.filter(isSottoSoglia).length;
+      btnOrdina.style.display = countSotto > 0 ? 'inline-block' : 'none';
+      btnOrdina.textContent = `🛒 Aggiungi ${countSotto} sotto soglia agli ordini`;
+    }
+
+    const grid = document.getElementById('magGrid');
+    if(!grid) return;
+
+    if(filtered.length === 0) {
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><span class="big">📦</span>${articoli.length === 0 ? 'Nessun articolo. Aggiungine uno!' : (soloSottoSoglia ? 'Nessun articolo sotto soglia. 👍' : 'Nessun articolo trovato.')}</div>`;
+      return;
+    }
+
+    grid.innerHTML = filtered.map(a => {
+      const giac = getGiacenzaLocale(a.id);
+      const giacClass = giac === 0 ? 'zero' : (a.soglia && giac <= parseFloat(a.soglia) ? 'bassa' : '');
+      const sogliaAlert = a.soglia && giac <= parseFloat(a.soglia) && giac > 0
+        ? `<div style="font-size:0.78rem;color:var(--red);margin-top:0.2rem">⚠️ Sotto soglia minima (${a.soglia} ${a.unita})</div>` : '';
+      const scadenzaHtml = a.scadenza ? (() => {
+        const [y, m] = a.scadenza.split('-');
+        const scadMs = new Date(parseInt(y, 10), parseInt(m, 10)-1, 1).getTime();
+        const oggi = Date.now();
+        const mesiAllaScad = Math.round((scadMs - oggi) / (1000 * 60 * 60 * 24 * 30));
+        const cls = mesiAllaScad <= 3 ? 'vicina' : '';
+        return `<div class="mag-scadenza ${cls}">Scad: ${m}/${y}${a.lotto ? ' · Lotto: '+a.lotto : ''}</div>`;
+      })() : '';
+
+      // Valore economico
+      const prezzoU = parseFloat(a.prezzoUnitario) || 0;
+      const valore = giac * prezzoU;
+      const valoreHtml = prezzoU > 0
+        ? `<div style="font-size:0.78rem;color:var(--text-light);margin-top:0.2rem">💰 € ${prezzoU.toFixed(2)}/${a.unita} · Valore: <strong>€ ${valore.toFixed(2)}</strong></div>` : '';
+
+      // Previsione consumo
+      const previsione = getPrevisioneConsumo(a.id, giac);
+
+      // Badge ordini in corso
+      const ordiniHtml = (() => {
         if(typeof getNecessitaPerArticolo !== 'function') return '';
         const ordiniArt = getNecessitaPerArticolo(a.id);
         if(ordiniArt.length === 0) return '';
@@ -232,15 +275,212 @@ function renderMagArticoli() {
         if(daOrd > 0 && inArrivo > 0) label = `${daOrd} da ordinare · ${inArrivo} in arrivo`;
         else if(daOrd > 0) label = `${daOrd} da ordinare`;
         else if(inArrivo > 0) label = `${inArrivo} in arrivo`;
-        return `<div onclick="navigateTo('magazzino');setTimeout(()=>{const b=document.querySelector('.mag-tab[onclick*=\\'necessita\\']');if(b)showMagTab('necessita',b);},50)" style="margin-top:0.4rem;background:rgba(200,134,10,0.12);color:var(--brown);padding:0.3rem 0.6rem;border-radius:4px;font-size:0.78rem;display:flex;align-items:center;gap:0.3rem;cursor:pointer;border:1px solid rgba(200,134,10,0.25)" title="Clicca per vedere la lista ordini">🛒 <strong>${totaleOrd % 1 === 0 ? totaleOrd : totaleOrd.toFixed(1)} ${a.unita}</strong> ${label}</div>`;
-      })()}
-      <div class="mag-actions">
-        <button class="btn" style="padding:0.35rem 0.8rem;font-size:0.82rem" onclick="openMovModal('${a.id}')">+ Mov.</button>
-        <button class="btn btn-secondary" style="padding:0.35rem 0.7rem;font-size:0.82rem" onclick="openArticoloModal('${a.id}')">✏️</button>
-        <button class="btn btn-danger" style="padding:0.35rem 0.7rem;font-size:0.82rem" onclick="deleteArticolo('${a.id}')">🗑</button>
-      </div>
-    </div>`;
-  }).join('');
+        return `<div onclick="event.stopPropagation();const b=document.querySelector('.mag-tab[onclick*=necessita]');if(b)showMagTab('necessita',b)" style="margin-top:0.4rem;background:rgba(200,134,10,0.12);color:var(--brown);padding:0.3rem 0.6rem;border-radius:4px;font-size:0.78rem;display:flex;align-items:center;gap:0.3rem;cursor:pointer;border:1px solid rgba(200,134,10,0.25)" title="Clicca per vedere la lista ordini">🛒 <strong>${totaleOrd % 1 === 0 ? totaleOrd : totaleOrd.toFixed(1)} ${a.unita}</strong> ${label}</div>`;
+      })();
+
+      return `
+      <div class="mag-card">
+        <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:${catColor[a.categoria]||'var(--brown-light)'};margin-bottom:0.4rem">${catLabel[a.categoria]||a.categoria}</div>
+        <div class="mag-card-nome">${a.nome}</div>
+        ${a.note ? `<div style="font-size:0.82rem;color:var(--text-light);margin-bottom:0.5rem">${a.note}</div>` : ''}
+        <div style="margin-top:0.5rem;display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap">
+          <span class="mag-giacenza ${giacClass}">${giac % 1 === 0 ? giac : giac.toFixed(1)}</span>
+          <span class="mag-unita">${a.unita}</span>
+          <!-- Carico/scarico rapido inline -->
+          <span style="display:inline-flex;gap:0.25rem;margin-left:auto">
+            <button onclick="movRapido('${a.id}', -1)" title="Scarico -1" style="width:28px;height:28px;border-radius:50%;border:1px solid var(--red);background:white;color:var(--red);cursor:pointer;font-size:1rem;font-weight:700;line-height:1;display:flex;align-items:center;justify-content:center">−</button>
+            <button onclick="movRapido('${a.id}', 1)" title="Carico +1" style="width:28px;height:28px;border-radius:50%;border:1px solid var(--green);background:white;color:var(--green);cursor:pointer;font-size:1rem;font-weight:700;line-height:1;display:flex;align-items:center;justify-content:center">+</button>
+          </span>
+        </div>
+        ${sogliaAlert}
+        ${scadenzaHtml}
+        ${valoreHtml}
+        ${previsione}
+        ${ordiniHtml}
+        <div class="mag-actions">
+          <button class="btn" style="padding:0.35rem 0.8rem;font-size:0.82rem" onclick="openMovModal('${a.id}')">+ Mov.</button>
+          <button class="btn btn-secondary" style="padding:0.35rem 0.7rem;font-size:0.82rem" onclick="openArticoloModal('${a.id}')">✏️</button>
+          <button class="btn btn-danger" style="padding:0.35rem 0.7rem;font-size:0.82rem" onclick="deleteArticolo('${a.id}')">🗑</button>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(err) {
+    console.error('[Magazzino] Errore in renderMagArticoli:', err.message);
+  }
+}
+
+// ======= KPI MAGAZZINO =======
+function renderMagKpi() {
+  try {
+    const bar = document.getElementById('magKpiBar');
+    if(!bar) return;
+
+    const totArticoli = articoli.length;
+    const sottoSoglia = articoli.filter(a => {
+      const g = getGiacenzaLocale(a.id);
+      return a.soglia && g <= parseFloat(a.soglia);
+    }).length;
+
+    // In scadenza nei prossimi 3 mesi
+    const oggi = Date.now();
+    const inScadenza = articoli.filter(a => {
+      if(!a.scadenza) return false;
+      const [y, m] = a.scadenza.split('-');
+      const scadMs = new Date(parseInt(y,10), parseInt(m,10)-1, 1).getTime();
+      const mesi = (scadMs - oggi) / (1000*60*60*24*30);
+      return mesi <= 3;
+    }).length;
+
+    // Valore totale magazzino
+    const valoreTot = articoli.reduce((s, a) => {
+      const g = getGiacenzaLocale(a.id);
+      return s + g * (parseFloat(a.prezzoUnitario) || 0);
+    }, 0);
+
+    const kpi = (icon, val, label, color) => `
+      <div style="flex:1;min-width:110px;background:white;border:1px solid var(--cream-dark);border-radius:6px;padding:0.6rem 0.8rem;text-align:center">
+        <div style="font-size:1.3rem;font-weight:700;color:${color};line-height:1">${icon} ${val}</div>
+        <div style="font-size:0.72rem;color:var(--text-light);margin-top:0.2rem;text-transform:uppercase;letter-spacing:0.04em">${label}</div>
+      </div>`;
+
+    bar.innerHTML =
+      kpi('📦', totArticoli, 'Articoli', 'var(--brown)') +
+      kpi('⚠️', sottoSoglia, 'Sotto soglia', sottoSoglia > 0 ? 'var(--red)' : 'var(--text-light)') +
+      kpi('⏰', inScadenza, 'In scadenza', inScadenza > 0 ? 'var(--amber)' : 'var(--text-light)') +
+      (valoreTot > 0 ? kpi('💰', '€' + valoreTot.toFixed(0), 'Valore stimato', 'var(--green)') : '');
+  } catch(err) {
+    console.error('[Magazzino] Errore in renderMagKpi:', err.message);
+  }
+}
+
+// ======= PREVISIONE CONSUMO =======
+// Calcola consumo medio mensile dagli ultimi 6 mesi di uscite
+function getPrevisioneConsumo(articoloId, giacenzaAttuale) {
+  try {
+    const oggi = new Date();
+    const seiMesiFa = new Date(oggi.getTime() - 180*24*60*60*1000);
+    const uscite = movimentazioni.filter(m => {
+      if(m.articoloId !== articoloId) return false;
+      if(m.tipo !== 'uscita') return false;
+      if(!m.data) return false;
+      const d = new Date(m.data);
+      return !isNaN(d.getTime()) && d >= seiMesiFa;
+    });
+    if(uscite.length < 2) return ''; // troppi pochi dati
+
+    const totaleConsumato = uscite.reduce((s, m) => s + (parseFloat(m.qta) || 0), 0);
+    if(totaleConsumato <= 0) return '';
+
+    // Mesi effettivi tra prima uscita e oggi
+    const date = uscite.map(m => new Date(m.data).getTime()).sort((a,b) => a-b);
+    const mesiSpan = Math.max(1, (oggi.getTime() - date[0]) / (1000*60*60*24*30));
+    const consumoMensile = totaleConsumato / mesiSpan;
+    if(consumoMensile <= 0) return '';
+
+    const mesiResidui = giacenzaAttuale / consumoMensile;
+    let txt, color;
+    if(mesiResidui < 1) { txt = 'meno di 1 mese'; color = 'var(--red)'; }
+    else if(mesiResidui < 2) { txt = `~${Math.round(mesiResidui)} mese`; color = 'var(--amber)'; }
+    else { txt = `~${Math.round(mesiResidui)} mesi`; color = 'var(--text-light)'; }
+
+    return `<div style="font-size:0.76rem;color:${color};margin-top:0.2rem" title="Consumo medio: ${consumoMensile.toFixed(1)}/mese negli ultimi 6 mesi">📉 Scorta per ${txt}</div>`;
+  } catch(err) {
+    console.error('[Magazzino] Errore in getPrevisioneConsumo:', err.message);
+    return '';
+  }
+}
+
+// ======= MOVIMENTO RAPIDO (+1 / -1 inline) =======
+function movRapido(articoloId, delta) {
+  try {
+    const art = articoli.find(a => a.id === articoloId);
+    if(!art) { console.warn('[Magazzino] Articolo non trovato:', articoloId); return; }
+
+    // Per scarico, verifica che ci sia giacenza
+    const giac = getGiacenzaLocale(articoloId);
+    if(delta < 0 && giac <= 0) {
+      showImportToast('⚠️ Giacenza già a zero');
+      return;
+    }
+
+    movimentazioni.push({
+      id: Date.now().toString() + Math.random().toString(36).slice(2),
+      articoloId,
+      tipo: delta > 0 ? 'entrata' : 'uscita',
+      qta: Math.abs(delta),
+      data: new Date().toISOString().slice(0,10),
+      note: delta > 0 ? 'Carico rapido +1' : 'Scarico rapido -1',
+    });
+    saveMagazzino();
+    renderMagArticoli();
+  } catch(err) {
+    console.error('[Magazzino] Errore in movRapido:', err.message);
+  }
+}
+
+// ======= AGGIUNGI SOTTO-SOGLIA AGLI ORDINI =======
+function aggiungiSottoSogliaAOrdini() {
+  try {
+    const sottoSoglia = articoli.filter(a => {
+      const g = getGiacenzaLocale(a.id);
+      return a.soglia && g <= parseFloat(a.soglia);
+    });
+    if(sottoSoglia.length === 0) {
+      alert('Nessun articolo sotto soglia.');
+      return;
+    }
+
+    // Filtra quelli già in lista ordini (per non duplicare)
+    const giaInLista = (typeof necessita !== 'undefined')
+      ? new Set(necessita.filter(n => n.stato !== 'ricevuto').map(n => n.articoloId).filter(Boolean))
+      : new Set();
+
+    const daAggiungere = sottoSoglia.filter(a => !giaInLista.has(a.id));
+    if(daAggiungere.length === 0) {
+      alert('Tutti gli articoli sotto soglia sono già nella lista ordini.');
+      return;
+    }
+
+    if(!confirm(`Aggiungere ${daAggiungere.length} articol${daAggiungere.length>1?'i':'o'} sotto soglia alla lista "Da ordinare"?\n\n${daAggiungere.map(a=>'• '+a.nome).join('\n')}`)) return;
+
+    if(typeof necessita === 'undefined') {
+      console.error('[Magazzino] Variabile necessita non disponibile');
+      return;
+    }
+
+    daAggiungere.forEach(a => {
+      const giac = getGiacenzaLocale(a.id);
+      const soglia = parseFloat(a.soglia) || 0;
+      // Quantità suggerita: porta a 2× soglia (l'utente può modificarla dopo)
+      const qtaSuggerita = Math.max(1, Math.round(soglia * 2 - giac));
+      necessita.push({
+        id: Date.now().toString() + Math.random().toString(36).slice(2) + a.id.slice(-3),
+        articoloId: a.id,
+        descrizione: '',
+        quantita: qtaSuggerita,
+        unita: a.unita || 'pz',
+        fornitore: '',
+        priorita: giac === 0 ? 'alta' : 'media',
+        dataPrevista: '',
+        prezzoStimato: parseFloat(a.prezzoUnitario) ? (parseFloat(a.prezzoUnitario) * qtaSuggerita) : null,
+        note: `Aggiunto automaticamente (sotto soglia: ${giac}/${a.soglia} ${a.unita})`,
+        stato: 'da_ordinare',
+        dataCreazione: new Date().toISOString().slice(0,10),
+        dataOrdine: null,
+      });
+    });
+
+    if(typeof saveNecessita === 'function') saveNecessita();
+    if(typeof renderNecessita === 'function') renderNecessita();
+    if(typeof renderHome === 'function') renderHome();
+    showImportToast(`✅ ${daAggiungere.length} articoli aggiunti agli ordini`);
+
+    // Passa alla tab ordini per mostrare il risultato
+    const b = document.querySelector('.mag-tab[onclick*=necessita]');
+    if(b) showMagTab('necessita', b);
+  } catch(err) {
+    console.error('[Magazzino] Errore in aggiungiSottoSogliaAOrdini:', err.message);
+  }
 }
 
 // ======= RENDER MOVIMENTAZIONI =======
@@ -303,6 +543,8 @@ function openArticoloModal(id) {
     document.getElementById('artScadenza').value = a.scadenza || '';
     document.getElementById('artLotto').value = a.lotto || '';
     document.getElementById('artSoglia').value = a.soglia || '';
+    const prezzoEl = document.getElementById('artPrezzoUnitario');
+    if(prezzoEl) prezzoEl.value = a.prezzoUnitario || '';
     document.getElementById('artNote').value = a.note || '';
   } else {
     document.getElementById('articoloModalTitle').textContent = '📦 Nuovo articolo';
@@ -313,6 +555,8 @@ function openArticoloModal(id) {
     document.getElementById('artScadenza').value = '';
     document.getElementById('artLotto').value = '';
     document.getElementById('artSoglia').value = '';
+    const prezzoEl = document.getElementById('artPrezzoUnitario');
+    if(prezzoEl) prezzoEl.value = '';
     document.getElementById('artNote').value = '';
   }
   toggleCampiConsumabile();
@@ -364,9 +608,17 @@ function saveArticolo() {
     scadenza: document.getElementById('artScadenza').value || '',
     lotto: document.getElementById('artLotto').value.trim(),
     soglia: document.getElementById('artSoglia').value,
+    prezzoUnitario: document.getElementById('artPrezzoUnitario')?.value || '',
     note: document.getElementById('artNote').value.trim()
   };
-  if(editId) { articoli = articoli.map(a => a.id === editId ? data : a); }
+  // Preserva prezzoUnitario esistente se il campo è vuoto in modifica
+  if(editId) {
+    const esistente = articoli.find(a => a.id === editId);
+    if(esistente && !data.prezzoUnitario && esistente.prezzoUnitario) {
+      data.prezzoUnitario = esistente.prezzoUnitario;
+    }
+    articoli = articoli.map(a => a.id === editId ? data : a);
+  }
   else { articoli.push(data); }
   saveMagazzino();
   closeArticoloModal();
