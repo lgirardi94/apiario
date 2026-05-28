@@ -7,7 +7,7 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐝</text></svg>">
 <link rel="stylesheet" href="style-main.css">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="shared.js?v=20260528"></script>
+<script src="shared.js?v=20260530"></script>
 </head>
 <body>
 
@@ -1543,6 +1543,18 @@
           <label>Arnia <span style="color:var(--red);font-size:0.8rem">* obbligatoria</span></label>
           <select id="logArnia" onchange="onVisitaArniaChange()"><option value="">— Seleziona arnia —</option></select>
         </div>
+
+        <!-- Toggle modalità multi-arnia -->
+        <div class="form-row" style="background:rgba(200,134,10,0.06);border-radius:6px;padding:0.6rem 0.8rem">
+          <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;margin:0">
+            <input type="checkbox" id="logMultiArnia" onchange="toggleMultiArnia()" style="width:auto;margin:0">
+            <span>🏘️ <strong>Visita multipla</strong> — registra più arnie insieme</span>
+          </label>
+          <div id="multiArniaSelector" style="display:none;margin-top:0.8rem">
+            <div style="font-size:0.82rem;color:var(--text-light);margin-bottom:0.5rem">Seleziona le arnie da visitare:</div>
+            <div id="multiArniaCheckboxes" style="display:flex;flex-wrap:wrap;gap:0.4rem"></div>
+          </div>
+        </div>
         <div class="form-row">
           <label>Tipo di intervento <span style="font-weight:300;font-style:italic;text-transform:none">(anche più di uno)</span></label>
           <div id="logTipo" style="display:flex;flex-wrap:wrap;gap:0.5rem;padding:0.3rem 0">
@@ -1652,6 +1664,9 @@
           <div id="accessoriContent"></div>
         </div>
 
+        <!-- ===== CAMPI PER-ARNIA (modalità multipla) ===== -->
+        <div id="multiArniaFields" style="display:none"></div>
+
         <button class="btn" onclick="addLogEntry()">Salva registrazione</button>
       </div>
       <div class="card">
@@ -1675,6 +1690,14 @@
         <option value="">Tutte le arnie</option>
       </select>
       <button class="btn btn-secondary" onclick="exportCSV()">⬇ Esporta CSV</button>
+    </div>
+    <div class="log-filters" style="margin-top:0.6rem;align-items:center">
+      <label style="font-size:0.85rem;color:var(--text-light);white-space:nowrap">📅 Dal</label>
+      <input type="date" id="filterDataDa" onchange="renderLog()" style="min-width:140px">
+      <label style="font-size:0.85rem;color:var(--text-light);white-space:nowrap">al</label>
+      <input type="date" id="filterDataA" onchange="renderLog()" style="min-width:140px">
+      <button class="btn btn-secondary" style="padding:0.35rem 0.7rem;font-size:0.82rem" onclick="resetFiltroDate()" title="Azzera intervallo date">✕ Azzera date</button>
+      <span id="filterDateInfo" style="font-size:0.82rem;color:var(--text-light)"></span>
     </div>
     <div class="log-entries" id="logEntries"></div>
   </section>
@@ -2548,20 +2571,20 @@
 </div><!-- fine appContent -->
 
 <!-- ===== JS MODULES — ordine importante! ===== -->
-<script src="js/state.js?v=20260528"></script>
-<script src="js/nav.js?v=20260528"></script>
-<script src="js/import-export.js?v=20260528"></script>
-<script src="js/registro.js?v=20260528"></script>
-<script src="js/arnie.js?v=20260528"></script>
-<script src="js/magazzino.js?v=20260528"></script>
-<script src="js/necessita.js?v=20260528"></script>
-<script src="js/contabilita.js?v=20260528"></script>
-<script src="js/obiettivi.js?v=20260528"></script>
-<script src="js/sciroppo.js?v=20260528"></script>
-<script src="js/candito.js?v=20260528"></script>
-<script src="js/propoli.js?v=20260528"></script>
-<script src="js/report.js?v=20260528"></script>
-<script src="js/home.js?v=20260528"></script>
+<script src="js/state.js?v=20260530"></script>
+<script src="js/nav.js?v=20260530"></script>
+<script src="js/import-export.js?v=20260530"></script>
+<script src="js/registro.js?v=20260530"></script>
+<script src="js/arnie.js?v=20260530"></script>
+<script src="js/magazzino.js?v=20260530"></script>
+<script src="js/necessita.js?v=20260530"></script>
+<script src="js/contabilita.js?v=20260530"></script>
+<script src="js/obiettivi.js?v=20260530"></script>
+<script src="js/sciroppo.js?v=20260530"></script>
+<script src="js/candito.js?v=20260530"></script>
+<script src="js/propoli.js?v=20260530"></script>
+<script src="js/report.js?v=20260530"></script>
+<script src="js/home.js?v=20260530"></script>
 <script src="js/drive-app.js"></script>
 
 </body>
