@@ -377,6 +377,47 @@ async function driveWriteFile(name, payload) {
 }
 
 /**
+ * Lista i file di backup automatici (nome inizia con apiario_autobackup_).
+ * Ritorna array di { id, name, modifiedTime } ordinati per nome (data) decrescente.
+ */
+async function driveListBackups() {
+  const r = await _driveApiCall(
+    `https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name+contains+'apiario_autobackup_'&fields=files(id,name,modifiedTime)&orderBy=name desc`
+  );
+  const d = await r.json();
+  return (d.files || []).filter(f => f.name.startsWith('apiario_autobackup_'));
+}
+
+async function driveDeleteFile(fileId) {
+  await _driveApiCall(`https://www.googleapis.com/drive/v3/files/${fileId}`, { method: 'DELETE' });
+}
+
+/**
+ * Crea un backup automatico datato e mantiene solo gli ultimi N (default 5).
+ * Il nome è apiario_autobackup_YYYY-MM-DD.json
+ */
+async function driveCreateAutoBackup(fullData, maxBackups = 5) {
+  const oggi = new Date().toISOString().slice(0, 10);
+  const name = `apiario_autobackup_${oggi}.json`;
+  await driveWriteFile(name, { version: 1, backupDate: new Date().toISOString(), ...fullData });
+
+  // Retention: elimina i backup più vecchi oltre maxBackups
+  try {
+    const backups = await driveListBackups();
+    if(backups.length > maxBackups) {
+      // backups già ordinati per nome desc (più recenti primi)
+      const daEliminare = backups.slice(maxBackups);
+      for(const b of daEliminare) {
+        await driveDeleteFile(b.id);
+      }
+    }
+  } catch(e) {
+    console.warn('[Shared] Retention backup fallita:', e.message);
+  }
+  return name;
+}
+
+/**
  * Carica tutti i file Drive in parallelo.
  * Restituisce { db, mag, cont, ob, nec, settings } — null se il file non esiste ancora.
  */
