@@ -1,4 +1,4 @@
-// ===== FILE VERSION: 2026-05-28.1 · versioni.js =====
+// ===== FILE VERSION: 2026-05-28.2 · versioni.js =====
 /* ===========================================================
    REGISTRO VERSIONI FILE
    Ogni volta che si modifica un file, aggiornare qui la sua versione
@@ -10,7 +10,7 @@ const FILE_VERSIONS = {
   // HTML
   'apiario.html (index.html)': '2026-05-28.9',
   'visita_rapida.html':        '2026-05-28.1',
-  'inserimento_rapido.html':   '2026-05-28.2',
+  'inserimento_rapido.html':   '2026-05-28.3',
   'etichette.html':            '2026-05-28.1',
   // Core
   'shared.js':                 '2026-05-28.1',
@@ -33,7 +33,7 @@ const FILE_VERSIONS = {
   // Infrastruttura
   'js/drive-app.js':           '2026-05-28.1',
   'js/import-export.js':       '2026-05-28.1',
-  'js/versioni.js':            '2026-05-28.1',
+  'js/versioni.js':            '2026-05-28.2',
 };
 
 // Versione "build" complessiva dell'app (la più recente tra tutte)
