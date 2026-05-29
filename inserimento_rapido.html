@@ -7,7 +7,7 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐝</text></svg>">
 <link rel="stylesheet" href="style-mobile.css">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="shared.js?v=20260524"></script>
+<script src="shared.js?v=20260534"></script>
 </head>
 <body>
 
@@ -44,6 +44,9 @@
     </button>
     <button class="tab-btn" onclick="showTab('magazzino', this)">
       <span class="tab-icon">📦</span>Magazzino
+    </button>
+    <button class="tab-btn" onclick="showTab('vendita', this)">
+      <span class="tab-icon">💰</span>Vendita
     </button>
     <button class="tab-btn" onclick="showTab('necessita', this)">
       <span class="tab-icon">🛒</span>Da ordinare
@@ -122,9 +125,14 @@
           <label>Categoria</label>
           <select id="magFiltroCat" onchange="populateMagArticoli()">
             <option value="">— Tutte le categorie —</option>
-            <option value="materiale">🔧 Materiale</option>
-            <option value="consumabile">💊 Consumabili</option>
+            <option value="farmaci">💊 Farmaci/sanitari</option>
+            <option value="alimentazione">🍬 Alimentazione</option>
+            <option value="telai_cera">🪵 Telai e cera</option>
+            <option value="arnie">📦 Arnie e componenti</option>
+            <option value="attrezzatura">🔧 Attrezzatura</option>
+            <option value="confezionamento">🫙 Confezionamento</option>
             <option value="prodotto">🍯 Prodotti finiti</option>
+            <option value="altro">📋 Altro</option>
           </select>
         </div>
         <div class="form-group">
@@ -163,6 +171,59 @@
           <div id="magNoteSuggerimenti" style="margin-top:0.4rem;display:flex;flex-wrap:wrap;gap:0.3rem"></div>
         </div>
         <button class="btn-submit" id="btnSaveMag" onclick="saveMagazzinoWithValidation()">💾 Salva movimento</button>
+      </div>
+    </div>
+
+    <!-- VENDITA -->
+    <div class="section" id="tabVendita">
+      <h2 style="margin-top:0;color:var(--brown);font-family:'Playfair Display',serif">💰 Registra vendita</h2>
+      <p style="color:var(--text-light);font-size:0.85rem;margin-bottom:1rem">Scarica il prodotto dal magazzino e registra l'entrata in contabilità in un colpo solo.</p>
+      <div class="card-form">
+        <div class="form-group">
+          <label>Prodotto venduto</label>
+          <select id="vendIRArticolo" onchange="onVendIRArticoloChange()">
+            <option value="">— Seleziona prodotto —</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label style="display:flex;align-items:center;gap:0.4rem"><input type="checkbox" id="vendIRLibera" onchange="onVendIRLiberaToggle()" style="width:auto;margin:0">Voce libera (non scala il magazzino)</label>
+          <input type="text" id="vendIRDescLibera" placeholder="Es. Vendita nuclei..." style="display:none;margin-top:0.4rem">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem">
+          <div class="form-group">
+            <label>Quantità</label>
+            <input type="number" id="vendIRQuantita" min="0.01" step="0.01" placeholder="Es. 20" inputmode="decimal" oninput="updateVendIRTotale()">
+          </div>
+          <div class="form-group">
+            <label>Prezzo unitario (€)</label>
+            <input type="number" id="vendIRPrezzo" min="0" step="0.01" placeholder="Es. 7.00" inputmode="decimal" oninput="updateVendIRTotale()">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem">
+          <div class="form-group">
+            <label>Data</label>
+            <input type="date" id="vendIRData">
+          </div>
+          <div class="form-group">
+            <label>Categoria</label>
+            <select id="vendIRCategoria">
+              <option value="vendita_miele">🍯 Vendita miele</option>
+              <option value="vendita_nuclei">🐝 Vendita nuclei/regine</option>
+              <option value="vendita_cera">🌿 Vendita cera/propoli</option>
+              <option value="altro_ricavo">💰 Altro ricavo</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Cliente / Note (opzionale)</label>
+          <input type="text" id="vendIRNote" placeholder="Es. cliente Rossi, mercato...">
+        </div>
+        <div style="background:rgba(200,134,10,0.1);border-radius:6px;padding:0.7rem 1rem;margin-bottom:1rem;display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:0.9rem;color:var(--brown)">Totale incasso</span>
+          <span id="vendIRTotale" style="font-size:1.3rem;font-weight:700;color:var(--brown)">€ 0,00</span>
+        </div>
+        <div id="vendIRWarn" style="display:none;font-size:0.82rem;color:var(--red);margin-bottom:0.8rem"></div>
+        <button class="btn-submit" onclick="salvaVenditaIR()">💰 Registra vendita</button>
       </div>
     </div>
 
@@ -221,9 +282,15 @@
             <input type="date" id="irNecDataPrevista">
           </div>
         </div>
-        <div class="form-group">
-          <label>Controvalore totale (€) — opzionale</label>
-          <input type="number" id="irNecPrezzoStimato" min="0" step="0.01" placeholder="Es. 35.00 (totale)">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem">
+          <div class="form-group">
+            <label>Controvalore merce (€)</label>
+            <input type="number" id="irNecPrezzoStimato" min="0" step="0.01" placeholder="Es. 35.00">
+          </div>
+          <div class="form-group">
+            <label>Spedizione (€)</label>
+            <input type="number" id="irNecSpedizione" min="0" step="0.01" placeholder="Es. 7.50">
+          </div>
         </div>
         <div class="form-group">
           <label>Note</label>
@@ -387,6 +454,7 @@ function showTab(tab, btn) {
     if(btn) btn.classList.add('active');
     if(tab === 'riepilogo') renderRiepilogo();
     if(tab === 'magazzino') populateMagArticoli();
+    if(tab === 'vendita') populateVendIRArticoli();
     if(tab === 'necessita') renderIRNecessita();
   } catch(err) {
     console.error('[Inserimento rapido] Errore in showTab:', err.message);
@@ -429,6 +497,12 @@ function renderIRNecessita() {
       const unita = n.unita || (art && art.unita) || '';
       const pColor = priColor[n.priorita] || '#C8860A';
       const dataInfo = n.dataPrevista ? ` · 📅 ${formatDateIT(n.dataPrevista)}` : '';
+      const prezzo = parseFloat(n.prezzoStimato) || 0;
+      const qtaN = parseFloat(n.quantita) || 0;
+      const prezzoInfo = prezzo > 0
+        ? ` · 💰 € ${prezzo.toFixed(2)}${qtaN>0 ? ` (€ ${(prezzo/qtaN).toFixed(2)}/${escapeHtmlIR(unita)})` : ''}`
+        : '';
+      const spedInfo = (parseFloat(n.spedizione)||0) > 0 ? ` · 📮 € ${parseFloat(n.spedizione).toFixed(2)}` : '';
 
       return `
         <div style="background:white;border:1px solid var(--cream-dark);border-left:4px solid ${pColor};border-radius:6px;padding:0.7rem 0.85rem;margin-bottom:0.5rem;${n.stato==='ordinato'?'opacity:0.85':''}">
@@ -438,7 +512,7 @@ function renderIRNecessita() {
                 ${priIcon[n.priorita]||''} ${escapeHtmlIR(desc)}
               </div>
               <div style="font-size:0.85rem;color:var(--text);margin-bottom:0.15rem">
-                <strong>${n.quantita || '?'}</strong> ${escapeHtmlIR(unita)}${n.fornitore ? ' · 🏪 '+escapeHtmlIR(n.fornitore) : ''}
+                <strong>${n.quantita || '?'}</strong> ${escapeHtmlIR(unita)}${n.fornitore ? ' · 🏪 '+escapeHtmlIR(n.fornitore) : ''}${prezzoInfo}${spedInfo}
               </div>
               <div style="font-size:0.78rem;color:var(--text-light)">
                 ${statoIcon[n.stato]||''} ${statoLabel[n.stato]||n.stato}${dataInfo}
@@ -492,6 +566,8 @@ function openIRNecessitaForm(id) {
       document.getElementById('irNecPriorita').value = n.priorita || 'media';
       document.getElementById('irNecDataPrevista').value = n.dataPrevista || '';
       document.getElementById('irNecPrezzoStimato').value = n.prezzoStimato || '';
+      const spedEl = document.getElementById('irNecSpedizione');
+      if(spedEl) spedEl.value = n.spedizione || '';
       document.getElementById('irNecNote').value = n.note || '';
     } else {
       document.getElementById('irNecEditId').value = '';
@@ -503,6 +579,8 @@ function openIRNecessitaForm(id) {
       document.getElementById('irNecPriorita').value = 'media';
       document.getElementById('irNecDataPrevista').value = '';
       document.getElementById('irNecPrezzoStimato').value = '';
+      const spedEl2 = document.getElementById('irNecSpedizione');
+      if(spedEl2) spedEl2.value = '';
       document.getElementById('irNecNote').value = '';
     }
 
@@ -539,6 +617,7 @@ async function saveIRNecessita() {
     const priorita = document.getElementById('irNecPriorita').value;
     const dataPrevista = document.getElementById('irNecDataPrevista').value;
     const prezzoStimato = parseFloat(document.getElementById('irNecPrezzoStimato').value) || null;
+    const spedizione = parseFloat(document.getElementById('irNecSpedizione')?.value) || null;
     const note = document.getElementById('irNecNote').value.trim();
 
     if(!articoloId && !descrizioneCustom) {
@@ -558,11 +637,12 @@ async function saveIRNecessita() {
       const newArt = {
         id: Date.now().toString() + Math.random().toString(36).slice(2),
         nome: descrizioneCustom,
-        categoria: 'materiale',
+        categoria: 'altro',
         unita: unita || 'pz',
         scadenza: '',
         lotto: '',
         soglia: '',
+        prezzoUnitario: '',
         note: ''
       };
       if(!magData.articoli) magData.articoli = [];
@@ -585,6 +665,7 @@ async function saveIRNecessita() {
       priorita,
       dataPrevista,
       prezzoStimato,
+      spedizione,
       note,
       stato: existing?.stato || 'da_ordinare',
       dataCreazione: existing?.dataCreazione || new Date().toISOString().slice(0,10),
@@ -623,12 +704,17 @@ async function markIRNecRicevuta(id) {
     if(!n) return;
     const art = n.articoloId ? (magData.articoli || []).find(a => a.id === n.articoloId) : null;
     const prezzoTot = parseFloat(n.prezzoStimato) || 0;
+    const spedizione = parseFloat(n.spedizione) || 0;
     const qta = parseFloat(n.quantita) || 0;
     const prezzoUnit = (prezzoTot > 0 && qta > 0) ? (prezzoTot / qta) : 0;
+    const dataOggi = new Date().toISOString().slice(0,10);
 
     let msg = `Confermi di aver ricevuto:\n\n${art ? art.nome : n.descrizione}\nQuantità: ${n.quantita} ${n.unita || ''}`;
-    if(prezzoTot > 0) msg += `\nControvalore: € ${prezzoTot.toFixed(2)}`;
-    msg += art ? `\n\n✅ Verrà caricato a magazzino${prezzoUnit > 0 ? `\n💰 Prezzo unitario → € ${prezzoUnit.toFixed(2)}` : ''}` : `\n\nLa voce verrà rimossa.`;
+    if(prezzoTot > 0) msg += `\nMerce: € ${prezzoTot.toFixed(2)}`;
+    if(spedizione > 0) msg += `\nSpedizione: € ${spedizione.toFixed(2)}`;
+    if(art) msg += `\n\n✅ Caricato a magazzino${prezzoUnit > 0 ? `\n💰 Prezzo unitario → € ${prezzoUnit.toFixed(2)}` : ''}`;
+    if(prezzoTot > 0 || spedizione > 0) msg += `\n📒 Spesa registrata in contabilità`;
+    if(!art && prezzoTot === 0 && spedizione === 0) msg += `\n\nLa voce verrà rimossa.`;
     if(!confirm(msg)) return;
 
     // Se articolo collegato → crea movimentazione di carico + aggiorna prezzo
@@ -639,14 +725,40 @@ async function markIRNecRicevuta(id) {
         articoloId: art.id,
         tipo: 'entrata',
         qta: qta,
-        data: new Date().toISOString().slice(0,10),
+        data: dataOggi,
         note: `Carico da ordine ricevuto${n.fornitore ? ' · '+n.fornitore : ''}${prezzoTot > 0 ? ' · € '+prezzoTot.toFixed(2) : ''}`,
         valore: prezzoTot > 0 ? prezzoTot : undefined,
       });
-      // Aggiorna prezzo unitario articolo
       if(prezzoUnit > 0) {
         magData.articoli = magData.articoli.map(a => a.id === art.id ? { ...a, prezzoUnitario: prezzoUnit.toFixed(4) } : a);
       }
+    }
+
+    // ===== AUTO-SPESA IN CONTABILITÀ =====
+    const descrArticolo = art ? art.nome : (n.descrizione || 'Articolo');
+    let catSpesa = 'altro_costo';
+    if(art && typeof getCatSpesaPerMagazzino === 'function' && typeof normalizzaCatMagazzino === 'function') {
+      const c = getCatSpesaPerMagazzino(normalizzaCatMagazzino(art.categoria));
+      if(c) catSpesa = c;
+    }
+    if(!contData.movimentiContabili) contData.movimentiContabili = [];
+    if(prezzoTot > 0) {
+      contData.movimentiContabili.unshift({
+        id: Date.now().toString() + Math.random().toString(36).slice(2),
+        data: dataOggi, tipo: 'uscita', importo: prezzoTot,
+        categorie: [catSpesa],
+        descrizione: `${descrArticolo}${n.fornitore ? ' · '+n.fornitore : ''} (${qta} ${n.unita||''})`,
+        origine: 'ordine', origineId: id,
+      });
+    }
+    if(spedizione > 0) {
+      contData.movimentiContabili.unshift({
+        id: Date.now().toString() + Math.random().toString(36).slice(2) + 's',
+        data: dataOggi, tipo: 'uscita', importo: spedizione,
+        categorie: ['spedizioni'],
+        descrizione: `Spedizione ${descrArticolo}${n.fornitore ? ' · '+n.fornitore : ''}`,
+        origine: 'ordine', origineId: id,
+      });
     }
 
     // Rimuovi dalla lista
@@ -654,7 +766,10 @@ async function markIRNecRicevuta(id) {
 
     await saveAllToCloudIR();
     renderIRNecessita();
-    showToastIR(art ? '✅ Caricato a magazzino' : '✅ Rimosso dalla lista');
+    const parts = [];
+    if(art) parts.push('caricato');
+    if(prezzoTot > 0 || spedizione > 0) parts.push('spesa registrata');
+    showToastIR(`✅ ${descrArticolo}${parts.length?' · '+parts.join(' · '):''}`);
   } catch(err) {
     console.error('[Inserimento rapido] Errore in markIRNecRicevuta:', err.message);
     alert('Errore: ' + err.message);
@@ -663,15 +778,133 @@ async function markIRNecRicevuta(id) {
 
 async function saveAllToCloudIR() {
   try {
-    // Salva solo il file necessità (più il magazzino se ho creato articoli nuovi)
+    // Salva necessità, magazzino e contabilità (la ricezione ordini tocca tutti e tre)
     necData.savedAt = new Date().toISOString();
     await driveWriteFile(FILENAME_NEC, necData);
-    // Se ho aggiunto articoli, salvo anche il magazzino
     magData.savedAt = new Date().toISOString();
     await driveWriteFile(FILENAME_MAG, magData);
+    contData.savedAt = new Date().toISOString();
+    await driveWriteFile(FILENAME_CONT, contData);
   } catch(err) {
     console.error('[Inserimento rapido] Errore salvataggio Drive:', err.message);
     alert('Errore salvataggio su Drive: ' + err.message);
+  }
+}
+
+// ===== VENDITA RAPIDA (IR) =====
+function populateVendIRArticoli() {
+  const sel = document.getElementById('vendIRArticolo');
+  if(!sel) return;
+  const norm = (typeof normalizzaCatMagazzino === 'function') ? normalizzaCatMagazzino : (x=>x||'altro');
+  const arts = magData.articoli || [];
+  const prodotti = arts.filter(a => norm(a.categoria) === 'prodotto').sort((a,b)=>a.nome.localeCompare(b.nome));
+  const lista = prodotti.length > 0 ? prodotti : [...arts].sort((a,b)=>a.nome.localeCompare(b.nome));
+  sel.innerHTML = '<option value="">— Seleziona prodotto —</option>' +
+    lista.map(a => `<option value="${a.id}">${escapeHtmlIR(a.nome)} (${getGiacenza(a.id, magData.movimentazioni||[])} ${a.unita})</option>`).join('');
+  const dataEl = document.getElementById('vendIRData');
+  if(dataEl && !dataEl.value) dataEl.value = today();
+  updateVendIRTotale();
+}
+
+function onVendIRArticoloChange() {
+  const artId = document.getElementById('vendIRArticolo')?.value;
+  const art = (magData.articoli||[]).find(a => a.id === artId);
+  if(art) {
+    const nome = art.nome.toLowerCase();
+    const catSel = document.getElementById('vendIRCategoria');
+    if(catSel) {
+      if(nome.includes('cera') || nome.includes('propoli') || nome.includes('polline')) catSel.value = 'vendita_cera';
+      else if(nome.includes('nucleo') || nome.includes('regina') || nome.includes('sciame')) catSel.value = 'vendita_nuclei';
+      else catSel.value = 'vendita_miele';
+    }
+  }
+  updateVendIRTotale();
+}
+
+function onVendIRLiberaToggle() {
+  const libera = document.getElementById('vendIRLibera').checked;
+  document.getElementById('vendIRDescLibera').style.display = libera ? 'block' : 'none';
+  const sel = document.getElementById('vendIRArticolo');
+  if(sel) sel.disabled = libera;
+  updateVendIRTotale();
+}
+
+function updateVendIRTotale() {
+  const q = parseFloat(document.getElementById('vendIRQuantita')?.value) || 0;
+  const p = parseFloat(document.getElementById('vendIRPrezzo')?.value) || 0;
+  const tot = q * p;
+  const el = document.getElementById('vendIRTotale');
+  if(el) el.textContent = '€ ' + tot.toFixed(2).replace('.', ',');
+  const warn = document.getElementById('vendIRWarn');
+  const libera = document.getElementById('vendIRLibera')?.checked;
+  if(warn && !libera) {
+    const artId = document.getElementById('vendIRArticolo')?.value;
+    if(artId && q > 0) {
+      const giac = getGiacenza(artId, magData.movimentazioni||[]);
+      if(q > giac) { warn.style.display = 'block'; warn.textContent = `⚠️ Giacenza disponibile: ${giac}.`; }
+      else warn.style.display = 'none';
+    } else warn.style.display = 'none';
+  }
+}
+
+async function salvaVenditaIR() {
+  try {
+    const libera = document.getElementById('vendIRLibera').checked;
+    const artId = document.getElementById('vendIRArticolo').value;
+    const descLibera = document.getElementById('vendIRDescLibera').value.trim();
+    const q = parseFloat(document.getElementById('vendIRQuantita').value);
+    const p = parseFloat(document.getElementById('vendIRPrezzo').value);
+    const data = document.getElementById('vendIRData').value;
+    const categoria = document.getElementById('vendIRCategoria').value;
+    const note = document.getElementById('vendIRNote').value.trim();
+
+    if(!libera && !artId) { showToastIR('⚠️ Seleziona un prodotto o "Voce libera"'); return; }
+    if(libera && !descLibera) { showToastIR('⚠️ Inserisci la descrizione'); return; }
+    if(!q || q <= 0) { showToastIR('⚠️ Quantità non valida'); return; }
+    if(!p || p < 0) { showToastIR('⚠️ Prezzo non valido'); return; }
+    if(!data) { showToastIR('⚠️ Inserisci la data'); return; }
+
+    const totale = q * p;
+    const art = artId ? (magData.articoli||[]).find(a => a.id === artId) : null;
+    const descrizione = libera ? descLibera : (art ? art.nome : 'Vendita');
+
+    // Scarico magazzino
+    if(!libera && art) {
+      if(!magData.movimentazioni) magData.movimentazioni = [];
+      magData.movimentazioni.push({
+        id: Date.now().toString() + Math.random().toString(36).slice(2),
+        articoloId: art.id, tipo: 'uscita', qta: q, data,
+        note: `Vendita${note ? ' · '+note : ''}`, valore: totale,
+      });
+    }
+    // Entrata contabilità
+    if(!contData.movimentiContabili) contData.movimentiContabili = [];
+    contData.movimentiContabili.unshift({
+      id: Date.now().toString() + Math.random().toString(36).slice(2),
+      data, tipo: 'entrata', importo: totale, categorie: [categoria],
+      descrizione: `${descrizione} (${q}${art ? ' '+art.unita : ' pz'} × € ${p.toFixed(2)})${note ? ' · '+note : ''}`,
+      origine: 'vendita', origineArticoloId: art ? art.id : null,
+    });
+
+    // Salva su Drive
+    magData.savedAt = new Date().toISOString();
+    contData.savedAt = new Date().toISOString();
+    await driveWriteFile(FILENAME_MAG, magData);
+    await driveWriteFile(FILENAME_CONT, contData);
+
+    // Reset form
+    document.getElementById('vendIRQuantita').value = '';
+    document.getElementById('vendIRPrezzo').value = '';
+    document.getElementById('vendIRNote').value = '';
+    document.getElementById('vendIRDescLibera').value = '';
+    document.getElementById('vendIRLibera').checked = false;
+    onVendIRLiberaToggle();
+    populateVendIRArticoli();
+    updateVendIRTotale();
+    showToastIR(`💰 Vendita registrata: € ${totale.toFixed(2)}`);
+  } catch(err) {
+    console.error('[Inserimento rapido] Errore salvaVenditaIR:', err.message);
+    alert('Errore: ' + err.message);
   }
 }
 
@@ -773,7 +1006,8 @@ function renderRiepilogo() {
   const recentCont = mc.slice().sort((a,b) => b.data.localeCompare(a.data)).slice(0,5).map(m => ({
     tipo: m.tipo, val: (m.tipo==='entrata'?'+':'−')+'€'+fmt(m.importo),
     valClass: m.tipo==='entrata'?'green':'red',
-    desc: m.descrizione||'—', date: formatDate(m.data),
+    desc: (m.descrizione||'—') + (m.origine ? ' <span style="font-size:0.65rem;background:rgba(55,138,221,0.12);color:#185FA5;padding:1px 5px;border-radius:7px;font-weight:600">🔗 auto</span>' : ''),
+    date: formatDate(m.data),
     icon: m.tipo==='entrata'?'💰':'💸'
   }));
 
@@ -926,9 +1160,17 @@ function resetFormCont() {
 
 // ===== MAGAZZINO =====
 const CAT_LABELS = {
-  materiale:   '🔧 Materiale',
-  consumabile: '💊 Consumabili',
-  prodotto:    '🍯 Prodotti finiti'
+  farmaci:        '💊 Farmaci/sanitari',
+  alimentazione:  '🍬 Alimentazione',
+  telai_cera:     '🪵 Telai e cera',
+  arnie:          '📦 Arnie e componenti',
+  attrezzatura:   '🔧 Attrezzatura',
+  confezionamento:'🫙 Confezionamento',
+  prodotto:       '🍯 Prodotti finiti',
+  altro:          '📋 Altro',
+  // legacy
+  materiale:      '🔧 Attrezzatura',
+  consumabile:    '🍬 Alimentazione'
 };
 
 const NOTE_SUGGERIMENTI = {
@@ -943,16 +1185,17 @@ function populateMagArticoli() {
   const search = (document.getElementById('magSearch')?.value || '').toLowerCase();
   const cur = sel.value;
 
-  // Filtra
+  // Filtra (normalizza categorie legacy)
+  const norm = (typeof normalizzaCatMagazzino === 'function') ? normalizzaCatMagazzino : (x => x || 'altro');
   const filtered = arts.filter(a =>
-    (!cat    || a.categoria === cat) &&
+    (!cat    || norm(a.categoria) === cat) &&
     (!search || a.nome.toLowerCase().includes(search))
   );
 
   // Raggruppa per categoria
   const groups = {};
   filtered.forEach(a => {
-    const c = a.categoria || 'altro';
+    const c = norm(a.categoria);
     if(!groups[c]) groups[c] = [];
     groups[c].push(a);
   });
