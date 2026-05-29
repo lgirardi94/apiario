@@ -1,4 +1,4 @@
-// ===== FILE VERSION: 2026-05-28.5 · necessita.js =====
+// ===== FILE VERSION: 2026-05-28.7 · necessita.js =====
 /* ===========================================================
    NECESSITÀ — Lista articoli da ordinare
    =========================================================== */
@@ -214,6 +214,74 @@ function escapeHtmlAttr(s) {
 // ============================================
 // MODALE: APRI / CHIUDI / SALVA
 // ============================================
+let _necRigheCount = 0;
+
+// Costruisce una riga articolo nel modale necessità
+function buildRigaNec(idx, preset) {
+  preset = preset || {};
+  const articoliSorted = [...articoli].sort((a,b) => a.nome.localeCompare(b.nome));
+  const opts = '<option value="">— Articolo nuovo (scrivi sotto) —</option>' +
+    articoliSorted.map(a => `<option value="${a.id}" ${preset.articoloId===a.id?'selected':''}>${escapeHtmlAttr(a.nome)} ${a.unita ? '('+a.unita+')' : ''}</option>`).join('');
+
+  const div = document.createElement('div');
+  div.id = 'necRiga_' + idx;
+  div.style.cssText = 'border:1px solid var(--cream-dark);border-radius:6px;padding:0.7rem 0.8rem;position:relative';
+  div.innerHTML = `
+    <select id="necArt_${idx}" onchange="onNecRigaArticoloChange(${idx})" style="margin-bottom:0.4rem;width:100%">${opts}</select>
+    <input type="text" id="necDesc_${idx}" placeholder="…oppure articolo nuovo / descrizione libera" value="${preset.descrizione?escapeHtmlAttr(preset.descrizione):''}" style="margin-bottom:0.4rem;width:100%">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:0.5rem;align-items:end">
+      <div>
+        <label style="font-size:0.76rem;color:var(--text-light)">Quantità</label>
+        <input type="number" id="necQta_${idx}" min="0.01" step="0.01" placeholder="Es. 50" value="${preset.quantita||''}">
+      </div>
+      <div>
+        <label style="font-size:0.76rem;color:var(--text-light)">Unità</label>
+        <input type="text" id="necUni_${idx}" placeholder="pz, kg…" value="${preset.unita?escapeHtmlAttr(preset.unita):''}" list="necUnitaList">
+      </div>
+      <div>
+        <label style="font-size:0.76rem;color:var(--text-light)">Controvalore merce €</label>
+        <input type="number" id="necPrz_${idx}" min="0" step="0.01" placeholder="Es. 35.00" value="${preset.prezzoStimato||''}">
+      </div>
+    </div>
+    <button type="button" onclick="rimuoviRigaNec(${idx})" title="Rimuovi riga" class="necRigaDelBtn" style="position:absolute;top:0.4rem;right:0.4rem;background:none;border:none;color:var(--red);cursor:pointer;font-size:0.95rem;display:none">✕</button>
+  `;
+  return div;
+}
+
+function aggiungiRigaNec(preset) {
+  const cont = document.getElementById('necRighe');
+  if(!cont) return;
+  cont.appendChild(buildRigaNec(_necRigheCount++, preset));
+  aggiornaVisibilitaDelBtnNec();
+}
+
+function rimuoviRigaNec(idx) {
+  const riga = document.getElementById('necRiga_' + idx);
+  if(riga) riga.remove();
+  aggiornaVisibilitaDelBtnNec();
+}
+
+// Mostra il pulsante ✕ solo se c'è più di una riga
+function aggiornaVisibilitaDelBtnNec() {
+  const righe = document.getElementById('necRighe')?.querySelectorAll('[id^="necRiga_"]') || [];
+  righe.forEach(r => {
+    const btn = r.querySelector('.necRigaDelBtn');
+    if(btn) btn.style.display = righe.length > 1 ? 'block' : 'none';
+  });
+}
+
+function onNecRigaArticoloChange(idx) {
+  const artId = document.getElementById('necArt_' + idx)?.value;
+  if(!artId) return;
+  const art = articoli.find(a => a.id === artId);
+  if(art) {
+    const uni = document.getElementById('necUni_' + idx);
+    if(uni && !uni.value) uni.value = art.unita || '';
+    const desc = document.getElementById('necDesc_' + idx);
+    if(desc) desc.value = '';
+  }
+}
+
 function openNecessitaModal(id) {
   try {
     const modal = document.getElementById('necessitaModal');
@@ -222,59 +290,45 @@ function openNecessitaModal(id) {
       return;
     }
 
-    // Popola dropdown articoli
-    const selArticolo = document.getElementById('necArticoloId');
-    if(selArticolo) {
-      const articoliSorted = [...articoli].sort((a,b) => a.nome.localeCompare(b.nome));
-      selArticolo.innerHTML = '<option value="">— Articolo nuovo (scrivi sotto) —</option>' +
-        articoliSorted.map(a => `<option value="${a.id}">${escapeHtmlAttr(a.nome)} ${a.unita ? '('+a.unita+')' : ''}</option>`).join('');
-    }
+    // Reset dropdown suggerimenti fornitori
+    const suggBox = document.getElementById('necFornitoreSuggest');
+    if(suggBox) { suggBox.style.display = 'none'; suggBox.innerHTML = ''; }
 
-    // Popola lista fornitori (lista gestita + quelli già usati)
-    const fornitoriUsati = (typeof getTuttiFornitori === 'function')
-      ? getTuttiFornitori()
-      : [...new Set(necessita.map(n => n.fornitore).filter(Boolean))].sort();
-    const dlFornitori = document.getElementById('necFornitoreList');
-    if(dlFornitori) {
-      dlFornitori.innerHTML = fornitoriUsati.map(f => `<option value="${escapeHtmlAttr(f)}">`).join('');
-    }
+    const cont = document.getElementById('necRighe');
+    if(cont) cont.innerHTML = '';
+    _necRigheCount = 0;
+
+    const addBtn = document.getElementById('necAddRigaBtn');
 
     if(id) {
+      // MODIFICA: una sola riga, niente "aggiungi articolo"
       const n = necessita.find(x => x.id === id);
-      if(!n) {
-        console.warn('[Necessita] Necessità non trovata:', id);
-        return;
-      }
+      if(!n) { console.warn('[Necessita] Necessità non trovata:', id); return; }
       document.getElementById('necessitaModalTitle').textContent = '✏️ Modifica necessità';
       document.getElementById('editNecessitaId').value = id;
-      if(selArticolo) selArticolo.value = n.articoloId || '';
-      document.getElementById('necDescrizioneCustom').value = n.descrizione || '';
-      document.getElementById('necQuantita').value = n.quantita || '';
-      document.getElementById('necUnita').value = n.unita || '';
+      aggiungiRigaNec({ articoloId: n.articoloId, descrizione: n.descrizione, quantita: n.quantita, unita: n.unita, prezzoStimato: n.prezzoStimato });
       document.getElementById('necFornitore').value = n.fornitore || '';
       document.getElementById('necPriorita').value = n.priorita || 'media';
       document.getElementById('necDataPrevista').value = n.dataPrevista || '';
-      document.getElementById('necPrezzoStimato').value = n.prezzoStimato || '';
       const spedEl = document.getElementById('necSpedizione');
       if(spedEl) spedEl.value = n.spedizione || '';
       document.getElementById('necNote').value = n.note || '';
+      if(addBtn) addBtn.style.display = 'none';
     } else {
+      // NUOVO: riga iniziale + pulsante aggiungi
       document.getElementById('necessitaModalTitle').textContent = '🛒 Nuova necessità';
       document.getElementById('editNecessitaId').value = '';
-      if(selArticolo) selArticolo.value = '';
-      document.getElementById('necDescrizioneCustom').value = '';
-      document.getElementById('necQuantita').value = '';
-      document.getElementById('necUnita').value = '';
+      aggiungiRigaNec();
       document.getElementById('necFornitore').value = '';
       document.getElementById('necPriorita').value = 'media';
       document.getElementById('necDataPrevista').value = '';
-      document.getElementById('necPrezzoStimato').value = '';
       const spedEl2 = document.getElementById('necSpedizione');
       if(spedEl2) spedEl2.value = '';
       document.getElementById('necNote').value = '';
+      if(addBtn) addBtn.style.display = '';
     }
 
-    onNecArticoloChange();
+    aggiornaVisibilitaDelBtnNec();
     modal.classList.add('open');
   } catch(err) {
     console.error('[Necessita] Errore in openNecessitaModal:', err.message);
@@ -286,98 +340,109 @@ function closeNecessitaModal() {
   if(modal) modal.classList.remove('open');
 }
 
-// Quando seleziono un articolo dalla dropdown, popolo unità automaticamente
-function onNecArticoloChange() {
-  const artId = document.getElementById('necArticoloId')?.value;
-  if(!artId) return;
-  const art = articoli.find(a => a.id === artId);
-  if(art) {
-    const unitaEl = document.getElementById('necUnita');
-    if(unitaEl && !unitaEl.value) unitaEl.value = art.unita || '';
-    const descrEl = document.getElementById('necDescrizioneCustom');
-    if(descrEl) descrEl.value = ''; // svuota descrizione custom se collego articolo
-  }
-}
-
 function saveNecessitaEntry() {
   try {
     const editId = document.getElementById('editNecessitaId').value;
-    const articoloId = document.getElementById('necArticoloId').value || null;
-    const descrizioneCustom = document.getElementById('necDescrizioneCustom').value.trim();
-    const quantita = parseFloat(document.getElementById('necQuantita').value);
-    const unita = document.getElementById('necUnita').value.trim();
+    // Campi comuni
     const fornitore = document.getElementById('necFornitore').value.trim();
     const priorita = document.getElementById('necPriorita').value;
     const dataPrevista = document.getElementById('necDataPrevista').value;
-    const prezzoStimato = parseFloat(document.getElementById('necPrezzoStimato').value) || null;
     const spedizione = parseFloat(document.getElementById('necSpedizione')?.value) || null;
     const note = document.getElementById('necNote').value.trim();
 
-    // Validazione
-    if(!articoloId && !descrizioneCustom) {
-      alert('Seleziona un articolo o scrivi una descrizione');
-      return;
-    }
-    if(!quantita || quantita <= 0) {
-      alert('Inserisci una quantità valida');
-      return;
-    }
+    // Raccogli le righe articolo
+    const righeEl = document.getElementById('necRighe').querySelectorAll('[id^="necRiga_"]');
+    const righe = [];
+    let errore = '';
+    righeEl.forEach(r => {
+      const idx = r.id.split('_')[1];
+      const articoloId = document.getElementById('necArt_' + idx)?.value || null;
+      const descrizione = document.getElementById('necDesc_' + idx)?.value.trim() || '';
+      const quantita = parseFloat(document.getElementById('necQta_' + idx)?.value);
+      const unita = document.getElementById('necUni_' + idx)?.value.trim() || '';
+      const prezzoStimato = parseFloat(document.getElementById('necPrz_' + idx)?.value) || null;
+      // Riga vuota (nessun articolo e nessuna descrizione e nessuna quantità) → ignora
+      if(!articoloId && !descrizione && !quantita) return;
+      if(!articoloId && !descrizione) { errore = 'Ogni riga deve avere un articolo o una descrizione.'; return; }
+      if(!quantita || quantita <= 0) { errore = 'Ogni riga deve avere una quantità valida.'; return; }
+      righe.push({ articoloId, descrizione, quantita, unita, prezzoStimato });
+    });
 
-    let finalArticoloId = articoloId;
-    let finalDescrizione = descrizioneCustom;
+    if(errore) { alert(errore); return; }
+    if(righe.length === 0) { alert('Aggiungi almeno un articolo.'); return; }
 
-    // Se ho descrizione custom ma nessun articolo collegato, creo l'articolo nel magazzino
-    if(!articoloId && descrizioneCustom) {
-      const newArt = {
-        id: Date.now().toString() + Math.random().toString(36).slice(2),
-        nome: descrizioneCustom,
-        categoria: 'altro',
-        unita: unita || 'pz',
-        scadenza: '',
-        lotto: '',
-        soglia: '',
-        prezzoUnitario: '',
-        note: ''
-      };
-      articoli.push(newArt);
-      saveMagazzino();
-      finalArticoloId = newArt.id;
-      finalDescrizione = ''; // ora abbiamo l'articolo, non serve descrizione
-      console.log('[Necessita] Creato nuovo articolo nel magazzino:', newArt.nome);
-    }
+    const oggi = new Date().toISOString().slice(0,10);
 
-    const existing = editId ? necessita.find(x => x.id === editId) : null;
-    const entry = {
-      id: editId || (Date.now().toString() + Math.random().toString(36).slice(2)),
-      articoloId: finalArticoloId,
-      descrizione: finalDescrizione,
-      quantita,
-      unita,
-      fornitore,
-      priorita,
-      dataPrevista,
-      prezzoStimato,
-      spedizione,
-      note,
-      stato: existing?.stato || 'da_ordinare',
-      dataCreazione: existing?.dataCreazione || new Date().toISOString().slice(0,10),
-      dataOrdine: existing?.dataOrdine || null,
-    };
-
+    // MODIFICA: aggiorna la singola voce (una sola riga prevista)
     if(editId) {
+      const r = righe[0];
+      const existing = necessita.find(x => x.id === editId);
+      let finalArticoloId = r.articoloId;
+      let finalDescrizione = r.descrizione;
+      if(!r.articoloId && r.descrizione) {
+        const newArt = creaArticoloDaNec(r.descrizione, r.unita);
+        finalArticoloId = newArt.id; finalDescrizione = '';
+      }
+      const entry = {
+        id: editId,
+        articoloId: finalArticoloId, descrizione: finalDescrizione,
+        quantita: r.quantita, unita: r.unita, fornitore, priorita, dataPrevista,
+        prezzoStimato: r.prezzoStimato, spedizione, note,
+        stato: existing?.stato || 'da_ordinare',
+        dataCreazione: existing?.dataCreazione || oggi,
+        dataOrdine: existing?.dataOrdine || null,
+      };
       necessita = necessita.map(n => n.id === editId ? entry : n);
     } else {
-      necessita.push(entry);
+      // NUOVO: crea N voci. La spedizione va messa solo sulla PRIMA (è unica per l'ordine)
+      righe.forEach((r, i) => {
+        let finalArticoloId = r.articoloId;
+        let finalDescrizione = r.descrizione;
+        if(!r.articoloId && r.descrizione) {
+          const newArt = creaArticoloDaNec(r.descrizione, r.unita);
+          finalArticoloId = newArt.id; finalDescrizione = '';
+        }
+        necessita.push({
+          id: Date.now().toString() + Math.random().toString(36).slice(2) + i,
+          articoloId: finalArticoloId, descrizione: finalDescrizione,
+          quantita: r.quantita, unita: r.unita, fornitore, priorita, dataPrevista,
+          prezzoStimato: r.prezzoStimato,
+          spedizione: i === 0 ? spedizione : null,
+          note,
+          stato: 'da_ordinare',
+          dataCreazione: oggi,
+          dataOrdine: null,
+        });
+      });
     }
+
     saveNecessita();
     closeNecessitaModal();
     renderNecessita();
     if(typeof renderHome === 'function') renderHome();
     if(typeof renderMagArticoli === 'function') renderMagArticoli();
+    if(typeof showImportToast === 'function' && !editId && righe.length > 1) {
+      showImportToast(`✅ ${righe.length} articoli aggiunti all'ordine`);
+    }
   } catch(err) {
     console.error('[Necessita] Errore in saveNecessitaEntry:', err.message);
     alert('Errore nel salvataggio. Apri F12 per dettagli.');
   }
+}
+
+// Crea un nuovo articolo nel magazzino a partire da una riga necessità
+function creaArticoloDaNec(descrizione, unita) {
+  const newArt = {
+    id: Date.now().toString() + Math.random().toString(36).slice(2),
+    nome: descrizione,
+    categoria: 'altro',
+    unita: unita || 'pz',
+    scadenza: '', lotto: '', soglia: '', prezzoUnitario: '', note: ''
+  };
+  articoli.push(newArt);
+  saveMagazzino();
+  console.log('[Necessita] Creato nuovo articolo nel magazzino:', newArt.nome);
+  return newArt;
 }
 
 // ============================================
@@ -720,6 +785,44 @@ function getTuttiFornitori() {
   const usati = (necessita || []).map(n => n.fornitore).filter(Boolean);
   return [...new Set([...salvati, ...usati])].sort((a,b) => a.localeCompare(b));
 }
+
+// Dropdown personalizzato suggerimenti fornitori (sostituisce il datalist nativo)
+function filtraFornitoriSuggeriti() {
+  try {
+    const inp = document.getElementById('necFornitore');
+    const box = document.getElementById('necFornitoreSuggest');
+    if(!inp || !box) return;
+    const q = inp.value.trim().toLowerCase();
+    const tutti = getTuttiFornitori();
+    const filtrati = q ? tutti.filter(f => f.toLowerCase().includes(q)) : tutti;
+
+    if(filtrati.length === 0) { box.style.display = 'none'; box.innerHTML = ''; return; }
+
+    box.innerHTML = filtrati.map(f =>
+      `<div class="forn-sugg-item" onmousedown="selezionaFornitore('${encodeURIComponent(f)}')" style="padding:0.5rem 0.8rem;cursor:pointer;font-size:0.9rem;color:var(--text);border-bottom:1px solid var(--cream)">🏪 ${escapeHtmlAttr(f)}</div>`
+    ).join('');
+    box.style.display = 'block';
+  } catch(err) {
+    console.error('[Necessita] Errore in filtraFornitoriSuggeriti:', err.message);
+  }
+}
+
+function selezionaFornitore(fEnc) {
+  const f = decodeURIComponent(fEnc);
+  const inp = document.getElementById('necFornitore');
+  const box = document.getElementById('necFornitoreSuggest');
+  if(inp) inp.value = f;
+  if(box) { box.style.display = 'none'; box.innerHTML = ''; }
+}
+
+// Chiudi il dropdown fornitori cliccando fuori
+document.addEventListener('click', (e) => {
+  const box = document.getElementById('necFornitoreSuggest');
+  const inp = document.getElementById('necFornitore');
+  if(box && inp && e.target !== inp && !box.contains(e.target)) {
+    box.style.display = 'none';
+  }
+});
 
 function openFornitoriModal() {
   try {
