@@ -1,3 +1,4 @@
+// ===== FILE VERSION: 2026-05-28.2 · registro.js =====
 // ======= ISPEZIONE =======
 // (TELAINO_OPZIONI, CELLE_REALI_LABEL e renderTelainiVisual sono ora in shared.js)
 
@@ -815,6 +816,12 @@ function renderLog() {
   const arniaF = document.getElementById('filterArnia')?.value||'';
   const dataDa = document.getElementById('filterDataDa')?.value||'';
   const dataA = document.getElementById('filterDataA')?.value||'';
+
+  // Dropdown filtri multiscelta
+  if(typeof initFiltroDropdown === 'function' && document.getElementById('registroFiltriDropdown')) {
+    initFiltroDropdown('registro', 'registroFiltriDropdown', renderLog);
+  }
+
   let filtered = logBook.filter(e => {
     if(tipo && !getTipi(e).includes(tipo)) return false;
     if(arniaF && e.arniaId !== arniaF) return false;
@@ -824,6 +831,7 @@ function renderLog() {
     if(dataA && e.data && e.data > dataA) return false;
     return true;
   });
+  if(typeof applicaFiltri === 'function') filtered = applicaFiltri('registro', filtered);
 
   // Info intervallo date
   const dateInfoEl = document.getElementById('filterDateInfo');

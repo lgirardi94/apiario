@@ -1,3 +1,4 @@
+// ===== FILE VERSION: 2026-05-28.2 · nav.js =====
 // ===== NAVIGAZIONE =====
 function navigateTo(id) {
   try {
@@ -17,7 +18,7 @@ function navigateTo(id) {
     if(id === 'arnie') renderArnie();
     if(id === 'magazzino') { renderMagArticoli(); updateMovArticoloSelect(); }
     if(id === 'contabilita') { renderContRiepilogo(); populateContAnnoFilter(); }
-    if(id === 'obiettivi') { populateAnnoSelects(); renderObStagionali(); }
+    if(id === 'obiettivi') { populateAnnoSelects(); renderObAnnuali(); }
   } catch(err) {
     console.error('[Nav] Errore in navigateTo:', err.message);
   }
