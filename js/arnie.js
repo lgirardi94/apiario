@@ -1,3 +1,4 @@
+// ===== FILE VERSION: 2026-05-28.2 · arnie.js =====
 // ======= ARNIE =======
 let editingMelari = []; // temp melari list while modal is open
 let editingRetePropoli = null; // singolo oggetto (max 1 per arnia)
@@ -364,8 +365,32 @@ function renderArnie() {
     return;
   }
 
-  // Ordina per numero crescente
-  const sorted = [...arnie].sort((a, b) => (parseInt(a.num,10)||0) - (parseInt(b.num,10)||0));
+  // Filtri dal cruscotto home (se impostati)
+  const fStatus = (typeof _filtroArnieStatus !== 'undefined') ? _filtroArnieStatus : null;
+  const fTipo = (typeof _filtroArnieTipo !== 'undefined') ? _filtroArnieTipo : null;
+
+  // Banner filtro attivo
+  let bannerEl = document.getElementById('arnieFiltroBanner');
+  if(fStatus || fTipo) {
+    const labelMap = { problema: '🔴 con problemi', debole: '🟠 deboli', famiglia: '🏠 famiglie', nucleo: '🍯 nuclei' };
+    const txt = labelMap[fStatus] || labelMap[fTipo] || '';
+    if(!bannerEl) {
+      bannerEl = document.createElement('div');
+      bannerEl.id = 'arnieFiltroBanner';
+      bannerEl.style.cssText = 'display:flex;align-items:center;gap:0.5rem;background:var(--amber-pale);border:1px solid var(--cream-dark);border-radius:6px;padding:0.5rem 0.9rem;margin-bottom:1rem;font-size:0.88rem;color:var(--brown)';
+      grid.parentNode.insertBefore(bannerEl, grid);
+    }
+    bannerEl.innerHTML = `<span>Filtro attivo: <strong>arnie ${txt}</strong></span><button onclick="azzeraFiltroArnie()" style="background:none;border:1px solid var(--brown);color:var(--brown);border-radius:4px;padding:0.15rem 0.6rem;cursor:pointer;font-family:inherit;font-size:0.8rem">✕ Mostra tutte</button>`;
+    bannerEl.style.display = 'flex';
+  } else if(bannerEl) {
+    bannerEl.style.display = 'none';
+  }
+
+  // Ordina per numero crescente + applica filtri
+  let sorted = [...arnie].sort((a, b) => (parseInt(a.num,10)||0) - (parseInt(b.num,10)||0));
+  if(fStatus) sorted = sorted.filter(a => a.status === fStatus);
+  if(fTipo === 'famiglia') sorted = sorted.filter(a => a.tipo === 'famiglia');
+  else if(fTipo === 'nucleo') sorted = sorted.filter(a => a.tipo === 'nucleo' || a.tipo === 'nucleo_fec');
 
   grid.innerHTML = sorted.map(a => {
     const statusLabel = {attiva:'Attiva',debole:'Debole',problema:'Problema',invernata:'Invernata'}[a.status];

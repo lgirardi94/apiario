@@ -1,3 +1,4 @@
+// ===== FILE VERSION: 2026-05-28.2 · magazzino.js =====
 // ======= FUZZY SIMILARITY =======
 function similarity(a, b) {
   a = a.toLowerCase().trim();
@@ -179,10 +180,8 @@ function getGiacenzaLocale(articoloId) {
 // ======= RENDER ARTICOLI =======
 function renderMagArticoli() {
   try {
-    const filtroCategoria = document.getElementById('magFiltroCategoria')?.value || '';
     const filtroSearch = (document.getElementById('magFiltroSearch')?.value || '').toLowerCase();
     const ordinamento = document.getElementById('magOrdinamento')?.value || 'nome';
-    const soloSottoSoglia = document.getElementById('magSoloSottoSoglia')?.checked || false;
     const catLabel = {
       farmaci: '💊 Farmaci/sanitari', alimentazione: '🍬 Alimentazione', telai_cera: '🪵 Telai e cera',
       arnie: '📦 Arnie e componenti', attrezzatura: '🔧 Attrezzatura', confezionamento: '🫙 Confezionamento',
@@ -200,18 +199,23 @@ function renderMagArticoli() {
     // ===== KPI BAR =====
     renderMagKpi();
 
+    // ===== DROPDOWN FILTRI =====
+    if(typeof initFiltroDropdown === 'function' && document.getElementById('magFiltriDropdown')) {
+      initFiltroDropdown('magazzino', 'magFiltriDropdown', renderMagArticoli);
+    }
+
     // Helper: è sotto soglia?
     const isSottoSoglia = (a) => {
       const g = getGiacenzaLocale(a.id);
       return a.soglia && g <= parseFloat(a.soglia);
     };
 
+    // Applica ricerca testuale + filtri multiscelta
     let filtered = articoli.filter(a => {
-      if(filtroCategoria && normalizzaCatMagazzino(a.categoria) !== filtroCategoria) return false;
       if(filtroSearch && !a.nome.toLowerCase().includes(filtroSearch)) return false;
-      if(soloSottoSoglia && !isSottoSoglia(a)) return false;
       return true;
     });
+    if(typeof applicaFiltri === 'function') filtered = applicaFiltri('magazzino', filtered);
 
     // ===== ORDINAMENTO =====
     filtered = [...filtered].sort((a, b) => {
@@ -247,7 +251,7 @@ function renderMagArticoli() {
     if(!grid) return;
 
     if(filtered.length === 0) {
-      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><span class="big">📦</span>${articoli.length === 0 ? 'Nessun articolo. Aggiungine uno!' : (soloSottoSoglia ? 'Nessun articolo sotto soglia. 👍' : 'Nessun articolo trovato.')}</div>`;
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><span class="big">📦</span>${articoli.length === 0 ? 'Nessun articolo. Aggiungine uno!' : 'Nessun articolo corrisponde ai filtri.'}</div>`;
       return;
     }
 
@@ -702,6 +706,7 @@ function renderMagMovimentazioni() {
         <div class="mov-nome">${art ? art.nome : '—'}</div>
         <div class="mov-note">${tipoEmoji[m.tipo]} ${tipoLabel[m.tipo]}${m.note ? ' · ' + m.note : ''}</div>
       </div>
+      <button class="btn-icon" onclick="openMovEditModal('${m.id}')" title="Modifica">✏️</button>
       <button class="btn-icon del" onclick="deleteMov('${m.id}')" title="Elimina">🗑</button>
     </div>`;
   }).join('');
@@ -906,14 +911,51 @@ function openMovModal(articoloId) {
   document.getElementById('movRighe').innerHTML = '';
   movRigheCount = 0;
   buildMovRiga(movRigheCount++, articoloId || '');
+  // Titolo + visibilità "aggiungi riga" (in modifica nascondo la multi-riga)
+  const titolo = document.getElementById('movModalTitle');
+  if(titolo) titolo.textContent = '🔄 Nuova movimentazione';
+  const addBtn = document.getElementById('movAddRigaBtn');
+  if(addBtn) addBtn.style.display = '';
   document.getElementById('movModal').classList.add('open');
 }
+
+// Modifica di una singola movimentazione esistente
+function openMovEditModal(id) {
+  try {
+    const m = movimentazioni.find(x => x.id === id);
+    if(!m) { console.warn('[Magazzino] Movimentazione non trovata:', id); return; }
+    updateMovArticoloSelect();
+    document.getElementById('editMovId').value = id;
+    document.getElementById('movData').value = m.data || today();
+    document.getElementById('movTipo').value = m.tipo || 'entrata';
+    document.getElementById('movNote').value = m.note || '';
+    // Una sola riga, precompilata
+    document.getElementById('movRighe').innerHTML = '';
+    movRigheCount = 0;
+    buildMovRiga(movRigheCount++, m.articoloId || '');
+    // Imposta la quantità nella riga appena creata
+    setTimeout(() => {
+      const qtaEl = document.getElementById('movQta_0');
+      if(qtaEl) qtaEl.value = m.qta;
+    }, 0);
+    const titolo = document.getElementById('movModalTitle');
+    if(titolo) titolo.textContent = '✏️ Modifica movimentazione';
+    // In modifica nascondo "aggiungi riga" (si modifica un movimento per volta)
+    const addBtn = document.getElementById('movAddRigaBtn');
+    if(addBtn) addBtn.style.display = 'none';
+    document.getElementById('movModal').classList.add('open');
+  } catch(err) {
+    console.error('[Magazzino] Errore in openMovEditModal:', err.message);
+  }
+}
+
 function closeMovModal() { document.getElementById('movModal').classList.remove('open'); }
 
 function saveMov() {
   const data = document.getElementById('movData').value;
   const tipo = document.getElementById('movTipo').value;
   const note = document.getElementById('movNote').value.trim();
+  const editId = document.getElementById('editMovId').value;
   if(!data) { alert('Inserisci la data'); return; }
 
   const righe = document.getElementById('movRighe').querySelectorAll('[id^="movRiga_"]');
@@ -927,6 +969,20 @@ function saveMov() {
     movs.push({ articoloId: artId, qta });
   });
   if(errore || movs.length === 0) { alert('Compila articolo e quantità per ogni riga'); return; }
+
+  if(editId) {
+    // Modifica: aggiorna il movimento esistente (preserva eventuale campo valore/origine)
+    const m0 = movs[0];
+    movimentazioni = movimentazioni.map(x => x.id === editId
+      ? { ...x, data, tipo, articoloId: m0.articoloId, qta: m0.qta, note }
+      : x);
+    saveMagazzino();
+    closeMovModal();
+    renderMagArticoli();
+    renderMagMovimentazioni();
+    showImportToast('✅ Movimentazione aggiornata!');
+    return;
+  }
 
   movs.forEach(m => {
     movimentazioni.push({

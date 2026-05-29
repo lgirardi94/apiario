@@ -1,3 +1,4 @@
+// ===== FILE VERSION: 2026-05-28.2 · contabilita.js =====
 
 function getCatList(tipo) { return tipo === 'entrata' ? CAT_ENTRATA : CAT_USCITA; }
 
@@ -694,19 +695,23 @@ function populateContAnnoFilter() {
 }
 
 function renderContMovimenti() {
-  const filtroTipo = document.getElementById('contFiltroTipo')?.value||'';
   const filtroAnno = document.getElementById('contFiltroAnno')?.value||'';
   const filtroSearch = (document.getElementById('contFiltroSearch')?.value||'').toLowerCase();
   const all=[...CAT_ENTRATA,...CAT_USCITA];
 
+  // Dropdown filtri multiscelta
+  if(typeof initFiltroDropdown === 'function' && document.getElementById('contFiltriDropdown')) {
+    initFiltroDropdown('contabilita', 'contFiltriDropdown', renderContMovimenti);
+  }
+
   let filtered = [...movimentiContabili]
     .sort((a,b)=>b.data.localeCompare(a.data))
     .filter(m=>{
-      if(filtroTipo && m.tipo!==filtroTipo) return false;
       if(filtroAnno && !m.data.startsWith(filtroAnno)) return false;
       if(filtroSearch && !(m.descrizione||'').toLowerCase().includes(filtroSearch) && !(m.note||'').toLowerCase().includes(filtroSearch)) return false;
       return true;
     });
+  if(typeof applicaFiltri === 'function') filtered = applicaFiltri('contabilita', filtered);
 
   const el = document.getElementById('contMovList');
   if(!el) return;
