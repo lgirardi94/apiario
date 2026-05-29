@@ -1,4 +1,4 @@
-// ===== FILE VERSION: 2026-05-28.3 · necessita.js =====
+// ===== FILE VERSION: 2026-05-28.4 · necessita.js =====
 /* ===========================================================
    NECESSITÀ — Lista articoli da ordinare
    =========================================================== */
@@ -35,11 +35,13 @@ function renderNecessita() {
 
     // Popola filtro fornitori
     const fornitori = [...new Set(necessita.map(n => n.fornitore).filter(Boolean))].sort();
+    const haSenzaFornitore = getNecessitaAttive().some(n => !n.fornitore);
     const filtroFornitoreEl = document.getElementById('necFiltroFornitore');
     if(filtroFornitoreEl) {
       const currentVal = filtroFornitoreEl.value;
       filtroFornitoreEl.innerHTML = '<option value="">Tutti i fornitori</option>' +
-        fornitori.map(f => `<option value="${escapeHtmlAttr(f)}">${escapeHtmlAttr(f)}</option>`).join('');
+        fornitori.map(f => `<option value="${escapeHtmlAttr(f)}">${escapeHtmlAttr(f)}</option>`).join('') +
+        (haSenzaFornitore ? '<option value="__nessuno__">(senza fornitore)</option>' : '');
       filtroFornitoreEl.value = currentVal;
     }
 
@@ -52,7 +54,8 @@ function renderNecessita() {
     let filtered = getNecessitaAttive();
     if(filtroStato) filtered = filtered.filter(n => n.stato === filtroStato);
     if(filtroPriorita) filtered = filtered.filter(n => n.priorita === filtroPriorita);
-    if(filtroFornitore) filtered = filtered.filter(n => n.fornitore === filtroFornitore);
+    if(filtroFornitore === '__nessuno__') filtered = filtered.filter(n => !n.fornitore);
+    else if(filtroFornitore) filtered = filtered.filter(n => n.fornitore === filtroFornitore);
 
     // Counter
     const counterEl = document.getElementById('necessitaCounter');
@@ -116,7 +119,11 @@ function renderNecessita() {
         .map(k => ({ label: labels[k], items: grouped[k] }));
     }
 
-    container.innerHTML = groups.map(g => {
+    const hintFornitore = (raggruppa === 'fornitore')
+      ? `<div style="background:var(--amber-pale);border-radius:6px;padding:0.5rem 0.8rem;margin-bottom:0.8rem;font-size:0.82rem;color:var(--brown)">💡 Premi <strong>📦 Ricevi ordine</strong> accanto a un fornitore per ricevere tutti i suoi articoli insieme, con spedizione unica.</div>`
+      : '';
+
+    container.innerHTML = hintFornitore + groups.map(g => {
       const ricBtn = g.fornitoreKey
         ? `<button class="btn btn-secondary" style="padding:0.3rem 0.7rem;font-size:0.8rem;white-space:nowrap" onclick="apriRicezioneFornitore('${encodeURIComponent(g.fornitoreKey)}')">📦 Ricevi ordine</button>`
         : '';

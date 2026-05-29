@@ -1,4 +1,4 @@
-// ===== FILE VERSION: 2026-05-28.3 · insights.js =====
+// ===== FILE VERSION: 2026-05-28.4 · insights.js =====
 /* ===========================================================
    INSIGHTS / ANALISI — costo miele, simulatore prezzo,
    heatmap produzione, genealogia regine, report narrativo
@@ -201,7 +201,9 @@ function renderHeatmapProduzione(anno) {
     };
     const txtCol = (v) => v === 0 ? 'transparent' : (v/maxVal > 0.5 ? '#fff' : '#27500A');
 
-    let html = `<div style="display:grid;grid-template-columns:auto repeat(${mesiAttivi.length},minmax(38px,1fr));gap:4px;align-items:center;min-width:${100+mesiAttivi.length*42}px">`;
+    // Celle a larghezza fissa (max 52px) così restano compatte e quadrate anche con pochi dati
+    const CELL = 48;
+    let html = `<div style="display:grid;grid-template-columns:auto repeat(${mesiAttivi.length},${CELL}px);gap:4px;align-items:center;width:max-content">`;
     html += '<div></div>';
     mesiAttivi.forEach(m => { html += `<div style="text-align:center;font-size:0.72rem;color:var(--text-light);font-weight:600">${mesi[m]}</div>`; });
 
@@ -214,10 +216,10 @@ function renderHeatmapProduzione(anno) {
     arnieConProd.forEach(aid => {
       const arnia = arnie.find(x => x.id === aid);
       const label = arnia ? '#'+arnia.num : '?';
-      html += `<div style="font-size:0.8rem;color:var(--text);font-weight:600;white-space:nowrap">${label}</div>`;
+      html += `<div style="font-size:0.8rem;color:var(--text);font-weight:600;white-space:nowrap;padding-right:6px">${label}</div>`;
       mesiAttivi.forEach(m => {
         const v = datiPerArnia[aid][m];
-        html += `<div title="${label} · ${mesi[m]}: ${v.toFixed(1)} kg" style="aspect-ratio:1;min-height:34px;background:${col(v)};border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:0.72rem;color:${txtCol(v)}">${v>0?(v%1===0?v:v.toFixed(1)):''}</div>`;
+        html += `<div title="${label} · ${mesi[m]}: ${v.toFixed(1)} kg" style="width:${CELL}px;height:${CELL}px;background:${col(v)};border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:0.72rem;color:${txtCol(v)}">${v>0?(v%1===0?v:v.toFixed(1)):''}</div>`;
       });
     });
     html += '</div>';

@@ -1,4 +1,4 @@
-// ===== FILE VERSION: 2026-05-28.3 · arnie.js =====
+// ===== FILE VERSION: 2026-05-28.4 · arnie.js =====
 // ======= ARNIE =======
 let editingMelari = []; // temp melari list while modal is open
 let editingRetePropoli = null; // singolo oggetto (max 1 per arnia)
@@ -1278,11 +1278,8 @@ function renderSchedaAnagrafica(a) {
   if(a.sciamatura) anagHtml += `<div class="scheda-anag-card"><div class="scheda-anag-label">⚠️ Sciamatura</div><div class="scheda-anag-val">${a.sciamatura}</div></div>`;
   anagHtml += '</div>';
 
-  // Genealogia (solo nucleo/sciame/fec)
-  let genealogiaHtml = '';
-  if(a.tipo !== 'famiglia') {
-    genealogiaHtml = renderGenealogiaSection(a);
-  }
+  // Genealogia (mostrata sempre, per ogni tipo di arnia)
+  let genealogiaHtml = renderGenealogiaSection(a);
 
   // Razza box
   let razzaBox = '';
