@@ -1,3 +1,4 @@
+// ===== FILE VERSION: 2026-05-28.3 · insights.js =====
 /* ===========================================================
    INSIGHTS / ANALISI — costo miele, simulatore prezzo,
    heatmap produzione, genealogia regine, report narrativo
@@ -154,7 +155,7 @@ function updateSimulatore() {
 // ===========================================================
 // 6. HEATMAP PRODUZIONE (arnia × mese)
 // ===========================================================
-function renderHeatmap(anno) {
+function renderHeatmapProduzione(anno) {
   try {
     const container = document.getElementById('analisiHeatmap');
     if(!container) return;
@@ -239,72 +240,119 @@ function renderHeatmap(anno) {
 }
 
 // ===========================================================
-// 7. GENEALOGIA REGINE
+// 7. GENEALOGIA REGINE — sempre popolata, con origine regina e telai
 // ===========================================================
 function renderGenealogia(anno) {
   try {
     const container = document.getElementById('analisiGenealogia');
     if(!container) return;
 
-    // Produzione totale per arnia (storica, non solo anno) per valutare le linee
+    const arnieAttive = (arnie||[]).filter(a => !a.annoDismissione);
+    if(arnieAttive.length === 0) {
+      container.innerHTML = `<div style="text-align:center;color:var(--text-light);font-style:italic;padding:1rem">Nessuna arnia attiva da mostrare.</div>`;
+      return;
+    }
+
+    // Produzione totale storica per arnia (per valutare le linee)
     const prodArnia = {};
     (logBook||[]).forEach(e => {
       const kg = (e.raccolta||[]).reduce((s,r) => s + (parseFloat(r.qta)||0), 0);
       prodArnia[e.arniaId] = (prodArnia[e.arniaId]||0) + kg;
     });
 
-    // Costruisci relazioni madre→figlia da reginaArniaSrc
-    const arnieAttive = arnie.filter(a => !a.annoDismissione);
-    const figlie = {}; // madreId -> [arnie figlie]
-    const conMadre = new Set();
+    const nomeArnia = (id) => { const a = arnie.find(x => x.id === id); return a ? '#'+a.num+(a.nome?' '+a.nome:'') : '?'; };
+
+    // Relazioni "figlia di" da regina inserita (reginaArniaSrc)
+    const figlieRegina = {}; // madreId -> [arnie]
+    const conMadreRegina = new Set();
     arnieAttive.forEach(a => {
-      if(a.reginaArniaSrc) {
-        if(!figlie[a.reginaArniaSrc]) figlie[a.reginaArniaSrc] = [];
-        figlie[a.reginaArniaSrc].push(a);
-        conMadre.add(a.id);
+      if(a.reginaOrigine === 'inserita' && a.reginaArniaSrc) {
+        (figlieRegina[a.reginaArniaSrc] = figlieRegina[a.reginaArniaSrc] || []).push(a);
+        conMadreRegina.add(a.id);
       }
     });
 
-    const radici = arnieAttive.filter(a => !conMadre.has(a.id) && figlie[a.id]);
-    if(radici.length === 0 && Object.keys(figlie).length === 0) {
-      container.innerHTML = `<div style="text-align:center;color:var(--text-light);font-style:italic;padding:1rem">Nessuna relazione genealogica registrata.<br><span style="font-size:0.85rem">Imposta "origine regina → da arnia" nelle schede arnia per costruire l'albero genetico.</span></div>`;
-      return;
-    }
-
-    const prodColor = (id) => {
-      const p = prodArnia[id] || 0;
-      if(p >= 15) return { bg:'#EAF3DE', border:'#639922', txt:'#27500A' };
-      if(p >= 8)  return { bg:'#FAEEDA', border:'#BA7517', txt:'#633806' };
-      return { bg:'rgba(0,0,0,0.03)', border:'var(--cream-dark)', txt:'var(--text-light)' };
+    // Contributi telai: per ogni arnia, da quali altre arnie ha ricevuto telai
+    const contributiTelai = (a) => {
+      const src = new Set();
+      (a.telainiOrigine || []).forEach(t => { if(t.arniaSrcId) src.add(t.arniaSrcId); });
+      return [...src];
     };
 
-    const renderNodo = (a, livello) => {
-      const c = prodColor(a.id);
-      const prod = prodArnia[a.id] || 0;
-      const reg = a.reginaAnno ? (typeof getReginaPallino==='function'? getReginaPallino(a.reginaAnno,10):'') + ' ' + a.reginaAnno : '';
-      let h = `<div style="margin-left:${livello*1.5}rem;display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem">
-        <div style="background:${c.bg};border:1px solid ${c.border};border-radius:6px;padding:0.4rem 0.8rem;font-size:0.88rem;color:${c.txt}">
-          <strong>#${a.num}</strong>${a.nome?' '+insEscape(a.nome):''} ${reg?'· '+reg:''} <span style="opacity:0.8">· ${prod.toFixed(0)}kg</span>
-        </div>
-      </div>`;
-      (figlie[a.id]||[]).sort((x,y)=>(prodArnia[y.id]||0)-(prodArnia[x.id]||0)).forEach(f => {
-        h += renderNodo(f, livello+1);
-      });
+    const origineInfo = {
+      allevata:   { icon: '🥚', label: 'allevata sul posto', col: '#639922', bg: '#EAF3DE' },
+      inserita:   { icon: '👑', label: 'regina inserita',     col: '#BA7517', bg: '#FAEEDA' },
+      acquistata: { icon: '🛒', label: 'regina acquistata',   col: '#4A6FA5', bg: '#E6EEF7' },
+    };
+
+    const prodBadge = (id) => {
+      const p = prodArnia[id] || 0;
+      if(p <= 0) return '';
+      const colore = p >= 15 ? '#27500A' : (p >= 8 ? '#633806' : 'var(--text-light)');
+      return `<span style="opacity:0.85;color:${colore};font-weight:600">· ${p.toFixed(0)}kg</span>`;
+    };
+
+    // Card di una singola arnia
+    const renderCard = (a, livello) => {
+      const oi = origineInfo[a.reginaOrigine] || origineInfo.allevata;
+      const reg = a.reginaAnno ? (typeof getReginaPallino==='function'? getReginaPallino(a.reginaAnno,9):'') + ' ' + a.reginaAnno : '';
+      // Dettaglio origine
+      let origineTxt = oi.label;
+      if(a.reginaOrigine === 'inserita' && a.reginaArniaSrc) origineTxt += ' da ' + nomeArnia(a.reginaArniaSrc);
+      else if(a.reginaOrigine === 'acquistata' && a.reginaFornitore) origineTxt += ' · ' + insEscape(a.reginaFornitore);
+      // Telai da altre arnie
+      const telai = contributiTelai(a).filter(id => id !== a.id);
+      const telaiTxt = telai.length > 0 ? ` · 🪵 telai da ${telai.map(nomeArnia).join(', ')}` : '';
+
+      return `
+        <div style="margin-left:${livello*1.4}rem;margin-bottom:0.4rem">
+          <div style="display:inline-flex;align-items:center;gap:0.5rem;background:${oi.bg};border:1px solid ${oi.col}40;border-left:3px solid ${oi.col};border-radius:6px;padding:0.4rem 0.8rem;font-size:0.88rem;color:var(--text)">
+            <span title="${oi.label}">${oi.icon}</span>
+            <strong>#${a.num}</strong>${a.nome?' '+insEscape(a.nome):''}
+            ${reg?'<span style="opacity:0.85">· '+reg+'</span>':''}
+            ${prodBadge(a.id)}
+            <span style="font-size:0.76rem;color:var(--text-light)">— ${origineTxt}${telaiTxt}</span>
+          </div>
+        </div>`;
+    };
+
+    // Nodo ricorsivo (per le figlie da regina inserita)
+    const renderNodo = (a, livello, visited) => {
+      if(visited.has(a.id)) return ''; // anti-loop
+      visited.add(a.id);
+      let h = renderCard(a, livello);
+      (figlieRegina[a.id] || [])
+        .sort((x,y)=>(prodArnia[y.id]||0)-(prodArnia[x.id]||0))
+        .forEach(f => { h += renderNodo(f, livello+1, visited); });
       return h;
     };
 
+    // Radici = arnie che NON sono figlie-da-regina di un'altra arnia attiva
+    // (include allevate, acquistate, e inserite la cui madre non è più attiva)
+    const radici = arnieAttive.filter(a => !conMadreRegina.has(a.id));
+    const visited = new Set();
     let html = '';
-    radici.sort((a,b)=>(prodArnia[b.id]||0)-(prodArnia[a.id]||0)).forEach(r => { html += renderNodo(r, 0); });
+    radici.sort((a,b)=>(prodArnia[b.id]||0)-(prodArnia[a.id]||0)).forEach(r => { html += renderNodo(r, 0, visited); });
 
-    // Suggerimento sulla linea migliore
+    // Eventuali arnie non ancora visitate (cicli o casi limite) → mostrale comunque
+    arnieAttive.forEach(a => { if(!visited.has(a.id)) html += renderCard(a, 0); });
+
+    // Legenda
+    html = `<div style="display:flex;flex-wrap:wrap;gap:0.8rem;margin-bottom:0.9rem;font-size:0.78rem;color:var(--text-light)">
+      <span>🥚 allevata sul posto</span>
+      <span>👑 regina inserita</span>
+      <span>🛒 regina acquistata</span>
+      <span>🪵 telai da altre arnie</span>
+    </div>` + html;
+
+    // Suggerimento sulla linea migliore (tra le madri con figlie da regina)
     let migliore = null, maxProd = 0;
-    Object.keys(figlie).forEach(mid => {
-      const tot = figlie[mid].reduce((s,f)=>s+(prodArnia[f.id]||0),0);
+    Object.keys(figlieRegina).forEach(mid => {
+      const tot = figlieRegina[mid].reduce((s,f)=>s+(prodArnia[f.id]||0),0);
       if(tot > maxProd) { maxProd = tot; migliore = mid; }
     });
-    if(migliore) {
-      const am = arnie.find(a=>a.id===migliore);
-      if(am) html += `<div style="margin-top:0.8rem;background:var(--amber-pale);border-radius:6px;padding:0.6rem 0.9rem;font-size:0.85rem;color:var(--brown)">💡 La linea di <strong>#${am.num}</strong> dà le figlie più produttive: usala per allevare nuove regine.</div>`;
+    if(migliore && maxProd > 0) {
+      html += `<div style="margin-top:0.8rem;background:var(--amber-pale);border-radius:6px;padding:0.6rem 0.9rem;font-size:0.85rem;color:var(--brown)">💡 La linea di <strong>${nomeArnia(migliore)}</strong> dà le figlie più produttive: usala per allevare nuove regine.</div>`;
     }
 
     container.innerHTML = html;
@@ -427,7 +475,7 @@ function renderAnalisi() {
 
     renderCostoMiele(anno);
     updateSimulatore();
-    renderHeatmap(anno);
+    renderHeatmapProduzione(anno);
     renderGenealogia(anno);
     renderNarrativo(anno);
   } catch(err) {

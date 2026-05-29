@@ -1,4 +1,4 @@
-// ===== FILE VERSION: 2026-05-28.2 · arnie.js =====
+// ===== FILE VERSION: 2026-05-28.3 · arnie.js =====
 // ======= ARNIE =======
 let editingMelari = []; // temp melari list while modal is open
 let editingRetePropoli = null; // singolo oggetto (max 1 per arnia)
@@ -1822,83 +1822,4 @@ function checkPromotionReady(arniaId) {
   return ispezioni.every(i => parseInt(i.ispezione.telaini, 10) >= 7);
 }
 
-// ============================================
-// LEGACY openDetail removed, all goes through scheda
-// ============================================
-function openDetailLegacy(id) {
-  const a = arnie.find(x => x.id === id);
-  if(!a) return;
-  document.getElementById('detailTitle').textContent = `#${a.num}${a.nome?' — '+a.nome:''}`;
-  const statusLabel = {attiva:'✅ Attiva e forte',debole:'⚠️ Debole',problema:'❌ Problema',invernata:'❄️ Invernata'}[a.status];
-  const melariAttivi = (a.melari||[]).filter(m=>m.status==='posizionato');
-  const melariTotali = (a.melari||[]).length;
-  const logArnia = logBook.filter(e=>e.arniaId===id).slice(0,5);
-  const statusLabel2 = {posizionato:'In produzione', rimosso:'Rimosso', produzione:'Smielato'};
-
-  // Trova ultima ispezione con dati
-  const ultimaIspezione = logBook.filter(e => {
-    const tipi = getTipi(e);
-    return e.arniaId === id && tipi.includes('ispezione') && e.ispezione;
-  })[0];
-
-  document.getElementById('detailBody').innerHTML = `
-    <div class="detail-section">
-      <h4>🏠 Informazioni generali</h4>
-      <div class="detail-row"><span class="detail-label">Stato</span><span class="detail-value">${statusLabel}</span></div>
-      ${a.reginaAnno?`<div class="detail-row"><span class="detail-label">${getReginaPallino(a.reginaAnno)}Anno regina</span><span class="detail-value">${a.reginaAnno}</span></div>`:''}
-      ${a.note?`<div class="detail-row"><span class="detail-label">Note</span><span class="detail-value" style="max-width:60%;text-align:right">${a.note}</span></div>`:''}
-    </div>
-
-    ${ultimaIspezione ? `<div class="detail-section">
-      <h4>🔍 Ultima ispezione <span style="font-weight:400;font-size:0.82rem;font-style:italic;color:var(--text-light)">${formatDate(ultimaIspezione.data)}</span></h4>
-      ${ultimaIspezione.ispezione.telaini ? `<div class="detail-row"><span class="detail-label">📏 Sviluppo famiglia</span><span class="detail-value"><strong>${ultimaIspezione.ispezione.telaini} telaini</strong></span></div>` : ''}
-      ${ultimaIspezione.ispezione.covata ? `<div class="detail-row"><span class="detail-label">🟤 Covata</span><span class="detail-value">${ultimaIspezione.ispezione.covata}/5</span></div>` : ''}
-      ${ultimaIspezione.ispezione.scorte ? `<div class="detail-row"><span class="detail-label">🟡 Scorte</span><span class="detail-value">${ultimaIspezione.ispezione.scorte}/5</span></div>` : ''}
-      ${ultimaIspezione.ispezione.celleReali !== undefined && ultimaIspezione.ispezione.celleReali !== '' ? `<div class="detail-row"><span class="detail-label">👑 Celle reali</span><span class="detail-value">${CELLE_REALI_LABEL[ultimaIspezione.ispezione.celleReali]||ultimaIspezione.ispezione.celleReali}</span></div>` : ''}
-      ${ultimaIspezione.ispezione.mappa && ultimaIspezione.ispezione.mappa.length ? renderTelainiVisual(ultimaIspezione.ispezione.mappa) : ''}
-    </div>` : ''}
-
-    ${a.razza ? `<div class="detail-section">
-      <h4>🐝 Razza & caratteristiche</h4>
-      <div class="detail-row"><span class="detail-label">Razza</span><span class="detail-value"><span class="razza-badge">${a.razza}</span></span></div>
-      ${a.razzaOrigine?`<div class="detail-row"><span class="detail-label">Provenienza</span><span class="detail-value">${a.razzaOrigine}</span></div>`:''}
-      ${a.temperamento?`<div class="detail-row"><span class="detail-label">Temperamento</span><span class="detail-value">${a.temperamento}</span></div>`:''}
-      ${a.sciamatura?`<div class="detail-row"><span class="detail-label">Tendenza sciamatura</span><span class="detail-value">${a.sciamatura}</span></div>`:''}
-      ${a.produttivita?`<div class="detail-row"><span class="detail-label">Produttività</span><span class="detail-value">${a.produttivita}</span></div>`:''}
-      ${a.razzaNote?`<div class="detail-row"><span class="detail-label">Note razza</span><span class="detail-value" style="max-width:60%;text-align:right">${a.razzaNote}</span></div>`:''}
-    </div>` : ''}
-
-    <div class="detail-section">
-      <h4>🍯 Melari (${melariTotali} totali, ${melariAttivi.length} attivi)</h4>
-      ${melariTotali === 0 ? '<div style="color:var(--text-light);font-style:italic;font-size:0.9rem">Nessun melario registrato.</div>' :
-        (a.melari||[]).map(m=>`
-        <div class="melario-item" style="margin-bottom:0.4rem">
-          <span>🍯</span>
-          <span class="mel-info"><strong>${m.num} telaini</strong>${m.note?' — '+m.note:''}</span>
-          <span class="mel-date">${m.data?formatDate(m.data):'—'}</span>
-          <span class="mel-status mel-${m.status}">${statusLabel2[m.status]||m.status}</span>
-        </div>`).join('')
-      }
-    </div>
-
-    <div class="detail-section">
-      <h4>📖 Ultime registrazioni</h4>
-      ${logArnia.length === 0 ? '<div style="color:var(--text-light);font-style:italic;font-size:0.9rem">Nessuna registrazione per questa arnia.</div>' :
-        logArnia.map(e=>`<div style="padding:0.5rem 0;border-bottom:1px dotted var(--cream-dark);font-size:0.92rem">
-          <span style="color:var(--text-light);font-style:italic">${formatDate(e.data)}</span> — ${e.note.substring(0,80)}${e.note.length>80?'...':''}
-        </div>`).join('')
-      }
-    </div>
-
-    <div style="display:flex;gap:0.6rem;flex-wrap:wrap">
-      <button class="btn" onclick="closeDetail();openArniModal('${id}')">✏️ Modifica</button>
-    </div>
-  `;
-  document.getElementById('detailPanel').classList.add('open');
-  document.getElementById('detailOverlay').style.display = 'block';
-}
-function closeDetail() {
-  document.getElementById('detailPanel').classList.remove('open');
-  document.getElementById('detailOverlay').style.display = 'none';
-}
 

@@ -1,4 +1,4 @@
-// ===== FILE VERSION: 2026-05-28.2 · necessita.js =====
+// ===== FILE VERSION: 2026-05-28.3 · necessita.js =====
 /* ===========================================================
    NECESSITÀ — Lista articoli da ordinare
    =========================================================== */
@@ -20,25 +20,6 @@ const NEC_STATO = {
 // ============================================
 function getNecessitaAttive() {
   return necessita.filter(n => n.stato !== 'ricevuto');
-}
-
-// Conta voci attive per home/badge
-function countNecessitaAttive() {
-  return getNecessitaAttive().length;
-}
-
-// Voci urgenti (priorità urgente o data prevista entro 7gg)
-function getNecessitaUrgenti() {
-  const oggi = new Date();
-  const tra7gg = new Date(oggi.getTime() + 7*24*60*60*1000);
-  return getNecessitaAttive().filter(n => {
-    if(n.priorita === 'urgente') return true;
-    if(n.dataPrevista) {
-      const dp = new Date(n.dataPrevista);
-      if(!isNaN(dp.getTime()) && dp <= tra7gg) return true;
-    }
-    return false;
-  });
 }
 
 // ============================================
