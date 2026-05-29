@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- FILE VERSION: 2026-05-28.7 · apiario.html -->
+<!-- FILE VERSION: 2026-05-28.9 · apiario.html -->
 <html lang="it">
 <head>
 <meta charset="UTF-8">
@@ -8,7 +8,7 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐝</text></svg>">
 <link rel="stylesheet" href="style-main.css">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="shared.js?v=20260540"></script>
+<script src="shared.js?v=20260542"></script>
 </head>
 <body>
 
@@ -2344,70 +2344,54 @@
 
 <!-- MODAL NECESSITÀ (da ordinare) -->
 <div class="modal-overlay" id="necessitaModal">
-  <div class="modal" style="max-width:550px">
+  <div class="modal" style="max-width:600px">
     <h3 id="necessitaModalTitle">🛒 Nuova necessità</h3>
     <input type="hidden" id="editNecessitaId">
 
-    <div class="form-row">
-      <label>Articolo</label>
-      <select id="necArticoloId" onchange="onNecArticoloChange()" style="margin-bottom:0.3rem">
-        <option value="">— Seleziona articolo dal magazzino —</option>
-      </select>
-      <div style="font-size:0.78rem;color:var(--text-light);font-style:italic;margin-top:0.2rem">Oppure scrivi sotto un articolo nuovo (verrà creato anche nel magazzino al salvataggio)</div>
-      <input type="text" id="necDescrizioneCustom" placeholder="Articolo nuovo / descrizione libera..." style="margin-top:0.3rem">
-    </div>
+    <!-- RIGHE ARTICOLI (multi-riga in inserimento, singola in modifica) -->
+    <label style="font-weight:600;color:var(--brown);font-size:0.9rem">Articoli da ordinare</label>
+    <div id="necRighe" style="display:flex;flex-direction:column;gap:0.6rem;margin:0.4rem 0 0.6rem"></div>
+    <button type="button" id="necAddRigaBtn" onclick="aggiungiRigaNec()" class="btn btn-secondary" style="padding:0.3rem 0.8rem;font-size:0.85rem;margin-bottom:1rem">+ Aggiungi articolo</button>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
-      <div class="form-row">
-        <label>Quantità</label>
-        <input type="number" id="necQuantita" min="0.01" step="0.01" placeholder="Es. 50">
-      </div>
-      <div class="form-row">
-        <label>Unità</label>
-        <input type="text" id="necUnita" placeholder="Es. pz, kg, L" list="necUnitaList">
-        <datalist id="necUnitaList">
-          <option value="pz"><option value="kg"><option value="L"><option value="g"><option value="ml"><option value="m"><option value="confezione">
-        </datalist>
-      </div>
-    </div>
+    <!-- CAMPI COMUNI -->
+    <div style="border-top:1px solid var(--cream-dark);padding-top:0.9rem">
+      <div style="font-size:0.82rem;color:var(--text-light);margin-bottom:0.6rem">📋 Dati comuni a tutti gli articoli di questo ordine</div>
 
-    <div class="form-row">
-      <label>Fornitore</label>
-      <input type="text" id="necFornitore" placeholder="Es. Apicoltura Nord" list="necFornitoreList">
-      <datalist id="necFornitoreList"></datalist>
-    </div>
+      <div class="form-row">
+        <label>Fornitore</label>
+        <div style="position:relative">
+          <input type="text" id="necFornitore" placeholder="Es. Apicoltura Nord" autocomplete="off"
+            oninput="filtraFornitoriSuggeriti()" onfocus="filtraFornitoriSuggeriti()">
+          <div id="necFornitoreSuggest" style="display:none;position:absolute;top:100%;left:0;right:0;margin-top:2px;background:white;border:1px solid var(--cream-dark);border-radius:6px;box-shadow:0 6px 20px rgba(0,0,0,0.12);z-index:60;max-height:200px;overflow-y:auto"></div>
+        </div>
+      </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
-      <div class="form-row">
-        <label>Priorità</label>
-        <select id="necPriorita">
-          <option value="bassa">⚪ Bassa</option>
-          <option value="media" selected>🟡 Media</option>
-          <option value="alta">🟠 Alta</option>
-          <option value="urgente">🔴 Urgente</option>
-        </select>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+        <div class="form-row">
+          <label>Priorità</label>
+          <select id="necPriorita">
+            <option value="bassa">⚪ Bassa</option>
+            <option value="media" selected>🟡 Media</option>
+            <option value="alta">🟠 Alta</option>
+            <option value="urgente">🔴 Urgente</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Data prevista (opzionale)</label>
+          <input type="date" id="necDataPrevista">
+        </div>
       </div>
-      <div class="form-row">
-        <label>Data prevista (opzionale)</label>
-        <input type="date" id="necDataPrevista">
-      </div>
-    </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
       <div class="form-row">
-        <label>Controvalore merce (€)</label>
-        <input type="number" id="necPrezzoStimato" min="0" step="0.01" placeholder="Es. 35.00">
-      </div>
-      <div class="form-row">
-        <label>Spese spedizione (€)</label>
+        <label>Spese spedizione totali ordine (€)</label>
         <input type="number" id="necSpedizione" min="0" step="0.01" placeholder="Es. 7.50">
+        <div style="font-size:0.76rem;color:var(--text-light);font-style:italic;margin-top:0.2rem">Una sola spedizione per tutto l'ordine. Alla ricezione la merce aggiorna il prezzo unitario, la spedizione è registrata come spesa a parte.</div>
       </div>
-    </div>
-    <div style="font-size:0.76rem;color:var(--text-light);font-style:italic;margin:-0.3rem 0 0.6rem">Alla ricezione: la merce aggiorna il prezzo unitario, la spedizione viene registrata come spesa a parte.</div>
 
-    <div class="form-row">
-      <label>Note</label>
-      <textarea id="necNote" rows="2" placeholder="Es. Preferire colore ambra scuro..."></textarea>
+      <div class="form-row">
+        <label>Note</label>
+        <textarea id="necNote" rows="2" placeholder="Es. Preferire colore ambra scuro..."></textarea>
+      </div>
     </div>
 
     <div style="display:flex;gap:0.5rem;justify-content:flex-end;border-top:1px solid var(--cream-dark);padding-top:1rem;margin-top:0.5rem">
@@ -2731,22 +2715,22 @@
 </div><!-- fine appContent -->
 
 <!-- ===== JS MODULES — ordine importante! ===== -->
-<script src="js/state.js?v=20260540"></script>
-<script src="js/nav.js?v=20260540"></script>
-<script src="js/import-export.js?v=20260540"></script>
-<script src="js/registro.js?v=20260540"></script>
-<script src="js/arnie.js?v=20260540"></script>
-<script src="js/magazzino.js?v=20260540"></script>
-<script src="js/necessita.js?v=20260540"></script>
-<script src="js/ricerca.js?v=20260540"></script>
-<script src="js/insights.js?v=20260540"></script>
-<script src="js/versioni.js?v=20260540"></script>
-<script src="js/filtri.js?v=20260540"></script>
-<script src="js/contabilita.js?v=20260540"></script>
-<script src="js/obiettivi.js?v=20260540"></script>
-<script src="js/calcolatori.js?v=20260540"></script>
-<script src="js/report.js?v=20260540"></script>
-<script src="js/home.js?v=20260540"></script>
+<script src="js/state.js?v=20260542"></script>
+<script src="js/nav.js?v=20260542"></script>
+<script src="js/import-export.js?v=20260542"></script>
+<script src="js/registro.js?v=20260542"></script>
+<script src="js/arnie.js?v=20260542"></script>
+<script src="js/magazzino.js?v=20260542"></script>
+<script src="js/necessita.js?v=20260542"></script>
+<script src="js/ricerca.js?v=20260542"></script>
+<script src="js/insights.js?v=20260542"></script>
+<script src="js/versioni.js?v=20260542"></script>
+<script src="js/filtri.js?v=20260542"></script>
+<script src="js/contabilita.js?v=20260542"></script>
+<script src="js/obiettivi.js?v=20260542"></script>
+<script src="js/calcolatori.js?v=20260542"></script>
+<script src="js/report.js?v=20260542"></script>
+<script src="js/home.js?v=20260542"></script>
 <script src="js/drive-app.js"></script>
 
 </body>
