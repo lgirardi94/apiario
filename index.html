@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- FILE VERSION: 2026-05-28.9 · apiario.html -->
 <html lang="it">
 <head>
 <meta charset="UTF-8">
@@ -7,7 +8,7 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐝</text></svg>">
 <link rel="stylesheet" href="style-main.css">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="shared.js?v=20260533"></script>
+<script src="shared.js?v=20260542"></script>
 </head>
 <body>
 
@@ -59,6 +60,7 @@
   <div style="display:flex;gap:0.6rem;flex-wrap:wrap;align-items:center">
     <button onclick="exportJSON()" style="background:transparent;border:1px solid rgba(200,134,10,0.3);color:rgba(245,200,66,0.6);padding:0.3rem 0.9rem;border-radius:2px;cursor:pointer;font-family:'Crimson Pro',serif;font-size:0.82rem" onmouseover="this.style.background='rgba(200,134,10,0.15)'" onmouseout="this.style.background='transparent'">⬇ Backup locale</button>
     <button onclick="mostraBackupDisponibili()" title="Backup automatici settimanali su Drive" style="background:transparent;border:1px solid rgba(200,134,10,0.3);color:rgba(245,200,66,0.6);padding:0.3rem 0.9rem;border-radius:2px;cursor:pointer;font-family:'Crimson Pro',serif;font-size:0.82rem" onmouseover="this.style.background='rgba(200,134,10,0.15)'" onmouseout="this.style.background='transparent'">☁️ Backup auto</button>
+    <button onclick="mostraVersioniFile()" title="Versioni dei file (per controllo allineamento con GitHub)" style="background:transparent;border:1px solid rgba(200,134,10,0.3);color:rgba(245,200,66,0.6);padding:0.3rem 0.9rem;border-radius:2px;cursor:pointer;font-family:'Crimson Pro',serif;font-size:0.82rem" onmouseover="this.style.background='rgba(200,134,10,0.15)'" onmouseout="this.style.background='transparent'">🏷️ Versioni</button>
     <label style="background:transparent;border:1px solid rgba(200,134,10,0.3);color:rgba(245,200,66,0.6);padding:0.3rem 0.9rem;border-radius:2px;cursor:pointer;font-family:'Crimson Pro',serif;font-size:0.82rem" onmouseover="this.style.background='rgba(200,134,10,0.15)'" onmouseout="this.style.background='transparent'">
       ⬆ Importa JSON
       <input type="file" accept=".json" onchange="importJSON(event)" style="display:none">
@@ -83,6 +85,9 @@
         <div style="font-size:0.72rem;color:#7a9a85;margin-top:0.2rem">↗ Vai al calendario</div>
       </div>
     </div>
+
+    <!-- CRUSCOTTO FILTRI RAPIDI -->
+    <div id="homeCruscotto" style="margin-bottom:1rem"></div>
 
     <!-- ALERTS -->
     <div id="homeAlerts" style="margin-bottom:1rem"></div>
@@ -1778,6 +1783,9 @@
       <button class="btn btn-secondary" style="padding:0.35rem 0.7rem;font-size:0.82rem" onclick="resetFiltroDate()" title="Azzera intervallo date">✕ Azzera date</button>
       <span id="filterDateInfo" style="font-size:0.82rem;color:var(--text-light)"></span>
     </div>
+    <div class="log-filters" style="margin-top:0.6rem;align-items:center">
+      <div id="registroFiltriDropdown"></div>
+    </div>
     <div class="log-entries" id="logEntries"></div>
   </section>
 
@@ -1810,17 +1818,6 @@
       <div style="display:flex;gap:0.8rem;margin-bottom:0.8rem;flex-wrap:wrap;align-items:center">
         <button class="btn" onclick="openArticoloModal()">+ Nuovo articolo</button>
         <button class="btn btn-secondary" onclick="openVenditaModal()" style="background:var(--green);color:white;border-color:var(--green)">💰 Registra vendita</button>
-        <select id="magFiltroCategoria" onchange="renderMagArticoli()" style="padding:0.45rem 0.8rem;border:1px solid var(--cream-dark);border-radius:3px;font-family:'Crimson Pro',serif;font-size:0.95rem;background:white;color:var(--text)">
-          <option value="">Tutte le categorie</option>
-          <option value="farmaci">💊 Farmaci/sanitari</option>
-          <option value="alimentazione">🍬 Alimentazione</option>
-          <option value="telai_cera">🪵 Telai e cera</option>
-          <option value="arnie">📦 Arnie e componenti</option>
-          <option value="attrezzatura">🔧 Attrezzatura</option>
-          <option value="confezionamento">🫙 Confezionamento</option>
-          <option value="prodotto">🍯 Prodotti finiti</option>
-          <option value="altro">📋 Altro</option>
-        </select>
         <select id="magOrdinamento" onchange="renderMagArticoli()" style="padding:0.45rem 0.8rem;border:1px solid var(--cream-dark);border-radius:3px;font-family:'Crimson Pro',serif;font-size:0.95rem;background:white;color:var(--text)">
           <option value="nome">↕ Nome (A-Z)</option>
           <option value="giacenza_asc">↕ Giacenza (crescente)</option>
@@ -1832,11 +1829,9 @@
         <input type="text" id="magFiltroSearch" placeholder="🔍 Cerca articolo..." oninput="renderMagArticoli()" style="padding:0.45rem 0.8rem;border:1px solid var(--cream-dark);border-radius:3px;font-family:'Crimson Pro',serif;font-size:0.95rem;background:white;flex:1;min-width:140px">
       </div>
 
-      <!-- Toggle sotto soglia + azione -->
+      <!-- Filtri multiscelta + azione -->
       <div style="display:flex;gap:0.8rem;margin-bottom:1.2rem;flex-wrap:wrap;align-items:center">
-        <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.88rem;cursor:pointer;color:var(--text)">
-          <input type="checkbox" id="magSoloSottoSoglia" onchange="renderMagArticoli()" style="width:auto;margin:0"> ⚠️ Mostra solo sotto soglia
-        </label>
+        <div id="magFiltriDropdown"></div>
         <button id="magBtnOrdinaSottoSoglia" class="btn btn-secondary" style="padding:0.35rem 0.8rem;font-size:0.82rem;display:none" onclick="aggiungiSottoSogliaAOrdini()">🛒 Aggiungi tutti agli ordini</button>
       </div>
 
@@ -1864,6 +1859,8 @@
 
       <div style="display:flex;gap:0.8rem;margin-bottom:1.2rem;flex-wrap:wrap;align-items:center">
         <button class="btn" onclick="openNecessitaModal()">+ Aggiungi necessità</button>
+        <button class="btn btn-secondary" onclick="apriRicezioneSelezioneFornitore()" title="Ricevi tutti gli articoli di un fornitore insieme">📦 Ricevi ordine</button>
+        <button class="btn btn-secondary" onclick="openFornitoriModal()" title="Gestisci l'elenco dei fornitori">🏪 Fornitori</button>
         <button class="btn btn-secondary" onclick="copiaListaNecessita()" title="Copia la lista negli appunti">📋 Copia lista</button>
         <span style="margin-left:auto;font-size:0.85rem;color:var(--text-light)" id="necessitaCounter">0 voci</span>
       </div>
@@ -1912,13 +1909,13 @@
     <p class="section-subtitle">Pianifica e monitora i tuoi traguardi stagionali e annuali</p>
 
     <div class="mag-tabs">
-      <button class="mag-tab active" onclick="showObTab('stagionali', this)">🌿 Stagionali</button>
-      <button class="mag-tab" onclick="showObTab('annuali', this)">📆 Annuali</button>
+      <button class="mag-tab active" onclick="showObTab('annuali', this)">📆 Annuali</button>
+      <button class="mag-tab" onclick="showObTab('stagionali', this)">🌿 Stagionali</button>
       <button class="mag-tab" onclick="showObTab('storico', this)">📊 Storico</button>
     </div>
 
     <!-- TAB STAGIONALI -->
-    <div id="obTabStagionali">
+    <div id="obTabStagionali" style="display:none">
       <div style="display:flex;gap:0.8rem;margin-bottom:1.2rem;flex-wrap:wrap;align-items:center">
         <button class="btn" onclick="openObModal('stagionale')">+ Nuovo obiettivo</button>
         <select id="obFiltroStagione" onchange="renderObStagionali()" style="padding:0.45rem 0.8rem;border:1px solid var(--cream-dark);border-radius:3px;font-family:'Crimson Pro',serif;font-size:0.95rem;background:white;color:var(--text)">
@@ -1942,7 +1939,7 @@
     </div>
 
     <!-- TAB ANNUALI -->
-    <div id="obTabAnnuali" style="display:none">
+    <div id="obTabAnnuali">
       <div style="display:flex;gap:0.8rem;margin-bottom:1.2rem;flex-wrap:wrap;align-items:center">
         <button class="btn" onclick="openObModal('annuale')">+ Nuovo obiettivo</button>
         <select id="obFiltroAnnoA" onchange="renderObAnnuali()" style="padding:0.45rem 0.8rem;border:1px solid var(--cream-dark);border-radius:3px;font-family:'Crimson Pro',serif;font-size:0.95rem;background:white;color:var(--text)">
@@ -2049,14 +2046,10 @@
       <div style="display:flex;gap:0.8rem;margin-bottom:1.2rem;flex-wrap:wrap;align-items:center">
         <button class="btn" onclick="openContMovModal()">+ Nuovo movimento</button>
         <button class="btn btn-secondary" onclick="openVenditaModal()" style="background:var(--green);color:white;border-color:var(--green)">💰 Registra vendita</button>
-        <select id="contFiltroTipo" onchange="renderContMovimenti()" style="padding:0.45rem 0.8rem;border:1px solid var(--cream-dark);border-radius:3px;font-family:'Crimson Pro',serif;font-size:0.95rem;background:white;color:var(--text)">
-          <option value="">Tutti i tipi</option>
-          <option value="entrata">🟢 Entrate</option>
-          <option value="uscita">🔴 Uscite</option>
-        </select>
         <select id="contFiltroAnno" onchange="renderContMovimenti()" style="padding:0.45rem 0.8rem;border:1px solid var(--cream-dark);border-radius:3px;font-family:'Crimson Pro',serif;font-size:0.95rem;background:white;color:var(--text)">
           <option value="">Tutti gli anni</option>
         </select>
+        <div id="contFiltriDropdown"></div>
         <input type="text" id="contFiltroSearch" placeholder="🔍 Cerca..." oninput="renderContMovimenti()" style="padding:0.45rem 0.8rem;border:1px solid var(--cream-dark);border-radius:3px;font-family:'Crimson Pro',serif;font-size:0.95rem;background:white;flex:1;min-width:120px">
       </div>
       <div id="contMovList"></div>
@@ -2277,7 +2270,7 @@
     <div style="margin-bottom:0.8rem">
       <div style="font-size:0.85rem;font-weight:600;color:var(--text-light);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem;display:flex;justify-content:space-between;align-items:center">
         Articoli
-        <button type="button" onclick="addMovRiga()" class="btn btn-secondary" style="padding:0.25rem 0.7rem;font-size:0.82rem">+ Aggiungi articolo</button>
+        <button type="button" id="movAddRigaBtn" onclick="addMovRiga()" class="btn btn-secondary" style="padding:0.25rem 0.7rem;font-size:0.82rem">+ Aggiungi articolo</button>
       </div>
       <div id="movRighe"></div>
     </div>
@@ -2351,75 +2344,80 @@
 
 <!-- MODAL NECESSITÀ (da ordinare) -->
 <div class="modal-overlay" id="necessitaModal">
-  <div class="modal" style="max-width:550px">
+  <div class="modal" style="max-width:600px">
     <h3 id="necessitaModalTitle">🛒 Nuova necessità</h3>
     <input type="hidden" id="editNecessitaId">
 
-    <div class="form-row">
-      <label>Articolo</label>
-      <select id="necArticoloId" onchange="onNecArticoloChange()" style="margin-bottom:0.3rem">
-        <option value="">— Seleziona articolo dal magazzino —</option>
-      </select>
-      <div style="font-size:0.78rem;color:var(--text-light);font-style:italic;margin-top:0.2rem">Oppure scrivi sotto un articolo nuovo (verrà creato anche nel magazzino al salvataggio)</div>
-      <input type="text" id="necDescrizioneCustom" placeholder="Articolo nuovo / descrizione libera..." style="margin-top:0.3rem">
-    </div>
+    <!-- RIGHE ARTICOLI (multi-riga in inserimento, singola in modifica) -->
+    <label style="font-weight:600;color:var(--brown);font-size:0.9rem">Articoli da ordinare</label>
+    <div id="necRighe" style="display:flex;flex-direction:column;gap:0.6rem;margin:0.4rem 0 0.6rem"></div>
+    <button type="button" id="necAddRigaBtn" onclick="aggiungiRigaNec()" class="btn btn-secondary" style="padding:0.3rem 0.8rem;font-size:0.85rem;margin-bottom:1rem">+ Aggiungi articolo</button>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
-      <div class="form-row">
-        <label>Quantità</label>
-        <input type="number" id="necQuantita" min="0.01" step="0.01" placeholder="Es. 50">
-      </div>
-      <div class="form-row">
-        <label>Unità</label>
-        <input type="text" id="necUnita" placeholder="Es. pz, kg, L" list="necUnitaList">
-        <datalist id="necUnitaList">
-          <option value="pz"><option value="kg"><option value="L"><option value="g"><option value="ml"><option value="m"><option value="confezione">
-        </datalist>
-      </div>
-    </div>
+    <!-- CAMPI COMUNI -->
+    <div style="border-top:1px solid var(--cream-dark);padding-top:0.9rem">
+      <div style="font-size:0.82rem;color:var(--text-light);margin-bottom:0.6rem">📋 Dati comuni a tutti gli articoli di questo ordine</div>
 
-    <div class="form-row">
-      <label>Fornitore</label>
-      <input type="text" id="necFornitore" placeholder="Es. Apicoltura Nord" list="necFornitoreList">
-      <datalist id="necFornitoreList"></datalist>
-    </div>
+      <div class="form-row">
+        <label>Fornitore</label>
+        <div style="position:relative">
+          <input type="text" id="necFornitore" placeholder="Es. Apicoltura Nord" autocomplete="off"
+            oninput="filtraFornitoriSuggeriti()" onfocus="filtraFornitoriSuggeriti()">
+          <div id="necFornitoreSuggest" style="display:none;position:absolute;top:100%;left:0;right:0;margin-top:2px;background:white;border:1px solid var(--cream-dark);border-radius:6px;box-shadow:0 6px 20px rgba(0,0,0,0.12);z-index:60;max-height:200px;overflow-y:auto"></div>
+        </div>
+      </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
-      <div class="form-row">
-        <label>Priorità</label>
-        <select id="necPriorita">
-          <option value="bassa">⚪ Bassa</option>
-          <option value="media" selected>🟡 Media</option>
-          <option value="alta">🟠 Alta</option>
-          <option value="urgente">🔴 Urgente</option>
-        </select>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+        <div class="form-row">
+          <label>Priorità</label>
+          <select id="necPriorita">
+            <option value="bassa">⚪ Bassa</option>
+            <option value="media" selected>🟡 Media</option>
+            <option value="alta">🟠 Alta</option>
+            <option value="urgente">🔴 Urgente</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Data prevista (opzionale)</label>
+          <input type="date" id="necDataPrevista">
+        </div>
       </div>
-      <div class="form-row">
-        <label>Data prevista (opzionale)</label>
-        <input type="date" id="necDataPrevista">
-      </div>
-    </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
       <div class="form-row">
-        <label>Controvalore merce (€)</label>
-        <input type="number" id="necPrezzoStimato" min="0" step="0.01" placeholder="Es. 35.00">
-      </div>
-      <div class="form-row">
-        <label>Spese spedizione (€)</label>
+        <label>Spese spedizione totali ordine (€)</label>
         <input type="number" id="necSpedizione" min="0" step="0.01" placeholder="Es. 7.50">
+        <div style="font-size:0.76rem;color:var(--text-light);font-style:italic;margin-top:0.2rem">Una sola spedizione per tutto l'ordine. Alla ricezione la merce aggiorna il prezzo unitario, la spedizione è registrata come spesa a parte.</div>
       </div>
-    </div>
-    <div style="font-size:0.76rem;color:var(--text-light);font-style:italic;margin:-0.3rem 0 0.6rem">Alla ricezione: la merce aggiorna il prezzo unitario, la spedizione viene registrata come spesa a parte.</div>
 
-    <div class="form-row">
-      <label>Note</label>
-      <textarea id="necNote" rows="2" placeholder="Es. Preferire colore ambra scuro..."></textarea>
+      <div class="form-row">
+        <label>Note</label>
+        <textarea id="necNote" rows="2" placeholder="Es. Preferire colore ambra scuro..."></textarea>
+      </div>
     </div>
 
     <div style="display:flex;gap:0.5rem;justify-content:flex-end;border-top:1px solid var(--cream-dark);padding-top:1rem;margin-top:0.5rem">
       <button class="btn btn-secondary" onclick="closeNecessitaModal()">Annulla</button>
       <button class="btn" onclick="saveNecessitaEntry()">💾 Salva</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL RICEZIONE ORDINE FORNITORE -->
+<div class="modal-overlay" id="ricezioneFornitoreModal">
+  <div class="modal" style="max-width:640px">
+    <h3 id="ricFornTitle">📦 Ricevi ordine</h3>
+    <p style="font-size:0.85rem;color:var(--text-light);margin:-0.3rem 0 1rem">Controlla quantità e prezzi prima di confermare. Puoi correggere ciò che il fornitore ha effettivamente spedito o escludere un articolo non arrivato. Le quantità mancanti tornano "da ordinare".</p>
+    <div id="ricFornRighe" style="display:flex;flex-direction:column;gap:0.6rem;margin-bottom:1rem;max-height:46vh;overflow-y:auto"></div>
+    <div style="display:flex;align-items:center;gap:0.6rem;background:var(--amber-pale);border-radius:6px;padding:0.7rem 1rem;margin-bottom:0.8rem">
+      <label style="font-size:0.9rem;color:var(--brown);white-space:nowrap">📮 Spedizione totale ordine (€)</label>
+      <input type="number" id="ricFornSpedizione" min="0" step="0.01" placeholder="Es. 7.50" style="width:110px" oninput="updateRicFornTotale()">
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:0.6rem 0.2rem;border-top:1px solid var(--cream-dark)">
+      <span style="font-size:0.9rem;color:var(--text)">Totale ordine (merce + spedizione)</span>
+      <span id="ricFornTotale" style="font-size:1.25rem;font-weight:700;color:var(--brown)">€ 0,00</span>
+    </div>
+    <div style="display:flex;gap:0.5rem;justify-content:flex-end;border-top:1px solid var(--cream-dark);padding-top:1rem;margin-top:0.5rem">
+      <button class="btn btn-secondary" onclick="closeRicezioneFornitore()">Annulla</button>
+      <button class="btn" onclick="confermaRicezioneFornitore()">✅ Conferma ricezione</button>
     </div>
   </div>
 </div>
@@ -2676,15 +2674,6 @@
   </div>
 </div>
 
-<!-- DETAIL PANEL -->
-<div class="detail-panel" id="detailPanel">
-  <div class="detail-panel-header">
-    <h3 id="detailTitle">Arnia</h3>
-    <button class="btn-icon" onclick="closeDetail()" style="color:var(--cream-dark);font-size:1.2rem;border-color:rgba(255,255,255,0.2)">✕</button>
-  </div>
-  <div class="detail-panel-body" id="detailBody"></div>
-</div>
-<div id="detailOverlay" onclick="closeDetail()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:199"></div>
 
 <!-- MODALE EDIT MAPPA TELAINI -->
 <div class="modal-overlay" id="editTelainiModal">
@@ -2726,22 +2715,22 @@
 </div><!-- fine appContent -->
 
 <!-- ===== JS MODULES — ordine importante! ===== -->
-<script src="js/state.js?v=20260533"></script>
-<script src="js/nav.js?v=20260533"></script>
-<script src="js/import-export.js?v=20260533"></script>
-<script src="js/registro.js?v=20260533"></script>
-<script src="js/arnie.js?v=20260533"></script>
-<script src="js/magazzino.js?v=20260533"></script>
-<script src="js/necessita.js?v=20260533"></script>
-<script src="js/ricerca.js?v=20260533"></script>
-<script src="js/insights.js?v=20260533"></script>
-<script src="js/contabilita.js?v=20260533"></script>
-<script src="js/obiettivi.js?v=20260533"></script>
-<script src="js/sciroppo.js?v=20260533"></script>
-<script src="js/candito.js?v=20260533"></script>
-<script src="js/propoli.js?v=20260533"></script>
-<script src="js/report.js?v=20260533"></script>
-<script src="js/home.js?v=20260533"></script>
+<script src="js/state.js?v=20260542"></script>
+<script src="js/nav.js?v=20260542"></script>
+<script src="js/import-export.js?v=20260542"></script>
+<script src="js/registro.js?v=20260542"></script>
+<script src="js/arnie.js?v=20260542"></script>
+<script src="js/magazzino.js?v=20260542"></script>
+<script src="js/necessita.js?v=20260542"></script>
+<script src="js/ricerca.js?v=20260542"></script>
+<script src="js/insights.js?v=20260542"></script>
+<script src="js/versioni.js?v=20260542"></script>
+<script src="js/filtri.js?v=20260542"></script>
+<script src="js/contabilita.js?v=20260542"></script>
+<script src="js/obiettivi.js?v=20260542"></script>
+<script src="js/calcolatori.js?v=20260542"></script>
+<script src="js/report.js?v=20260542"></script>
+<script src="js/home.js?v=20260542"></script>
 <script src="js/drive-app.js"></script>
 
 </body>
