@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- FILE VERSION: 2026-05-28.1 · apiario.html -->
+<!-- FILE VERSION: 2026-05-28.3 · apiario.html -->
 <html lang="it">
 <head>
 <meta charset="UTF-8">
@@ -8,7 +8,7 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐝</text></svg>">
 <link rel="stylesheet" href="style-main.css">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="shared.js?v=20260535"></script>
+<script src="shared.js?v=20260536"></script>
 </head>
 <body>
 
@@ -2268,7 +2268,7 @@
     <div style="margin-bottom:0.8rem">
       <div style="font-size:0.85rem;font-weight:600;color:var(--text-light);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem;display:flex;justify-content:space-between;align-items:center">
         Articoli
-        <button type="button" onclick="addMovRiga()" class="btn btn-secondary" style="padding:0.25rem 0.7rem;font-size:0.82rem">+ Aggiungi articolo</button>
+        <button type="button" id="movAddRigaBtn" onclick="addMovRiga()" class="btn btn-secondary" style="padding:0.25rem 0.7rem;font-size:0.82rem">+ Aggiungi articolo</button>
       </div>
       <div id="movRighe"></div>
     </div>
@@ -2411,6 +2411,27 @@
     <div style="display:flex;gap:0.5rem;justify-content:flex-end;border-top:1px solid var(--cream-dark);padding-top:1rem;margin-top:0.5rem">
       <button class="btn btn-secondary" onclick="closeNecessitaModal()">Annulla</button>
       <button class="btn" onclick="saveNecessitaEntry()">💾 Salva</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL RICEZIONE ORDINE FORNITORE -->
+<div class="modal-overlay" id="ricezioneFornitoreModal">
+  <div class="modal" style="max-width:640px">
+    <h3 id="ricFornTitle">📦 Ricevi ordine</h3>
+    <p style="font-size:0.85rem;color:var(--text-light);margin:-0.3rem 0 1rem">Controlla quantità e prezzi prima di confermare. Puoi correggere ciò che il fornitore ha effettivamente spedito o escludere un articolo non arrivato. Le quantità mancanti tornano "da ordinare".</p>
+    <div id="ricFornRighe" style="display:flex;flex-direction:column;gap:0.6rem;margin-bottom:1rem;max-height:46vh;overflow-y:auto"></div>
+    <div style="display:flex;align-items:center;gap:0.6rem;background:var(--amber-pale);border-radius:6px;padding:0.7rem 1rem;margin-bottom:0.8rem">
+      <label style="font-size:0.9rem;color:var(--brown);white-space:nowrap">📮 Spedizione totale ordine (€)</label>
+      <input type="number" id="ricFornSpedizione" min="0" step="0.01" placeholder="Es. 7.50" style="width:110px" oninput="updateRicFornTotale()">
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:0.6rem 0.2rem;border-top:1px solid var(--cream-dark)">
+      <span style="font-size:0.9rem;color:var(--text)">Totale ordine (merce + spedizione)</span>
+      <span id="ricFornTotale" style="font-size:1.25rem;font-weight:700;color:var(--brown)">€ 0,00</span>
+    </div>
+    <div style="display:flex;gap:0.5rem;justify-content:flex-end;border-top:1px solid var(--cream-dark);padding-top:1rem;margin-top:0.5rem">
+      <button class="btn btn-secondary" onclick="closeRicezioneFornitore()">Annulla</button>
+      <button class="btn" onclick="confermaRicezioneFornitore()">✅ Conferma ricezione</button>
     </div>
   </div>
 </div>
@@ -2717,24 +2738,24 @@
 </div><!-- fine appContent -->
 
 <!-- ===== JS MODULES — ordine importante! ===== -->
-<script src="js/state.js?v=20260535"></script>
-<script src="js/nav.js?v=20260535"></script>
-<script src="js/import-export.js?v=20260535"></script>
-<script src="js/registro.js?v=20260535"></script>
-<script src="js/arnie.js?v=20260535"></script>
-<script src="js/magazzino.js?v=20260535"></script>
-<script src="js/necessita.js?v=20260535"></script>
-<script src="js/ricerca.js?v=20260535"></script>
-<script src="js/insights.js?v=20260535"></script>
-<script src="js/versioni.js?v=20260535"></script>
-<script src="js/filtri.js?v=20260535"></script>
-<script src="js/contabilita.js?v=20260535"></script>
-<script src="js/obiettivi.js?v=20260535"></script>
-<script src="js/sciroppo.js?v=20260535"></script>
-<script src="js/candito.js?v=20260535"></script>
-<script src="js/propoli.js?v=20260535"></script>
-<script src="js/report.js?v=20260535"></script>
-<script src="js/home.js?v=20260535"></script>
+<script src="js/state.js?v=20260536"></script>
+<script src="js/nav.js?v=20260536"></script>
+<script src="js/import-export.js?v=20260536"></script>
+<script src="js/registro.js?v=20260536"></script>
+<script src="js/arnie.js?v=20260536"></script>
+<script src="js/magazzino.js?v=20260536"></script>
+<script src="js/necessita.js?v=20260536"></script>
+<script src="js/ricerca.js?v=20260536"></script>
+<script src="js/insights.js?v=20260536"></script>
+<script src="js/versioni.js?v=20260536"></script>
+<script src="js/filtri.js?v=20260536"></script>
+<script src="js/contabilita.js?v=20260536"></script>
+<script src="js/obiettivi.js?v=20260536"></script>
+<script src="js/sciroppo.js?v=20260536"></script>
+<script src="js/candito.js?v=20260536"></script>
+<script src="js/propoli.js?v=20260536"></script>
+<script src="js/report.js?v=20260536"></script>
+<script src="js/home.js?v=20260536"></script>
 <script src="js/drive-app.js"></script>
 
 </body>
