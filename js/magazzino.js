@@ -767,7 +767,13 @@ function closeArticoloModal() { document.getElementById('articoloModal').classLi
 
 function toggleCampiConsumabile() {
   const cat = document.getElementById('artCategoria').value;
-  document.getElementById('artCampiConsumabile').style.display = cat === 'consumabile' ? 'grid' : 'none';
+  // Scadenza/lotto rilevanti per farmaci, alimentazione, telai/cera e prodotti finiti.
+  // Lascio comunque la possibilità anche su "altro". Le nascondo solo per
+  // attrezzatura, arnie e componenti (che non scadono).
+  const senzaScadenza = ['attrezzatura', 'arnie', 'materiale'];
+  const mostra = !senzaScadenza.includes(cat);
+  const el = document.getElementById('artCampiConsumabile');
+  if(el) el.style.display = mostra ? 'grid' : 'none';
 }
 
 function saveArticolo() {
