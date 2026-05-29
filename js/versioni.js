@@ -8,7 +8,7 @@
 
 const FILE_VERSIONS = {
   // HTML
-  'apiario.html (index.html)': '2026-05-28.5',
+  'apiario.html (index.html)': '2026-05-28.6',
   'visita_rapida.html':        '2026-05-28.1',
   'inserimento_rapido.html':   '2026-05-28.2',
   'etichette.html':            '2026-05-28.1',
@@ -18,16 +18,16 @@ const FILE_VERSIONS = {
   'js/nav.js':                 '2026-05-28.2',
   // Sezioni
   'js/home.js':                '2026-05-28.2',
-  'js/arnie.js':               '2026-05-28.3',
+  'js/arnie.js':               '2026-05-28.4',
   'js/registro.js':            '2026-05-28.2',
   'js/magazzino.js':           '2026-05-28.3',
   'js/contabilita.js':         '2026-05-28.2',
-  'js/necessita.js':           '2026-05-28.3',
+  'js/necessita.js':           '2026-05-28.4',
   'js/obiettivi.js':           '2026-05-28.1',
   // Utility / calcolatori
   'js/calcolatori.js':         '2026-05-28.1',
   'js/report.js':              '2026-05-28.1',
-  'js/insights.js':            '2026-05-28.3',
+  'js/insights.js':            '2026-05-28.4',
   'js/ricerca.js':             '2026-05-28.1',
   'js/filtri.js':              '2026-05-28.1',
   // Infrastruttura
@@ -37,7 +37,7 @@ const FILE_VERSIONS = {
 };
 
 // Versione "build" complessiva dell'app (la più recente tra tutte)
-const APP_BUILD = '2026-05-28.5';
+const APP_BUILD = '2026-05-28.6';
 
 function mostraVersioniFile() {
   try {
