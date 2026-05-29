@@ -1,4 +1,4 @@
-// ===== FILE VERSION: 2026-05-28.4 · necessita.js =====
+// ===== FILE VERSION: 2026-05-28.5 · necessita.js =====
 /* ===========================================================
    NECESSITÀ — Lista articoli da ordinare
    =========================================================== */
@@ -230,8 +230,10 @@ function openNecessitaModal(id) {
         articoliSorted.map(a => `<option value="${a.id}">${escapeHtmlAttr(a.nome)} ${a.unita ? '('+a.unita+')' : ''}</option>`).join('');
     }
 
-    // Popola lista fornitori
-    const fornitoriUsati = [...new Set(necessita.map(n => n.fornitore).filter(Boolean))].sort();
+    // Popola lista fornitori (lista gestita + quelli già usati)
+    const fornitoriUsati = (typeof getTuttiFornitori === 'function')
+      ? getTuttiFornitori()
+      : [...new Set(necessita.map(n => n.fornitore).filter(Boolean))].sort();
     const dlFornitori = document.getElementById('necFornitoreList');
     if(dlFornitori) {
       dlFornitori.innerHTML = fornitoriUsati.map(f => `<option value="${escapeHtmlAttr(f)}">`).join('');
@@ -705,6 +707,146 @@ function confermaRicezioneFornitore() {
   } catch(err) {
     console.error('[Necessita] Errore in confermaRicezioneFornitore:', err.message);
     alert('Errore durante la ricezione dell\'ordine: ' + err.message);
+  }
+}
+
+// ===========================================================
+// GESTIONE FORNITORI (lista persistente in settings.fornitori)
+// ===========================================================
+
+// Ritorna l'elenco completo fornitori: quelli salvati + quelli già usati nelle voci
+function getTuttiFornitori() {
+  const salvati = (settings && Array.isArray(settings.fornitori)) ? settings.fornitori : [];
+  const usati = (necessita || []).map(n => n.fornitore).filter(Boolean);
+  return [...new Set([...salvati, ...usati])].sort((a,b) => a.localeCompare(b));
+}
+
+function openFornitoriModal() {
+  try {
+    if(!settings.fornitori) settings.fornitori = [];
+    const old = document.getElementById('fornitoriOverlay');
+    if(old) old.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'fornitoriOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(26,18,8,0.55);z-index:2000;display:flex;align-items:center;justify-content:center;padding:1rem';
+    overlay.addEventListener('click', e => { if(e.target === overlay) overlay.remove(); });
+    overlay.innerHTML = `
+      <div style="background:white;border-radius:8px;padding:1.5rem;width:100%;max-width:440px;max-height:82vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+        <h3 style="font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--brown);margin:0 0 0.3rem">🏪 Gestione fornitori</h3>
+        <p style="font-size:0.83rem;color:var(--text-light);margin:0 0 1rem">Aggiungi i tuoi fornitori abituali: compariranno come suggerimenti quando crei un ordine.</p>
+        <div style="display:flex;gap:0.5rem;margin-bottom:1rem">
+          <input type="text" id="nuovoFornitoreInput" placeholder="Nome fornitore..." style="flex:1;padding:0.5rem 0.7rem;border:1px solid var(--cream-dark);border-radius:4px;font-family:inherit;font-size:0.9rem" onkeydown="if(event.key==='Enter')aggiungiFornitore()">
+          <button class="btn" onclick="aggiungiFornitore()" style="padding:0.5rem 0.9rem">+ Aggiungi</button>
+        </div>
+        <div id="fornitoriListaModal"></div>
+        <button onclick="document.getElementById('fornitoriOverlay').remove()" style="width:100%;margin-top:1rem;padding:0.6rem;background:var(--brown);border:none;border-radius:6px;font-weight:700;color:white;cursor:pointer;font-family:inherit">Chiudi</button>
+      </div>`;
+    document.body.appendChild(overlay);
+    renderFornitoriListaModal();
+    document.getElementById('nuovoFornitoreInput')?.focus();
+  } catch(err) {
+    console.error('[Necessita] Errore in openFornitoriModal:', err.message);
+  }
+}
+
+function renderFornitoriListaModal() {
+  const cont = document.getElementById('fornitoriListaModal');
+  if(!cont) return;
+  const salvati = (settings.fornitori || []).slice().sort((a,b)=>a.localeCompare(b));
+  // Fornitori usati ma non ancora salvati in lista
+  const usatiNonSalvati = [...new Set((necessita||[]).map(n=>n.fornitore).filter(Boolean))]
+    .filter(f => !salvati.includes(f)).sort((a,b)=>a.localeCompare(b));
+
+  if(salvati.length === 0 && usatiNonSalvati.length === 0) {
+    cont.innerHTML = `<div style="text-align:center;color:var(--text-light);font-style:italic;padding:1rem;font-size:0.88rem">Nessun fornitore ancora. Aggiungine uno qui sopra.</div>`;
+    return;
+  }
+
+  let html = '';
+  salvati.forEach(f => {
+    html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0.7rem;border:1px solid var(--cream-dark);border-radius:5px;margin-bottom:0.4rem">
+      <span style="font-size:0.9rem;color:var(--text)">🏪 ${escapeHtmlAttr(f)}</span>
+      <button onclick="rimuoviFornitore('${encodeURIComponent(f)}')" title="Rimuovi" style="background:none;border:1px solid var(--cream-dark);color:var(--red);border-radius:4px;padding:0.2rem 0.5rem;cursor:pointer;font-size:0.78rem">🗑</button>
+    </div>`;
+  });
+  if(usatiNonSalvati.length > 0) {
+    html += `<div style="font-size:0.78rem;color:var(--text-light);margin:0.8rem 0 0.4rem">Usati negli ordini (tocca + per salvarli in lista):</div>`;
+    usatiNonSalvati.forEach(f => {
+      html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0.7rem;border:1px dashed var(--cream-dark);border-radius:5px;margin-bottom:0.4rem">
+        <span style="font-size:0.9rem;color:var(--text-light)">${escapeHtmlAttr(f)}</span>
+        <button onclick="salvaFornitoreInLista('${encodeURIComponent(f)}')" title="Salva in lista" style="background:none;border:1px solid var(--green);color:var(--green);border-radius:4px;padding:0.2rem 0.5rem;cursor:pointer;font-size:0.78rem">+ Salva</button>
+      </div>`;
+    });
+  }
+  cont.innerHTML = html;
+}
+
+function aggiungiFornitore() {
+  const inp = document.getElementById('nuovoFornitoreInput');
+  if(!inp) return;
+  const nome = inp.value.trim();
+  if(!nome) return;
+  if(!settings.fornitori) settings.fornitori = [];
+  if(settings.fornitori.some(f => f.toLowerCase() === nome.toLowerCase())) {
+    alert('Questo fornitore è già in lista.');
+    return;
+  }
+  settings.fornitori.push(nome);
+  saveSettings();
+  inp.value = '';
+  renderFornitoriListaModal();
+  // Aggiorna i datalist in giro
+  if(typeof renderNecessita === 'function') renderNecessita();
+}
+
+function rimuoviFornitore(fEnc) {
+  const f = decodeURIComponent(fEnc);
+  if(!confirm(`Rimuovere "${f}" dall'elenco fornitori?\n(Gli ordini che lo usano non saranno modificati)`)) return;
+  settings.fornitori = (settings.fornitori || []).filter(x => x !== f);
+  saveSettings();
+  renderFornitoriListaModal();
+}
+
+function salvaFornitoreInLista(fEnc) {
+  const f = decodeURIComponent(fEnc);
+  if(!settings.fornitori) settings.fornitori = [];
+  if(!settings.fornitori.includes(f)) { settings.fornitori.push(f); saveSettings(); }
+  renderFornitoriListaModal();
+}
+
+// Picker per ricevere un ordine: sceglie il fornitore tra quelli con voci attive
+function apriRicezioneSelezioneFornitore() {
+  try {
+    const attive = getNecessitaAttive();
+    if(attive.length === 0) { alert('Nessun ordine in lista da ricevere.'); return; }
+
+    // Raggruppa per fornitore (incluso "senza fornitore")
+    const perForn = {};
+    attive.forEach(n => { const k = n.fornitore || '(senza fornitore)'; (perForn[k] = perForn[k] || []).push(n); });
+    const chiavi = Object.keys(perForn).sort((a,b)=>a.localeCompare(b));
+
+    const old = document.getElementById('ricSelOverlay');
+    if(old) old.remove();
+    const overlay = document.createElement('div');
+    overlay.id = 'ricSelOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(26,18,8,0.55);z-index:2000;display:flex;align-items:center;justify-content:center;padding:1rem';
+    overlay.addEventListener('click', e => { if(e.target === overlay) overlay.remove(); });
+    const righe = chiavi.map(k => `
+      <button onclick="document.getElementById('ricSelOverlay').remove(); apriRicezioneFornitore('${encodeURIComponent(k)}')" style="display:flex;justify-content:space-between;align-items:center;width:100%;background:var(--amber-pale);border:1px solid var(--cream-dark);border-radius:6px;padding:0.7rem 0.9rem;cursor:pointer;font-family:inherit;font-size:0.9rem;color:var(--brown);margin-bottom:0.5rem">
+        <span>🏪 <strong>${escapeHtmlAttr(k)}</strong></span>
+        <span style="background:var(--green);color:white;border-radius:4px;padding:0.15rem 0.6rem;font-size:0.78rem">${perForn[k].length} ${perForn[k].length===1?'voce':'voci'} →</span>
+      </button>`).join('');
+    overlay.innerHTML = `
+      <div style="background:white;border-radius:8px;padding:1.5rem;width:100%;max-width:440px;max-height:82vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+        <h3 style="font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--brown);margin:0 0 0.3rem">📦 Ricevi ordine</h3>
+        <p style="font-size:0.83rem;color:var(--text-light);margin:0 0 1rem">Scegli il fornitore di cui ricevere gli articoli:</p>
+        ${righe}
+        <button onclick="document.getElementById('ricSelOverlay').remove()" style="width:100%;margin-top:0.5rem;padding:0.6rem;background:white;border:1.5px solid var(--cream-dark);border-radius:6px;font-weight:600;color:var(--text);cursor:pointer;font-family:inherit">Annulla</button>
+      </div>`;
+    document.body.appendChild(overlay);
+  } catch(err) {
+    console.error('[Necessita] Errore in apriRicezioneSelezioneFornitore:', err.message);
   }
 }
 

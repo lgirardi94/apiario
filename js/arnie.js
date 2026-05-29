@@ -1,4 +1,4 @@
-// ===== FILE VERSION: 2026-05-28.4 · arnie.js =====
+// ===== FILE VERSION: 2026-05-28.5 · arnie.js =====
 // ======= ARNIE =======
 let editingMelari = []; // temp melari list while modal is open
 let editingRetePropoli = null; // singolo oggetto (max 1 per arnia)
@@ -110,25 +110,22 @@ function updateGenealogiaVisibility() {
 
   if(!box) return;
 
-  // Famiglia: nascondi tutto il box genealogia
-  if(tipo === 'famiglia') {
-    box.style.display = 'none';
-    return;
-  }
-
+  // Box genealogia mostrato per tutti i tipi (anche famiglia)
   box.style.display = 'block';
 
   // Sciame: mostra box sciame, nascondi telaini, etichetta diversa per data
   if(tipo === 'sciame') {
-    sciameBox.style.display = 'block';
-    telainiBox.style.display = 'none';
-    dataLabel.textContent = '📅 Data cattura';
-    subtitle.textContent = '— Origine dello sciame';
+    if(sciameBox) sciameBox.style.display = 'block';
+    if(telainiBox) telainiBox.style.display = 'block';
+    if(dataLabel) dataLabel.textContent = '📅 Data cattura';
+    if(subtitle) subtitle.textContent = '— Origine dello sciame';
   } else {
-    sciameBox.style.display = 'none';
-    telainiBox.style.display = 'block';
-    dataLabel.textContent = '📅 Data costituzione';
-    subtitle.textContent = (tipo === 'nucleo_fec') ? '— Tracciamento mini-arnia' : '— Tracciamento provenienza';
+    if(sciameBox) sciameBox.style.display = 'none';
+    if(telainiBox) telainiBox.style.display = 'block';
+    if(dataLabel) dataLabel.textContent = (tipo === 'famiglia') ? '📅 Data installazione' : '📅 Data costituzione';
+    if(subtitle) subtitle.textContent = (tipo === 'nucleo_fec') ? '— Tracciamento mini-arnia'
+      : (tipo === 'famiglia') ? '— Origine regina e telai'
+      : '— Tracciamento provenienza';
   }
 
   // Aggiorna le dropdown arnia di provenienza nei telaini
