@@ -1,4 +1,4 @@
-// ===== FILE VERSION: 2026-05-28.2 · magazzino.js =====
+// ===== FILE VERSION: 2026-05-28.3 · magazzino.js =====
 // ======= FUZZY SIMILARITY =======
 function similarity(a, b) {
   a = a.toLowerCase().trim();

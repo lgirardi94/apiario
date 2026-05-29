@@ -1,3 +1,4 @@
+// ===== FILE VERSION: 2026-05-28.2 · necessita.js =====
 /* ===========================================================
    NECESSITÀ — Lista articoli da ordinare
    =========================================================== */
@@ -109,7 +110,7 @@ function renderNecessita() {
         grouped[k].push(n);
       });
       groups = Object.entries(grouped).sort((a, b) => a[0].localeCompare(b[0]))
-        .map(([k, items]) => ({ label: `🏪 ${k}`, items }));
+        .map(([k, items]) => ({ label: `🏪 ${k}`, items, fornitoreKey: k }));
     } else if(raggruppa === 'data') {
       const oggi = new Date();
       const grouped = { scaduti: [], settimana: [], mese: [], futuri: [], nessuna: [] };
@@ -134,10 +135,18 @@ function renderNecessita() {
         .map(k => ({ label: labels[k], items: grouped[k] }));
     }
 
-    container.innerHTML = groups.map(g => `
-      ${g.label ? `<h4 style="font-family:'Playfair Display',serif;color:${g.color || 'var(--brown)'};margin:1.2rem 0 0.6rem;font-size:1rem;border-bottom:1px solid var(--cream-dark);padding-bottom:0.4rem">${g.label} <span style="font-size:0.78rem;color:var(--text-light);font-weight:400">(${g.items.length})</span></h4>` : ''}
-      ${g.items.map(n => renderNecessitaCard(n)).join('')}
-    `).join('');
+    container.innerHTML = groups.map(g => {
+      const ricBtn = g.fornitoreKey
+        ? `<button class="btn btn-secondary" style="padding:0.3rem 0.7rem;font-size:0.8rem;white-space:nowrap" onclick="apriRicezioneFornitore('${encodeURIComponent(g.fornitoreKey)}')">📦 Ricevi ordine</button>`
+        : '';
+      const header = g.label
+        ? `<div style="display:flex;justify-content:space-between;align-items:center;gap:0.6rem;margin:1.2rem 0 0.6rem;border-bottom:1px solid var(--cream-dark);padding-bottom:0.4rem">
+             <h4 style="font-family:'Playfair Display',serif;color:${g.color || 'var(--brown)'};margin:0;font-size:1rem">${g.label} <span style="font-size:0.78rem;color:var(--text-light);font-weight:400">(${g.items.length})</span></h4>
+             ${ricBtn}
+           </div>`
+        : '';
+      return header + g.items.map(n => renderNecessitaCard(n)).join('');
+    }).join('');
   } catch(err) {
     console.error('[Necessita] Errore in renderNecessita:', err.message);
   }
@@ -507,6 +516,207 @@ function marcaNecessitaRicevuta(id) {
   } catch(err) {
     console.error('[Necessita] Errore in marcaNecessitaRicevuta:', err.message);
     alert('Errore durante la ricezione. Apri F12 per dettagli.');
+  }
+}
+
+// ===========================================================
+// RICEZIONE ORDINE PER FORNITORE (multi-articolo + spedizione condivisa)
+// ===========================================================
+let _ricVociFornitore = [];      // snapshot delle voci in ricezione
+let _ricFornitoreCorrente = null;
+
+function apriRicezioneFornitore(fornitoreEnc) {
+  try {
+    const fornitore = decodeURIComponent(fornitoreEnc);
+    _ricFornitoreCorrente = fornitore;
+
+    // Raccogli le voci attive di questo fornitore
+    const senzaForn = (fornitore === '(senza fornitore)');
+    _ricVociFornitore = getNecessitaAttive().filter(n =>
+      senzaForn ? !n.fornitore : (n.fornitore === fornitore)
+    );
+
+    if(_ricVociFornitore.length === 0) {
+      alert('Nessuna voce da ricevere per questo fornitore.');
+      return;
+    }
+
+    const titolo = document.getElementById('ricFornTitle');
+    if(titolo) titolo.textContent = `📦 Ricevi ordine — ${fornitore}`;
+
+    const cont = document.getElementById('ricFornRighe');
+    if(cont) {
+      cont.innerHTML = _ricVociFornitore.map((n, idx) => {
+        const art = n.articoloId ? articoli.find(a => a.id === n.articoloId) : null;
+        const nome = art ? art.nome : (n.descrizione || 'Articolo');
+        const unita = n.unita || (art && art.unita) || '';
+        const prezzo = parseFloat(n.prezzoStimato) || '';
+        return `
+          <div class="ric-riga" data-idx="${idx}" style="border:1px solid var(--cream-dark);border-radius:6px;padding:0.7rem 0.85rem">
+            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem">
+              <input type="checkbox" id="ricChk_${idx}" checked onchange="updateRicFornTotale()" style="width:auto;margin:0">
+              <label for="ricChk_${idx}" style="font-weight:600;color:var(--brown);font-size:0.92rem;cursor:pointer;flex:1">${escapeHtmlAttr(nome)}</label>
+              <span style="font-size:0.78rem;color:var(--text-light)">ordinati: ${n.quantita} ${escapeHtmlAttr(unita)}</span>
+            </div>
+            <div style="display:flex;gap:0.6rem;flex-wrap:wrap">
+              <div style="display:flex;align-items:center;gap:0.3rem">
+                <label style="font-size:0.8rem;color:var(--text-light)">Ricevuti</label>
+                <input type="number" id="ricQta_${idx}" value="${n.quantita}" min="0" step="0.01" style="width:80px" oninput="updateRicFornTotale()">
+                <span style="font-size:0.8rem;color:var(--text-light)">${escapeHtmlAttr(unita)}</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:0.3rem">
+                <label style="font-size:0.8rem;color:var(--text-light)">Merce €</label>
+                <input type="number" id="ricPrezzo_${idx}" value="${prezzo}" min="0" step="0.01" placeholder="0.00" style="width:90px" oninput="updateRicFornTotale()">
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    // Spedizione: somma eventuali spedizioni già presenti sulle voci (le accorpo)
+    const spedTot = _ricVociFornitore.reduce((s, n) => s + (parseFloat(n.spedizione) || 0), 0);
+    const spedEl = document.getElementById('ricFornSpedizione');
+    if(spedEl) spedEl.value = spedTot > 0 ? spedTot.toFixed(2) : '';
+
+    updateRicFornTotale();
+    document.getElementById('ricezioneFornitoreModal').classList.add('open');
+  } catch(err) {
+    console.error('[Necessita] Errore in apriRicezioneFornitore:', err.message);
+  }
+}
+
+function closeRicezioneFornitore() {
+  const m = document.getElementById('ricezioneFornitoreModal');
+  if(m) m.classList.remove('open');
+  _ricVociFornitore = [];
+  _ricFornitoreCorrente = null;
+}
+
+function updateRicFornTotale() {
+  try {
+    let merce = 0;
+    _ricVociFornitore.forEach((n, idx) => {
+      const chk = document.getElementById('ricChk_' + idx);
+      if(!chk || !chk.checked) return;
+      merce += parseFloat(document.getElementById('ricPrezzo_' + idx)?.value) || 0;
+    });
+    const spedizione = parseFloat(document.getElementById('ricFornSpedizione')?.value) || 0;
+    const el = document.getElementById('ricFornTotale');
+    if(el) el.textContent = '€ ' + (merce + spedizione).toFixed(2).replace('.', ',');
+  } catch(err) {
+    console.error('[Necessita] Errore in updateRicFornTotale:', err.message);
+  }
+}
+
+function confermaRicezioneFornitore() {
+  try {
+    const spedizione = parseFloat(document.getElementById('ricFornSpedizione')?.value) || 0;
+    const dataOggi = new Date().toISOString().slice(0,10);
+    const fornitore = _ricFornitoreCorrente || '';
+
+    let ricevutiCount = 0;
+    const idDaRimuovere = [];
+
+    _ricVociFornitore.forEach((n, idx) => {
+      const chk = document.getElementById('ricChk_' + idx);
+      if(!chk || !chk.checked) return; // escluso: resta invariato
+
+      const qtaRic = parseFloat(document.getElementById('ricQta_' + idx)?.value) || 0;
+      const prezzoMerce = parseFloat(document.getElementById('ricPrezzo_' + idx)?.value) || 0;
+      if(qtaRic <= 0) return; // niente ricevuto su questa voce
+
+      const qtaOrdinata = parseFloat(n.quantita) || 0;
+      const art = n.articoloId ? articoli.find(a => a.id === n.articoloId) : null;
+      const prezzoUnit = (prezzoMerce > 0 && qtaRic > 0) ? (prezzoMerce / qtaRic) : 0;
+      const descr = art ? art.nome : (n.descrizione || 'Articolo');
+
+      // 1. Carico magazzino + prezzo unitario
+      if(art) {
+        movimentazioni.push({
+          id: Date.now().toString() + Math.random().toString(36).slice(2),
+          articoloId: art.id,
+          tipo: 'entrata',
+          qta: qtaRic,
+          data: dataOggi,
+          note: `Carico da ordine ricevuto${fornitore && fornitore !== '(senza fornitore)' ? ' · '+fornitore : ''}${prezzoMerce > 0 ? ' · € '+prezzoMerce.toFixed(2) : ''}`,
+          valore: prezzoMerce > 0 ? prezzoMerce : undefined,
+        });
+        if(prezzoUnit > 0) {
+          articoli = articoli.map(a => a.id === art.id ? { ...a, prezzoUnitario: prezzoUnit.toFixed(4) } : a);
+        }
+      }
+
+      // 2. Spesa merce in contabilità (auto)
+      if(prezzoMerce > 0) {
+        let catSpesa = 'altro_costo';
+        if(art && typeof getCatSpesaPerMagazzino === 'function') {
+          const c = getCatSpesaPerMagazzino(normalizzaCatMagazzino(art.categoria));
+          if(c) catSpesa = c;
+        }
+        movimentiContabili.unshift({
+          id: Date.now().toString() + Math.random().toString(36).slice(2),
+          data: dataOggi,
+          tipo: 'uscita',
+          importo: prezzoMerce,
+          categorie: [catSpesa],
+          descrizione: `${descr}${fornitore && fornitore !== '(senza fornitore)' ? ' · '+fornitore : ''} (${qtaRic} ${n.unita||''})`,
+          origine: 'ordine',
+          origineId: n.id,
+        });
+      }
+
+      ricevutiCount++;
+
+      // 3. Gestione parziale: il mancante torna "da ordinare"
+      const mancante = qtaOrdinata - qtaRic;
+      if(mancante > 0) {
+        n.quantita = mancante;
+        n.stato = 'da_ordinare';
+        n.prezzoStimato = prezzoUnit > 0 ? Number((prezzoUnit * mancante).toFixed(2)) : n.prezzoStimato;
+        n.spedizione = null; // spedizione già pagata in questo ordine
+        n.dataOrdine = null;
+      } else {
+        idDaRimuovere.push(n.id);
+      }
+    });
+
+    if(ricevutiCount === 0) {
+      alert('Nessun articolo selezionato per la ricezione. Spunta almeno una voce con quantità maggiore di zero.');
+      return;
+    }
+
+    // 4. Spedizione: UNA sola spesa per tutto l'ordine
+    if(spedizione > 0) {
+      movimentiContabili.unshift({
+        id: Date.now().toString() + Math.random().toString(36).slice(2) + 's',
+        data: dataOggi,
+        tipo: 'uscita',
+        importo: spedizione,
+        categorie: ['spedizioni'],
+        descrizione: `Spedizione ordine${fornitore && fornitore !== '(senza fornitore)' ? ' · '+fornitore : ''}`,
+        origine: 'ordine',
+      });
+    }
+
+    // 5. Rimuovi le voci completamente ricevute
+    necessita = necessita.filter(n => !idDaRimuovere.includes(n.id));
+
+    // 6. Salvataggi + re-render
+    saveMagazzino();
+    if(typeof saveContabilita === 'function') saveContabilita();
+    saveNecessita();
+    closeRicezioneFornitore();
+    renderNecessita();
+    if(typeof renderHome === 'function') renderHome();
+    if(typeof renderMagArticoli === 'function') renderMagArticoli();
+    if(typeof renderContRiepilogo === 'function') renderContRiepilogo();
+    if(typeof renderContMovimenti === 'function') renderContMovimenti();
+    if(typeof showImportToast === 'function') {
+      showImportToast(`✅ Ordine ricevuto: ${ricevutiCount} articol${ricevutiCount>1?'i':'o'}${spedizione>0?' + spedizione':''}`);
+    }
+  } catch(err) {
+    console.error('[Necessita] Errore in confermaRicezioneFornitore:', err.message);
+    alert('Errore durante la ricezione dell\'ordine: ' + err.message);
   }
 }
 
