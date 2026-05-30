@@ -1,4 +1,4 @@
-// ===== FILE VERSION: 2026-05-28.2 · nav.js =====
+// ===== FILE VERSION: 2026-05-28.3 · nav.js =====
 // ===== NAVIGAZIONE =====
 function navigateTo(id) {
   try {
@@ -15,6 +15,7 @@ function navigateTo(id) {
     if(id === 'home') renderHome();
     if(id === 'utility') { sciCalc(); }
     if(id === 'registro') { updateArniSelects(); renderLog(); renderStats(); }
+    if(id === 'todo') { renderTodo(); }
     if(id === 'arnie') renderArnie();
     if(id === 'magazzino') { renderMagArticoli(); updateMovArticoloSelect(); }
     if(id === 'contabilita') { renderContRiepilogo(); populateContAnnoFilter(); }

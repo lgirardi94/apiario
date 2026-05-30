@@ -1,3 +1,4 @@
+// ===== FILE VERSION: 2026-05-28.2 · drive-app.js =====
 // ======= GOOGLE DRIVE — LOGIN OBBLIGATORIO + AUTO-SAVE =======
 
 // Costanti di timing
@@ -77,12 +78,13 @@ function initGoogleDrive() {
 
 async function loadFromCloud() {
   try {
-    const { db, mag, cont, ob, nec, settings: settingsData } = await driveLoadAll();
+    const { db, mag, cont, ob, nec, settings: settingsData, todo } = await driveLoadAll();
     if(db && db.arnie && db.logBook) { arnie = db.arnie; logBook = db.logBook; }
     if(mag && mag.articoli && mag.movimentazioni) { articoli = mag.articoli; movimentazioni = mag.movimentazioni; }
     if(cont && cont.movimentiContabili) { movimentiContabili = cont.movimentiContabili; }
     if(ob && ob.obiettivi) { obiettivi = ob.obiettivi; }
     if(nec && nec.necessita) { necessita = nec.necessita; }
+    if(todo && Array.isArray(todo.todos)) { todos = todo.todos; }
     if(settingsData) {
       // Riempie settings con le proprietà da Drive, mantenendo i default per quelle nuove
       Object.assign(settings, settingsData);
@@ -303,7 +305,8 @@ async function _doSave(silent) {
       { movimentiContabili },
       { obiettivi },
       { necessita },
-      settings
+      settings,
+      { todos }
     );
     _hasUnsavedChanges = false;
     if(!silent) showImportToast('☁️ Salvato su Drive');
@@ -336,9 +339,11 @@ function driveLogoutApp() {
   articoli = []; movimentazioni = [];
   movimentiContabili = [];
   obiettivi = [];
+  necessita = [];
+  todos = [];
   settings = { duplicatiIgnorati: [] };
   // Pulisci anche la cache locale
-  ['arnie','logBook','articoli','movimentazioni','movimentiContabili','obiettivi','apiario_settings'].forEach(k => localStorage.removeItem(k));
+  ['arnie','logBook','articoli','movimentazioni','movimentiContabili','obiettivi','necessita','todos','apiario_settings'].forEach(k => localStorage.removeItem(k));
   document.getElementById('appContent').style.display = 'none';
   document.getElementById('loginGate').style.display = 'flex';
   document.getElementById('loginGateStatus').textContent = '👇 Tocca il pulsante per accedere';

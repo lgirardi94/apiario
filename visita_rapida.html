@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- FILE VERSION: 2026-05-28.2 · visita_rapida.html -->
 <html lang="it">
 <head>
 <meta charset="UTF-8">
@@ -683,7 +684,10 @@
       <div class="success-bee">✅</div>
       <h3 style="color:var(--green);font-size:1.3rem">Visita salvata!</h3>
       <p id="wizSuccessMsg" style="color:var(--text-light);font-size:0.9rem"></p>
-      <button onclick="resetWizard()" class="btn-another" style="margin-top:0.5rem;padding:0.7rem 1.5rem;background:var(--amber-pale);border:1.5px solid var(--amber);border-radius:8px;color:var(--brown);font-size:0.95rem;font-weight:600;cursor:pointer">+ Nuova visita</button>
+      <div style="display:flex;gap:0.6rem;flex-wrap:wrap;justify-content:center;margin-top:0.5rem">
+        <button onclick="riapriCalendarioVisita()" style="padding:0.7rem 1.3rem;background:white;border:1.5px solid var(--amber);border-radius:8px;color:var(--brown);font-size:0.95rem;font-weight:600;cursor:pointer">📅 Prossima visita</button>
+        <button onclick="resetWizard()" class="btn-another" style="padding:0.7rem 1.5rem;background:var(--amber-pale);border:1.5px solid var(--amber);border-radius:8px;color:var(--brown);font-size:0.95rem;font-weight:600;cursor:pointer">+ Nuova visita</button>
+      </div>
     </div>
 
   </div><!-- wizard-body -->
@@ -1382,7 +1386,21 @@ function selectTelainiNum(n) {
   document.querySelectorAll('.tel-num-btn').forEach(b =>
     b.classList.toggle('selected', parseInt(b.textContent) === n)
   );
-  renderWizTelainiMap(n, null);
+  // Preserva le selezioni già fatte: leggo la mappa corrente e la ripasso.
+  // Aumentando → i telai esistenti restano e il nuovo è vuoto; diminuendo → si toglie l'ultimo.
+  const mappaCorrente = leggiMappaTelainiCorrente();
+  renderWizTelainiMap(n, mappaCorrente);
+}
+
+// Legge lo stato attuale dei select telaini (per non perderlo al cambio numero)
+function leggiMappaTelainiCorrente() {
+  const mappa = [];
+  for(let i = 0; i < 10; i++) {
+    const sel = document.getElementById('wizTel_' + i);
+    if(!sel) break;
+    mappa[i] = sel.value;
+  }
+  return mappa;
 }
 
 function renderWizTelainiMap(n, mappa) {
@@ -1613,6 +1631,21 @@ async function saveVisita() {
     document.getElementById('wizSuccess').classList.add('show');
     hapticSuccess();
 
+    // Popup "schedula prossima visita" (una sola volta per tutte le arnie della visita)
+    if(typeof showCalendarPopup === 'function') {
+      // Etichetta: nome arnia se singola, conteggio se multipla
+      let etichetta;
+      if(selectedArniaIds.length === 1) {
+        const a = dbData.arnie.find(x => x.id === selectedArniaIds[0]);
+        etichetta = a ? `#${a.num}${a.nome ? ' — ' + a.nome : ''}` : 'apiario';
+      } else {
+        etichetta = `${arnieRegistrate} arnie`;
+      }
+      _ultimaEtichettaVisita = etichetta;
+      // Piccolo ritardo per far vedere prima la schermata di successo
+      setTimeout(() => { showCalendarPopup(etichetta, null); }, 600);
+    }
+
   } catch(e) {
     console.error('[Visita rapida] Errore salvataggio:', e);
     const btn = document.getElementById('btnNext');
@@ -1628,6 +1661,15 @@ async function saveVisita() {
       showToast('❌ Errore salvataggio: ' + e.message);
     }
     if(btn) { btn.disabled = false; btn.textContent = '💾 Salva visita'; }
+  }
+}
+
+// Etichetta dell'ultima visita salvata (per riaprire il popup calendario)
+let _ultimaEtichettaVisita = 'apiario';
+
+function riapriCalendarioVisita() {
+  if(typeof showCalendarPopup === 'function') {
+    showCalendarPopup(_ultimaEtichettaVisita, null);
   }
 }
 

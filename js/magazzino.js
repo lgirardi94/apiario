@@ -1,4 +1,4 @@
-// ===== FILE VERSION: 2026-05-28.3 · magazzino.js =====
+// ===== FILE VERSION: 2026-05-28.4 · magazzino.js =====
 // ======= FUZZY SIMILARITY =======
 function similarity(a, b) {
   a = a.toLowerCase().trim();
@@ -314,6 +314,7 @@ function renderMagArticoli() {
         ${ordiniHtml}
         <div class="mag-actions">
           <button class="btn" style="padding:0.35rem 0.8rem;font-size:0.82rem" onclick="openMovModal('${a.id}')">+ Mov.</button>
+          <button class="btn btn-secondary" style="padding:0.35rem 0.7rem;font-size:0.82rem" onclick="creaPromemoriaArticolo('${a.id}')" title="Crea un promemoria nella sezione Da Fare">📋</button>
           <button class="btn btn-secondary" style="padding:0.35rem 0.7rem;font-size:0.82rem" onclick="openArticoloModal('${a.id}')">✏️</button>
           <button class="btn btn-danger" style="padding:0.35rem 0.7rem;font-size:0.82rem" onclick="deleteArticolo('${a.id}')">🗑</button>
         </div>
@@ -321,6 +322,26 @@ function renderMagArticoli() {
     }).join('');
   } catch(err) {
     console.error('[Magazzino] Errore in renderMagArticoli:', err.message);
+  }
+}
+
+// Crea un promemoria To-Do collegato a un articolo (da magazzino)
+function creaPromemoriaArticolo(articoloId) {
+  try {
+    const a = articoli.find(x => x.id === articoloId);
+    if(!a) { console.warn('[Magazzino] Articolo non trovato per promemoria:', articoloId); return; }
+    if(typeof creaTodoRapido !== 'function') {
+      alert('Sezione "Da Fare" non disponibile.');
+      return;
+    }
+    creaTodoRapido({
+      testo: `Ordinare ${a.nome}`,
+      categoria: 'acquisto',
+      priorita: 'media',
+      articoloId: a.id,
+    });
+  } catch(err) {
+    console.error('[Magazzino] Errore in creaPromemoriaArticolo:', err.message);
   }
 }
 
@@ -713,8 +734,7 @@ function renderMagMovimentazioni() {
 }
 
 // ======= ARTICOLO MODAL =======
-function openArticoloModal(id) {
-  const modal = document.getElementById('articoloModal');
+function openArticoloModal(id) {const modal = document.getElementById('articoloModal');
   if(!modal) {
     console.error('[Magazzino] articoloModal non trovato nel DOM');
     return;

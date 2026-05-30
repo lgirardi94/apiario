@@ -1946,3 +1946,57 @@ main {
 /* Dropdown suggerimenti fornitori (custom, tema-coerente) */
 .forn-sugg-item:last-child { border-bottom: none !important; }
 .forn-sugg-item:hover { background: var(--amber-pale); }
+
+/* ===== SEZIONE TO-DO ===== */
+.todo-chip { background: white; border: 1px solid var(--cream-dark); border-radius: 20px;
+  padding: 0.3rem 0.85rem; font-size: 0.83rem; cursor: pointer; color: var(--text-light); }
+.todo-chip.on { background: var(--amber-pale); border-color: var(--amber); color: var(--brown); font-weight: 600; }
+
+.todo-gruppo-tit { font-size: 1rem; color: var(--brown); margin: 1.3rem 0 0.5rem;
+  border-bottom: 1px solid var(--cream-dark); padding-bottom: 0.3rem; font-weight: 700; }
+.todo-gruppo-tit .cnt { font-size: 0.78rem; color: var(--text-light); font-weight: 400; }
+
+.todo-card { background: white; border: 1px solid var(--cream-dark); border-left: 4px solid var(--cream-dark);
+  border-radius: 8px; padding: 0.8rem 1rem; margin-bottom: 0.6rem; display: flex; gap: 0.8rem; align-items: flex-start; }
+.todo-card.urg { border-left-color: var(--red); }
+.todo-card.alta { border-left-color: var(--amber-light); }
+.todo-card.fatto { opacity: 0.55; }
+.todo-card.fatto .todo-card-testo { text-decoration: line-through; }
+.todo-check { width: 22px; height: 22px; border: 2px solid var(--amber); border-radius: 6px;
+  flex-shrink: 0; margin-top: 2px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  background: white; color: white; font-size: 0.9rem; transition: all 0.15s; }
+.todo-check.done { background: var(--green); border-color: var(--green); }
+.todo-card-body { flex: 1; min-width: 0; }
+.todo-card-testo { font-size: 1.05rem; color: var(--text); font-weight: 600; }
+.todo-card-meta { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.4rem; align-items: center; }
+.todo-tag { font-size: 0.76rem; padding: 0.15rem 0.55rem; border-radius: 4px; display: inline-flex; align-items: center; gap: 0.25rem; }
+.todo-tag.scad { background: #F3EEE2; color: var(--text-light); }
+.todo-tag.scad.scaduto { background: #FBE9E7; color: var(--red); font-weight: 600; }
+.todo-tag.scad.vicino { background: #FFF3DC; color: #9A6B00; }
+.todo-tag.arnia { background: #EAF0F7; color: var(--blue); cursor: pointer; }
+.todo-card-azioni { display: flex; gap: 0.3rem; flex-shrink: 0; }
+.todo-ic { background: none; border: none; cursor: pointer; font-size: 1rem; padding: 0.2rem; border-radius: 4px; opacity: 0.6; }
+.todo-ic:hover { opacity: 1; background: var(--cream); }
+
+.todo-cl-progress { font-size: 0.74rem; color: var(--text-light); margin-left: 0.3rem; }
+.todo-checklist { margin-top: 0.6rem; padding-top: 0.5rem; border-top: 1px dashed var(--cream-dark); }
+.todo-cl-item { display: flex; gap: 0.5rem; align-items: center; font-size: 0.9rem; color: var(--text-light); padding: 0.18rem 0; cursor: pointer; }
+.todo-cl-box { width: 16px; height: 16px; border: 1.5px solid var(--brown-light); border-radius: 4px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: white; }
+.todo-cl-box.done { background: var(--green-light); border-color: var(--green-light); }
+.todo-cl-item.done span { text-decoration: line-through; opacity: 0.7; }
+
+/* Editor checklist nel modale */
+.todo-cl-edit { display: flex; gap: 0.5rem; align-items: center; font-size: 0.9rem; color: var(--text);
+  padding: 0.3rem 0.5rem; background: var(--cream); border-radius: 5px; }
+.todo-cl-edit .todo-cl-box { cursor: pointer; }
+
+/* Widget To-Do in Home */
+.home-todo-widget { background: white; border: 1px solid var(--cream-dark); border-left: 4px solid var(--amber);
+  border-radius: 10px; padding: 1rem 1.2rem; }
+.home-todo-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; }
+.home-todo-head h4 { color: var(--brown); margin: 0; font-family: 'Playfair Display', serif; }
+.home-todo-head a { font-size: 0.75rem; color: var(--amber); text-decoration: none; font-weight: 600; }
+.home-todo-row { display: flex; gap: 0.5rem; align-items: center; padding: 0.35rem 0; font-size: 0.92rem; border-bottom: 1px solid var(--cream); }
+.home-todo-row:last-child { border-bottom: none; }
+.home-todo-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }

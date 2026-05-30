@@ -1,3 +1,4 @@
+// ===== FILE VERSION: 2026-05-28.2 · shared.js =====
 // ============================================================
 //  shared.js — Funzioni comuni a index.html e inserimento_rapido.html
 //  Google Drive API + costanti + utility
@@ -12,6 +13,7 @@ const FILENAME_CONT = 'apiario_contabilita.json';
 const FILENAME_OB  = 'apiario_obiettivi.json';
 const FILENAME_NEC = 'apiario_necessita.json';
 const FILENAME_SETTINGS = 'apiario_settings.json';
+const FILENAME_TODO = 'apiario_todo.json';
 
 // ===== CATEGORIE CONTABILI =====
 const CAT_ENTRATA = [
@@ -455,15 +457,16 @@ async function driveCreateAutoBackup(fullData, maxBackups = 5) {
  * Restituisce { db, mag, cont, ob, nec, settings } — null se il file non esiste ancora.
  */
 async function driveLoadAll() {
-  const [db, mag, cont, ob, nec, settings] = await Promise.all([
+  const [db, mag, cont, ob, nec, settings, todo] = await Promise.all([
     driveReadFile(FILENAME_DB),
     driveReadFile(FILENAME_MAG),
     driveReadFile(FILENAME_CONT),
     driveReadFile(FILENAME_OB),
     driveReadFile(FILENAME_NEC),
-    driveReadFile(FILENAME_SETTINGS)
+    driveReadFile(FILENAME_SETTINGS),
+    driveReadFile(FILENAME_TODO)
   ]);
-  return { db, mag, cont, ob, nec, settings };
+  return { db, mag, cont, ob, nec, settings, todo };
 }
 
 /**
@@ -475,7 +478,7 @@ async function driveLoadAll() {
  * @param {Object} nec      - { necessita }
  * @param {Object} settings - { duplicatiIgnorati, ... }
  */
-async function driveSaveAll(db, mag, cont, ob, nec, settings) {
+async function driveSaveAll(db, mag, cont, ob, nec, settings, todo) {
   const ts = new Date().toISOString();
   await Promise.all([
     driveWriteFile(FILENAME_DB,       { version: 1, savedAt: ts, ...db }),
@@ -483,6 +486,7 @@ async function driveSaveAll(db, mag, cont, ob, nec, settings) {
     driveWriteFile(FILENAME_CONT,     { version: 1, savedAt: ts, ...cont }),
     driveWriteFile(FILENAME_OB,       { version: 1, savedAt: ts, ...ob }),
     driveWriteFile(FILENAME_NEC,      { version: 1, savedAt: ts, ...nec }),
-    driveWriteFile(FILENAME_SETTINGS, { version: 1, savedAt: ts, ...settings })
+    driveWriteFile(FILENAME_SETTINGS, { version: 1, savedAt: ts, ...settings }),
+    driveWriteFile(FILENAME_TODO,     { version: 1, savedAt: ts, ...(todo || { todos: [] }) })
   ]);
 }

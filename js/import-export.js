@@ -1,9 +1,10 @@
+// ===== FILE VERSION: 2026-05-28.2 · import-export.js =====
 // ======= EXPORT / IMPORT JSON =======
 function exportJSON() {
   try {
     const payload = {
       version: 1, exportedAt: new Date().toISOString(),
-      arnie, logBook, articoli, movimentazioni, movimentiContabili, obiettivi
+      arnie, logBook, articoli, movimentazioni, movimentiContabili, obiettivi, necessita, todos
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], {type: 'application/json'});
     const a = document.createElement('a');
@@ -31,17 +32,24 @@ function importJSON(event) {
       const nMov = (data.movimentazioni||[]).length;
       const nCont = (data.movimentiContabili||[]).length;
       const nOb = (data.obiettivi||[]).length;
-      const msg = `Il file contiene:\n• ${nArnie} arnie\n• ${nLog} registrazioni\n• ${nArt} articoli magazzino\n• ${nMov} movimentazioni magazzino\n• ${nCont} movimenti contabili\n• ${nOb} obiettivi\n\nI dati attuali verranno sostituiti. Continuare?`;
+      const nNec = (data.necessita||[]).length;
+      const nTodo = (data.todos||[]).length;
+      const msg = `Il file contiene:\n• ${nArnie} arnie\n• ${nLog} registrazioni\n• ${nArt} articoli magazzino\n• ${nMov} movimentazioni magazzino\n• ${nCont} movimenti contabili\n• ${nOb} obiettivi\n• ${nNec} ordini\n• ${nTodo} cose da fare\n\nI dati attuali verranno sostituiti. Continuare?`;
       if(!confirm(msg)) { event.target.value=''; return; }
       arnie = data.arnie; logBook = data.logBook;
       articoli = data.articoli||[]; movimentazioni = data.movimentazioni||[];
       movimentiContabili = data.movimentiContabili||[];
       obiettivi = data.obiettivi||[];
+      if(data.necessita) necessita = data.necessita;
+      if(data.todos) todos = data.todos;
       saveDB();
       saveMagazzino();
       saveContabilita();
       saveObiettivi();
+      if(data.necessita) saveNecessita();
+      if(data.todos) saveTodos();
       renderArnie(); updateArniSelects(); renderLog(); renderStats(); renderMagArticoli();
+      if(typeof renderTodo === 'function') renderTodo();
       showImportToast(`✅ Importazione completata!`);
     } catch(err) {
       console.error('[Import-Export] Errore nel parsing JSON:', err.message);

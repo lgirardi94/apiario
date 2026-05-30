@@ -1,3 +1,4 @@
+// ===== FILE VERSION: 2026-05-28.2 · state.js =====
 // ===== STATE GLOBALE =====
 // I dati sono caricati da Drive dopo il login. localStorage è solo cache di backup.
 
@@ -12,6 +13,8 @@ let movimentiContabili = [];
 let obiettivi = [];
 
 let necessita = []; // Lista articoli da ordinare
+
+let todos = []; // Sezione "Cose da fare" (To-Do)
 
 // Settings — preferenze e dati di servizio (es. duplicati ignorati)
 let settings = {
@@ -65,6 +68,15 @@ function saveNecessita() {
     pushToCloud(true);
   } catch(err) {
     console.error('[State] Errore in saveNecessita:', err.message);
+  }
+}
+
+function saveTodos() {
+  try {
+    localStorage.setItem('todos', JSON.stringify(todos));
+    pushToCloud(true);
+  } catch(err) {
+    console.error('[State] Errore in saveTodos:', err.message);
   }
 }
 

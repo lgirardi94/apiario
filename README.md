@@ -55,6 +55,17 @@ Web app completa per la gestione di un apiario amatoriale o semi-professionale: 
 - **Visita multi-arnia**:
   - **Desktop**: blocchi affiancati: dati comuni (data/tipo/trattamento) + note e ispezione separate per ogni arnia, con precompilazione dall'ultima visita di ciascuna
   - **Mobile** (visita rapida): wizard a step ripetuti — selezione multipla → tipo comune → uno step di dettaglio per ogni arnia → schermata di riepilogo a schede → salvataggio di N visite distinte
+  - Al termine, popup per **schedulare la prossima visita** in calendario
+
+### 📋 Cose da fare (To-Do)
+- Lista compiti con **stato** (da fare / fatto), spuntabili con un click
+- **Categorie**: trattamento, controllo, manutenzione, amministrazione, acquisto, altro
+- **Priorità** (urgente/alta/media/bassa) e **scadenza** opzionale (con evidenza colorata: scaduto / oggi / settimana)
+- **Collegamento a un'arnia** (cliccabile per aprirne la scheda) e **a un articolo di magazzino**
+- **Checklist interne**: ogni compito può avere sotto-attività spuntabili con contatore di avanzamento
+- **Raggruppamenti**: per scadenza, categoria o arnia; **filtri**: oggi, settimana, scaduti, completati
+- **Crea promemoria al volo** da altre sezioni (es. dal magazzino: "Ordinare X" già collegato all'articolo)
+- **Widget in Home**: i compiti urgenti/in scadenza appaiono nella dashboard
 
 ### 📦 Magazzino intelligente
 - **8 categorie strutturate**: 💊 Farmaci/sanitari, 🍬 Alimentazione, 🪵 Telai e cera, 📦 Arnie e componenti, 🔧 Attrezzatura, 🫙 Confezionamento, 🍯 Prodotti finiti, 📋 Altro
@@ -142,7 +153,7 @@ Gestione rapida di **contabilità, magazzino, vendite e ordini** da telefono, co
 ## 💾 Sincronizzazione e backup
 
 - Salvataggio automatico su **Google Drive** (cartella privata `appDataFolder`) a ogni modifica
-- File separati per database, magazzino, contabilità, obiettivi, ordini, impostazioni, etichette
+- File separati per database, magazzino, contabilità, obiettivi, ordini, cose da fare, impostazioni, etichette
 - **Backup automatico settimanale**: crea copie datate (ultime 5 mantenute)
 - **Ripristino backup**: dalla barra in alto puoi vedere i backup disponibili e ripristinarne uno; prima del ripristino viene creato un backup di sicurezza dello stato corrente
 - Backup/ripristino manuale anche in formato JSON locale
@@ -175,6 +186,7 @@ App **statica** (HTML + CSS + JavaScript vanilla), senza framework né build. Os
 | `necessita.js` | Ordini "da ordinare", ricezione, auto-spesa |
 | `contabilita.js` | Movimenti contabili, categorie, modifica |
 | `obiettivi.js` | Obiettivi annuali, stagionali e storico |
+| `todo.js` | Sezione "Cose da fare": compiti, checklist, widget Home |
 | `calcolatori.js` | Calcolatori sciroppo, candito e propoli (uniti) |
 | `report.js` | Report PDF (completo e trattamenti) |
 | `insights.js` | Analisi economiche, heatmap, genealogia, report annuale |

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- FILE VERSION: 2026-05-28.10 · apiario.html (index.html) -->
+<!-- FILE VERSION: 2026-05-28.12 · apiario.html (index.html) -->
 <html lang="it">
 <head>
 <meta charset="UTF-8">
@@ -8,7 +8,7 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐝</text></svg>">
 <link rel="stylesheet" href="style-main.css">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="shared.js?v=20260542"></script>
+<script src="shared.js?v=20260547"></script>
 </head>
 <body>
 
@@ -45,6 +45,7 @@
   <button onclick="showSection('utility')">📚 Utility</button>
   <button onclick="showSection('arnie')">🏠 Le Mie Arnie</button>
   <button onclick="showSection('registro')">📖 Registro Visite</button>
+  <button onclick="showSection('todo')">📋 Da Fare</button>
   <button onclick="showSection('obiettivi')">🎯 Obiettivi</button>
   <button onclick="showSection('magazzino')">📦 Magazzino</button>
   <button onclick="showSection('contabilita')">💰 Contabilità</button>
@@ -91,6 +92,9 @@
 
     <!-- ALERTS -->
     <div id="homeAlerts" style="margin-bottom:1rem"></div>
+
+    <!-- WIDGET TO-DO -->
+    <div id="homeTodoWidget" class="home-todo-widget" style="display:none;margin-bottom:1.2rem"></div>
 
     <!-- KPI -->
     <div class="stats-grid" id="homeKpi" style="margin-bottom:1.2rem"></div>
@@ -1789,6 +1793,25 @@
     <div class="log-entries" id="logEntries"></div>
   </section>
 
+  <!-- ===== TO-DO (Cose da fare) ===== -->
+  <section class="section" id="todo">
+    <h2 class="section-title">📋 Cose da fare</h2>
+    <p style="color:var(--text-light);margin:-0.5rem 0 1.2rem">Promemoria, controlli e attività dell'apiario</p>
+
+    <div style="display:flex;gap:0.7rem;flex-wrap:wrap;align-items:center;margin-bottom:1rem">
+      <button class="btn" onclick="openTodoModal()">+ Nuovo compito</button>
+      <select id="todoRaggruppa" onchange="setTodoRaggruppa(this.value)" style="margin-left:auto;padding:0.45rem 0.8rem;border:1px solid var(--cream-dark);border-radius:4px;font-family:inherit;font-size:0.9rem;background:white;color:var(--text)">
+        <option value="scadenza">Raggruppa: per scadenza</option>
+        <option value="categoria">Raggruppa: per categoria</option>
+        <option value="arnia">Raggruppa: per arnia</option>
+      </select>
+    </div>
+
+    <div id="todoFiltri" style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:1.2rem"></div>
+
+    <div id="todoLista"></div>
+  </section>
+
   <!-- ===== ARNIE ===== -->
   <section class="section" id="arnie">
     <h2 class="section-title">Le Mie Arnie</h2>
@@ -2422,6 +2445,66 @@
   </div>
 </div>
 
+<!-- MODAL TO-DO -->
+<div class="modal-overlay" id="todoModal">
+  <div class="modal" style="max-width:500px">
+    <h3 id="todoModalTitle">📋 Nuovo compito</h3>
+    <input type="hidden" id="editTodoId">
+    <input type="hidden" id="todoArticoloId">
+
+    <div class="form-row">
+      <label>Cosa fare</label>
+      <input type="text" id="todoTesto" placeholder="Es. Controllo covata e regina">
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+      <div class="form-row">
+        <label>Categoria</label>
+        <select id="todoCategoria"></select>
+      </div>
+      <div class="form-row">
+        <label>Priorità</label>
+        <select id="todoPriorita">
+          <option value="urgente">🔴 Urgente</option>
+          <option value="alta">🟠 Alta</option>
+          <option value="media" selected>🟡 Media</option>
+          <option value="bassa">⚪ Bassa</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+      <div class="form-row">
+        <label>Scadenza (opzionale)</label>
+        <input type="date" id="todoScadenza">
+      </div>
+      <div class="form-row">
+        <label>Arnia collegata (opzionale)</label>
+        <select id="todoArnia"></select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label>Checklist (sotto-attività, opzionale)</label>
+      <div id="todoChecklistEditor" style="display:flex;flex-direction:column;gap:0.35rem;margin-bottom:0.4rem"></div>
+      <div style="display:flex;gap:0.4rem">
+        <input type="text" id="todoChecklistInput" placeholder="Aggiungi voce..." onkeydown="if(event.key==='Enter'){event.preventDefault();aggiungiTempChecklist();}" style="flex:1">
+        <button type="button" class="btn btn-secondary" onclick="aggiungiTempChecklist()" style="padding:0.4rem 0.8rem;font-size:0.85rem">+ Aggiungi</button>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label>Note (opzionale)</label>
+      <textarea id="todoNote" rows="2" placeholder="Dettagli aggiuntivi..."></textarea>
+    </div>
+
+    <div style="display:flex;gap:0.5rem;justify-content:flex-end;border-top:1px solid var(--cream-dark);padding-top:1rem;margin-top:0.5rem">
+      <button class="btn btn-secondary" onclick="closeTodoModal()">Annulla</button>
+      <button class="btn" onclick="saveTodoEntry()">💾 Salva</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL ARNIA -->
 <div class="modal-overlay" id="arniModal">
   <div class="modal" style="max-width:600px">
@@ -2715,22 +2798,23 @@
 </div><!-- fine appContent -->
 
 <!-- ===== JS MODULES — ordine importante! ===== -->
-<script src="js/state.js?v=20260542"></script>
-<script src="js/nav.js?v=20260542"></script>
-<script src="js/import-export.js?v=20260542"></script>
-<script src="js/registro.js?v=20260542"></script>
-<script src="js/arnie.js?v=20260542"></script>
-<script src="js/magazzino.js?v=20260542"></script>
-<script src="js/necessita.js?v=20260542"></script>
-<script src="js/ricerca.js?v=20260542"></script>
-<script src="js/insights.js?v=20260542"></script>
-<script src="js/versioni.js?v=20260545"></script>
-<script src="js/filtri.js?v=20260542"></script>
-<script src="js/contabilita.js?v=20260542"></script>
-<script src="js/obiettivi.js?v=20260542"></script>
-<script src="js/calcolatori.js?v=20260542"></script>
-<script src="js/report.js?v=20260542"></script>
-<script src="js/home.js?v=20260542"></script>
+<script src="js/state.js?v=20260547"></script>
+<script src="js/nav.js?v=20260547"></script>
+<script src="js/import-export.js?v=20260547"></script>
+<script src="js/registro.js?v=20260547"></script>
+<script src="js/arnie.js?v=20260547"></script>
+<script src="js/magazzino.js?v=20260547"></script>
+<script src="js/necessita.js?v=20260547"></script>
+<script src="js/todo.js?v=20260547"></script>
+<script src="js/ricerca.js?v=20260547"></script>
+<script src="js/insights.js?v=20260547"></script>
+<script src="js/versioni.js?v=20260547"></script>
+<script src="js/filtri.js?v=20260547"></script>
+<script src="js/contabilita.js?v=20260547"></script>
+<script src="js/obiettivi.js?v=20260547"></script>
+<script src="js/calcolatori.js?v=20260547"></script>
+<script src="js/report.js?v=20260547"></script>
+<script src="js/home.js?v=20260547"></script>
 <script src="js/drive-app.js"></script>
 
 </body>

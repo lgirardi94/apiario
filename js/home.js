@@ -1,4 +1,4 @@
-// ===== FILE VERSION: 2026-05-28.2 · home.js =====
+// ===== FILE VERSION: 2026-05-28.3 · home.js =====
 // ======= HOME =======
 const STAGIONI_INFO = {
   primavera: { nome: 'Primavera 2026', sub: 'Mar–Mag · Periodo acacia e sciamatura', mesi: [2,3,4] },
@@ -317,6 +317,7 @@ function renderHome() {
     // 🛒 RIEPILOGO DA ORDINARE
     renderHomeNecessitaBox();
     if(typeof renderHomeCruscotto === 'function') renderHomeCruscotto();
+    if(typeof renderTodoWidgetHome === 'function') renderTodoWidgetHome();
   } catch(err) {
     console.error('[Home] Errore durante renderHome:', err.message, err);
   }
