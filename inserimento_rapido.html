@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- FILE VERSION: 2026-05-28.3 · inserimento_rapido.html -->
+<!-- FILE VERSION: 2026-05-28.4 · inserimento_rapido.html -->
 <html lang="it">
 <head>
 <meta charset="UTF-8">
@@ -305,6 +305,7 @@ let dbData   = { arnie: [], logBook: [] };
 let magData  = { articoli: [], movimentazioni: [] };
 let contData = { movimentiContabili: [] };
 let necData  = { necessita: [] };
+let settings = { fornitori: [] };
 let tipoContabile = 'entrata';
 let tipoMagazzino = 'entrata';
 let pendingMagMov = null;
@@ -384,11 +385,13 @@ window.addEventListener('load', () => {
       async () => {
         showLoadingScreen('🔄 Caricamento dati...');
         try {
-          const { db, mag, cont, nec } = await driveLoadAll();
+          const { db, mag, cont, nec, settings: s } = await driveLoadAll();
           if(db)   dbData   = db;
           if(mag)  magData  = mag;
           if(cont) contData = cont;
           if(nec)  necData  = nec;
+          if(s)    settings  = s;
+          if(!settings.fornitori) settings.fornitori = [];
         } catch(e) { console.error('[Inserimento rapido] Errore loadAll:', e); }
         showApp();
       },
@@ -548,10 +551,14 @@ let _irNecRigheCount = 0;
 function buildRigaIRNec(idx, preset) {
   preset = preset || {};
   const arts = [...(magData.articoli || [])].sort((a,b) => a.nome.localeCompare(b.nome));
+  if(arts.length === 0) {
+    console.warn('[Inserimento rapido] Nessun articolo in magData al momento della riga necessità. Dati caricati?', magData);
+  }
   const opts = '<option value="">— Articolo nuovo (scrivi sotto) —</option>' +
     arts.map(a => `<option value="${a.id}" ${preset.articoloId===a.id?'selected':''}>${escapeHtmlIR(a.nome)}${a.unita?' ('+a.unita+')':''}</option>`).join('');
   const div = document.createElement('div');
   div.id = 'irNecRiga_' + idx;
+  div.className = 'ir-nec-riga';
   div.style.cssText = 'border:1px solid var(--cream-dark);border-radius:6px;padding:0.6rem 0.7rem;position:relative;background:white';
   div.innerHTML = `
     <select id="irNecArt_${idx}" onchange="onIRNecRigaArticoloChange(${idx})" style="width:100%;margin-bottom:0.4rem">${opts}</select>
@@ -622,7 +629,7 @@ function filtraFornitoriIR() {
     const filtrati = q ? tutti.filter(f => f.toLowerCase().includes(q)) : tutti;
     if(filtrati.length === 0) { box.style.display = 'none'; box.innerHTML = ''; return; }
     box.innerHTML = filtrati.map(f =>
-      `<div onmousedown="selezionaFornitoreIR('${encodeURIComponent(f)}')" ontouchstart="selezionaFornitoreIR('${encodeURIComponent(f)}')" style="padding:0.5rem 0.8rem;cursor:pointer;font-size:0.9rem;color:var(--text);border-bottom:1px solid var(--cream-light)">🏪 ${escapeHtmlIR(f)}</div>`
+      `<div onmousedown="selezionaFornitoreIR('${encodeURIComponent(f)}')" ontouchstart="selezionaFornitoreIR('${encodeURIComponent(f)}')" style="padding:0.8rem 1rem;cursor:pointer;font-size:1rem;color:var(--text);border-bottom:1px solid var(--cream-light)">🏪 ${escapeHtmlIR(f)}</div>`
     ).join('');
     box.style.display = 'block';
   } catch(err) {

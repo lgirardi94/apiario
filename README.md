@@ -37,7 +37,7 @@ Web app completa per la gestione di un apiario amatoriale o semi-professionale: 
 - Eliminazione con conferma e avviso sulle visite collegate
 - **Scheda dettagliata** con 5 tab: Anagrafica, Produzioni, Timeline, Statistiche, Note
 
-### 🌳 Genealogia (per Nucleo/Sciame/Fecondazione)
+### 🌳 Genealogia delle regine
 - Data di costituzione/cattura
 - Composizione telaini: tipo (covata/scorte/misto/foglio cereo) + arnia di provenienza + note
 - **Origine regina** in 3 varianti con date previste automatiche:
@@ -69,15 +69,18 @@ Web app completa per la gestione di un apiario amatoriale o semi-professionale: 
 ### 🛒 Ordini (Da ordinare)
 - Lista articoli da acquistare con stato: **da ordinare → ordinato → ricevuto**
 - Priorità (urgente/alta/media/bassa), fornitore, data prevista
-- **Controvalore merce** e **spese di spedizione** separate
+- **Inserimento multiplo**: in un solo modale si aggiungono più articoli (righe multiple) con dati comuni (fornitore, priorità, data, spedizione) impostati una volta
+- **Controvalore merce** per articolo e **spese di spedizione** uniche per ordine
 - Possibilità di creare al volo un articolo nuovo nel magazzino
+- **Gestione fornitori** persistente (elenco salvato nei settings) con suggerimenti nel campo fornitore
 - Filtri per stato/priorità/fornitore e raggruppamenti
 - **Copia lista** negli appunti, formattata per priorità
+- **📦 Ricezione cumulativa per fornitore**: si ricevono tutti gli articoli di un fornitore insieme, con possibilità di correggere le quantità effettivamente arrivate o escludere un articolo. Le quantità mancanti tornano "da ordinare".
 - **Alla ricezione**, in automatico:
   - Carico a magazzino della merce
   - Aggiornamento del prezzo unitario dell'articolo (merce ÷ quantità)
   - Registrazione della spesa in contabilità (categoria dedotta dal tipo articolo)
-  - Registrazione separata della spesa di spedizione
+  - Registrazione **unica** della spesa di spedizione per tutto l'ordine
 
 ### 💰 Contabilità integrata
 - Movimenti entrata/uscita con categorie dedicate (incluse spese di spedizione)
@@ -132,7 +135,7 @@ Documento completo e stampabile con:
 Wizard ottimizzato per il campo: selezione arnie (anche multipla) → tipo intervento → dettagli per arnia → riepilogo → salvataggio. Carica automaticamente le raccolte a magazzino.
 
 ### Inserimento rapido (`inserimento_rapido.html`)
-Gestione rapida di **contabilità, magazzino, vendite e ordini** da telefono, con la stessa logica integrata della versione desktop (auto-spesa, vendita, spedizioni, badge auto).
+Gestione rapida di **contabilità, magazzino, vendite e ordini** da telefono, con la stessa logica integrata della versione desktop (auto-spesa, vendita, spedizioni, badge auto). Include l'**inserimento multiplo di necessità** (righe impilate), i **suggerimenti fornitori** e la **ricezione cumulativa per fornitore**.
 
 ---
 
@@ -171,13 +174,15 @@ App **statica** (HTML + CSS + JavaScript vanilla), senza framework né build. Os
 | `magazzino.js` | Magazzino, KPI, previsioni, vendita rapida |
 | `necessita.js` | Ordini "da ordinare", ricezione, auto-spesa |
 | `contabilita.js` | Movimenti contabili, categorie, modifica |
-| `obiettivi.js` | Obiettivi stagionali |
-| `sciroppo.js` / `candito.js` / `propoli.js` | Calcolatori |
+| `obiettivi.js` | Obiettivi annuali, stagionali e storico |
+| `calcolatori.js` | Calcolatori sciroppo, candito e propoli (uniti) |
 | `report.js` | Report PDF (completo e trattamenti) |
 | `insights.js` | Analisi economiche, heatmap, genealogia, report annuale |
 | `ricerca.js` | Ricerca globale |
+| `filtri.js` | Filtri multiscelta riutilizzabili + cruscotto home |
 | `drive-app.js` | Integrazione Google Drive, backup, ripristino |
 | `import-export.js` | Import/export dati |
+| `versioni.js` | Registro versioni file + verifica allineamento |
 
 ### Google Drive
 - **Client ID** OAuth dedicato, scope `drive.appdata` (solo cartella privata dell'app, nessun accesso ad altri file dell'utente)
@@ -192,7 +197,33 @@ App **statica** (HTML + CSS + JavaScript vanilla), senza framework né build. Os
 3. Attiva **GitHub Pages** sul branch principale
 4. Per aggiornare: sostituisci i file modificati e fai un **hard refresh** (Ctrl/Cmd + Shift + R)
 
-> I tag `<script>` usano un parametro di versione (`?v=YYYYMMDD`) come *cache buster*: va incrementato quando si aggiornano i file JS per forzare il ricaricamento.
+### 🏷️ Sistema versioni e verifica allineamento
+
+Ogni file ha in cima un header con la sua versione, nel formato:
+
+```
+// ===== FILE VERSION: AAAA-MM-GG.progressivo · nomefile =====
+```
+
+(negli HTML è un commento `<!-- FILE VERSION: ... -->` sulla seconda riga).
+
+Il registro centrale di tutte le versioni attese è in `js/versioni.js` (oggetto `FILE_VERSIONS`), insieme alla costante `APP_BUILD`.
+
+**Procedura ad ogni modifica di un file:**
+1. Incrementare l'header `FILE VERSION` in cima al file modificato
+2. Aggiornare la riga corrispondente in `js/versioni.js` (campo `ver`)
+3. Se si modifica `index.html` o `js/versioni.js`, aggiornare anche `APP_BUILD` e il *cache buster* `?v=...` sui relativi `<script>`
+
+**Verifica dopo il caricamento su GitHub:**
+- Apri l'app → barra in alto → **🏷️ Versioni** → premi **🔍 Verifica**
+- L'app ri-scarica ogni file servito, ne legge l'header reale e lo confronta con la versione attesa nel registro:
+  - 🟢 = il file caricato corrisponde alla versione attesa
+  - 🔴 = il file è **disallineato** (versione vecchia, file dimenticato, o cache non aggiornata) → ricaricalo su GitHub e fai hard refresh
+  - ⚠️ = file non leggibile o header mancante
+
+Questo permette di scoprire subito se un file caricato è rimasto a una versione precedente o se ne è stato dimenticato uno, senza dover controllare a mano.
+
+> I tag `<script>` usano un parametro di versione (`?v=YYYYMMDD`) come *cache buster*, incrementato quando si aggiornano i file JS per forzare il ricaricamento.
 
 ---
 
