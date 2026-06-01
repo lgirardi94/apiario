@@ -239,9 +239,23 @@ Questo permette di scoprire subito se un file caricato è rimasto a una versione
 
 ---
 
-## 📲 PWA
+## 📲 PWA (app installabili su smartphone)
 
-L'app è installabile come Progressive Web App su smartphone e desktop, per l'accesso rapido dalla schermata home e l'uso a schermo intero.
+Tre pagine mobile sono installabili come **app a schermo intero** (Progressive Web App), ognuna con la propria icona sulla schermata home:
+
+| App | Icona | Pagina | Uso |
+|-----|-------|--------|-----|
+| 📋 **Da fare** | checklist ambra | `todo.html` | Consultare e aggiungere cose da fare al volo |
+| 🔍 **Visita rapida** | lente verde | `visita_rapida.html` | Registrare visite sul campo |
+| ⬆️ **Inserimento** | freccia blu | `inserimento_rapido.html` | Contabilità, magazzino, ordini |
+
+Ogni app ha il suo manifest (`todo.manifest.json`, `visita.manifest.json`, `inserimento.manifest.json`) e le icone in `icons/`.
+
+**Installazione su iPhone** (Safari): apri la pagina → **Condividi** → **"Aggiungi alla schermata Home"**. Da quel momento l'icona apre l'app a schermo intero, senza barra del browser. Si fa una volta per ciascuna.
+
+**Pagina "Da fare" (`todo.html`)** — pensata per la consultazione veloce: in cima il colpo d'occhio con i contatori 🔴 Scaduti / 🟠 In scadenza (10 giorni) / 📆 Futuri (cliccabili per filtrare), interruttore vista per scadenza o per categoria, e tasto largo per aggiungere un nuovo compito. Legge e scrive lo stesso file `apiario_todo.json` dell'app principale.
+
+> Nota: non è presente un service worker, quindi le app richiedono la connessione (necessaria comunque per Google Drive). Questo evita problemi di cache con versioni vecchie dei file.
 
 ---
 
