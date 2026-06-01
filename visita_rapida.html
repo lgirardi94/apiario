@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- FILE VERSION: 2026-05-28.3 · visita_rapida.html -->
+<!-- FILE VERSION: 2026-05-28.4 · visita_rapida.html -->
 <html lang="it">
 <head>
 <meta charset="UTF-8">
@@ -18,48 +18,75 @@
 <style>
   /* WIZARD */
   .wizard-header {
-    background: var(--dark-mid);
-    padding: 0.8rem 1.2rem;
-    border-bottom: 2px solid var(--amber);
+    background: linear-gradient(135deg, var(--dark-mid), var(--dark));
+    padding: 1rem 1.1rem 0.9rem;
     position: sticky;
     top: 0;
     z-index: 50;
+    color: var(--amber-glow);
   }
-  .wizard-progress {
-    display: flex;
-    gap: 4px;
-    margin-bottom: 0.5rem;
-  }
-  .wizard-progress-step {
-    flex: 1;
-    height: 4px;
-    border-radius: 2px;
-    background: rgba(255,255,255,0.15);
-    transition: background 0.3s;
-  }
-  .wizard-progress-step.done    { background: var(--amber); }
-  .wizard-progress-step.active  { background: var(--amber-glow); }
-  .wizard-header-row {
+  /* Riga titolo header (coordinata con le altre app) */
+  .wizard-title-row {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.9rem;
   }
-  .wizard-step-label {
-    font-size: 0.72rem;
-    color: rgba(251,245,230,0.6);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  .wizard-step-title {
-    font-size: 1rem;
+  .wizard-title-row h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.1rem;
+    font-weight: 700;
     color: var(--amber-glow);
-    font-weight: 600;
   }
+  /* Step numerati con etichette */
+  .wizard-progress {
+    display: flex;
+    align-items: flex-start;
+  }
+  .wiz-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    position: relative;
+  }
+  .wiz-step .circ {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: rgba(245,200,66,0.2);
+    color: rgba(245,200,66,0.7);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem; font-weight: 700;
+    z-index: 2; border: 2px solid transparent;
+    transition: all 0.3s;
+  }
+  .wiz-step .sl {
+    font-size: 0.58rem;
+    margin-top: 0.25rem;
+    color: rgba(245,200,66,0.6);
+    transition: color 0.3s;
+  }
+  .wiz-step::before {
+    content: '';
+    position: absolute;
+    top: 13px; left: -50%;
+    width: 100%; height: 2px;
+    background: rgba(245,200,66,0.2);
+    z-index: 1;
+    transition: background 0.3s;
+  }
+  .wiz-step:first-child::before { display: none; }
+  .wiz-step.done .circ { background: var(--amber); color: white; }
+  .wiz-step.active .circ { background: var(--amber-glow); color: var(--dark); border-color: white; }
+  .wiz-step.active .sl { color: var(--amber-glow); font-weight: 700; }
+  .wiz-step.done::before, .wiz-step.active::before { background: var(--amber); }
+
   .wizard-drive-dot {
     width: 8px; height: 8px;
     border-radius: 50%;
     background: #888;
     flex-shrink: 0;
+    margin-left: auto;
   }
   .wizard-drive-dot.connected { background: #4CAF50; }
 
@@ -483,18 +510,16 @@
 
 <!-- HEADER WIZARD -->
 <div class="wizard-header">
-  <div class="wizard-progress">
-    <div class="wizard-progress-step active" id="prog-1"></div>
-    <div class="wizard-progress-step" id="prog-2"></div>
-    <div class="wizard-progress-step" id="prog-3"></div>
-    <div class="wizard-progress-step" id="prog-4"></div>
-  </div>
-  <div class="wizard-header-row">
-    <div>
-      <div class="wizard-step-label" id="wiz-step-label">Passo 1 di 4</div>
-      <div class="wizard-step-title" id="wiz-step-title">Seleziona arnia</div>
-    </div>
+  <div class="wizard-title-row">
+    <span style="font-size:1.2rem">🔍</span>
+    <h1>Visita rapida</h1>
     <div class="wizard-drive-dot" id="wizDriveDot"></div>
+  </div>
+  <div class="wizard-progress">
+    <div class="wiz-step active" id="prog-1"><div class="circ">1</div><div class="sl">Arnia</div></div>
+    <div class="wiz-step" id="prog-2"><div class="circ">2</div><div class="sl">Tipo</div></div>
+    <div class="wiz-step" id="prog-3"><div class="circ">3</div><div class="sl">Dettagli</div></div>
+    <div class="wiz-step" id="prog-4"><div class="circ">4</div><div class="sl">Riepilogo</div></div>
   </div>
 </div>
 
@@ -826,34 +851,14 @@ function showWizard() {
 }
 
 // ===== STEP NAVIGATION =====
-const STEP_INFO = {
-  1: { label: 'Passo 1 di 4', title: 'Seleziona arnie' },
-  2: { label: 'Passo 2 di 4', title: 'Quando e cosa?' },
-  3: { label: 'Passo 3 di 4', title: 'Dettagli' },
-  4: { label: 'Passo 4 di 4', title: 'Riepilogo' },
-};
-
 function updateWizHeader() {
-  let label = STEP_INFO[step].label;
-  let title = STEP_INFO[step].title;
-
-  // Durante step 3 con più arnie: mostra "Arnia [nome] — X di Y"
-  if(step === 3 && selectedArniaIds.length > 0) {
-    const arnia = (dbData.arnie||[]).find(a => a.id === selectedArniaId);
-    const nome = arnia ? (arnia.nome || `#${arnia.num}`) : '—';
-    if(selectedArniaIds.length > 1) {
-      label = `Arnia ${currentArniaIndex+1} di ${selectedArniaIds.length}`;
-      title = `🏠 ${nome}`;
-    } else {
-      title = `🏠 ${nome}`;
-    }
-  }
-
-  document.getElementById('wiz-step-label').textContent = label;
-  document.getElementById('wiz-step-title').textContent = title;
+  // Aggiorna i cerchi step: done (spunta) / active / futuro
   for(let i=1; i<=4; i++) {
     const el = document.getElementById(`prog-${i}`);
-    if(el) el.className = 'wizard-progress-step' + (i < step ? ' done' : i === step ? ' active' : '');
+    if(!el) continue;
+    el.className = 'wiz-step' + (i < step ? ' done' : i === step ? ' active' : '');
+    const circ = el.querySelector('.circ');
+    if(circ) circ.textContent = (i < step) ? '✓' : i;
   }
 }
 
