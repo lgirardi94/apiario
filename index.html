@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- FILE VERSION: 2026-05-28.12 · apiario.html (index.html) -->
+<!-- FILE VERSION: 2026-05-28.14 · apiario.html (index.html) -->
 <html lang="it">
 <head>
 <meta charset="UTF-8">
@@ -8,7 +8,7 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐝</text></svg>">
 <link rel="stylesheet" href="style-main.css">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="shared.js?v=20260547"></script>
+<script src="shared.js?v=20260549"></script>
 </head>
 <body>
 
@@ -62,6 +62,7 @@
     <button onclick="exportJSON()" style="background:transparent;border:1px solid rgba(200,134,10,0.3);color:rgba(245,200,66,0.6);padding:0.3rem 0.9rem;border-radius:2px;cursor:pointer;font-family:'Crimson Pro',serif;font-size:0.82rem" onmouseover="this.style.background='rgba(200,134,10,0.15)'" onmouseout="this.style.background='transparent'">⬇ Backup locale</button>
     <button onclick="mostraBackupDisponibili()" title="Backup automatici settimanali su Drive" style="background:transparent;border:1px solid rgba(200,134,10,0.3);color:rgba(245,200,66,0.6);padding:0.3rem 0.9rem;border-radius:2px;cursor:pointer;font-family:'Crimson Pro',serif;font-size:0.82rem" onmouseover="this.style.background='rgba(200,134,10,0.15)'" onmouseout="this.style.background='transparent'">☁️ Backup auto</button>
     <button onclick="mostraVersioniFile()" title="Versioni dei file (per controllo allineamento con GitHub)" style="background:transparent;border:1px solid rgba(200,134,10,0.3);color:rgba(245,200,66,0.6);padding:0.3rem 0.9rem;border-radius:2px;cursor:pointer;font-family:'Crimson Pro',serif;font-size:0.82rem" onmouseover="this.style.background='rgba(200,134,10,0.15)'" onmouseout="this.style.background='transparent'">🏷️ Versioni</button>
+    <button onclick="mostraExportReport()" title="Esporta i report disponibili (completo, annuale, trattamenti)" style="background:transparent;border:1px solid rgba(200,134,10,0.3);color:rgba(245,200,66,0.6);padding:0.3rem 0.9rem;border-radius:2px;cursor:pointer;font-family:'Crimson Pro',serif;font-size:0.82rem" onmouseover="this.style.background='rgba(200,134,10,0.15)'" onmouseout="this.style.background='transparent'">📄 Export report</button>
     <label style="background:transparent;border:1px solid rgba(200,134,10,0.3);color:rgba(245,200,66,0.6);padding:0.3rem 0.9rem;border-radius:2px;cursor:pointer;font-family:'Crimson Pro',serif;font-size:0.82rem" onmouseover="this.style.background='rgba(200,134,10,0.15)'" onmouseout="this.style.background='transparent'">
       ⬆ Importa JSON
       <input type="file" accept=".json" onchange="importJSON(event)" style="display:none">
@@ -1818,8 +1819,6 @@
     <p class="section-subtitle">Gestisci il censimento del tuo apiario</p>
     <div style="display:flex;gap:0.8rem;margin-bottom:1.5rem;flex-wrap:wrap">
       <button class="btn" onclick="openArniModal()">+ Aggiungi Arnia</button>
-      <button class="btn btn-secondary" onclick="generaReportCompleto()" title="Genera report PDF completo annuale">📄 Report annuale</button>
-      <button class="btn btn-secondary" onclick="generaReportTrattamenti()" title="Registro trattamenti per ispezione veterinaria">💊 Registro trattamenti</button>
     </div>
     <div class="arnie-grid" id="arnieGrid"></div>
   </section>
@@ -2798,23 +2797,23 @@
 </div><!-- fine appContent -->
 
 <!-- ===== JS MODULES — ordine importante! ===== -->
-<script src="js/state.js?v=20260547"></script>
-<script src="js/nav.js?v=20260547"></script>
-<script src="js/import-export.js?v=20260547"></script>
-<script src="js/registro.js?v=20260547"></script>
-<script src="js/arnie.js?v=20260547"></script>
-<script src="js/magazzino.js?v=20260547"></script>
-<script src="js/necessita.js?v=20260547"></script>
-<script src="js/todo.js?v=20260547"></script>
-<script src="js/ricerca.js?v=20260547"></script>
-<script src="js/insights.js?v=20260547"></script>
-<script src="js/versioni.js?v=20260547"></script>
-<script src="js/filtri.js?v=20260547"></script>
-<script src="js/contabilita.js?v=20260547"></script>
-<script src="js/obiettivi.js?v=20260547"></script>
-<script src="js/calcolatori.js?v=20260547"></script>
-<script src="js/report.js?v=20260547"></script>
-<script src="js/home.js?v=20260547"></script>
+<script src="js/state.js?v=20260549"></script>
+<script src="js/nav.js?v=20260549"></script>
+<script src="js/import-export.js?v=20260549"></script>
+<script src="js/registro.js?v=20260549"></script>
+<script src="js/arnie.js?v=20260549"></script>
+<script src="js/magazzino.js?v=20260549"></script>
+<script src="js/necessita.js?v=20260549"></script>
+<script src="js/todo.js?v=20260549"></script>
+<script src="js/ricerca.js?v=20260549"></script>
+<script src="js/insights.js?v=20260549"></script>
+<script src="js/versioni.js?v=20260549"></script>
+<script src="js/filtri.js?v=20260549"></script>
+<script src="js/contabilita.js?v=20260549"></script>
+<script src="js/obiettivi.js?v=20260549"></script>
+<script src="js/calcolatori.js?v=20260549"></script>
+<script src="js/report.js?v=20260549"></script>
+<script src="js/home.js?v=20260549"></script>
 <script src="js/drive-app.js"></script>
 
 </body>
