@@ -1,4 +1,4 @@
-// ===== FILE VERSION: 2026-05-28.13 · versioni.js =====
+// ===== FILE VERSION: 2026-05-28.14 · versioni.js =====
 /* ===========================================================
    REGISTRO VERSIONI FILE
    Ogni volta che si modifica un file, aggiornare qui la sua versione
@@ -11,9 +11,9 @@
 // Per ogni file: percorso reale (per ri-scaricarlo) + versione attesa.
 const FILE_VERSIONS = {
   // HTML
-  'index.html':                { path: 'index.html',            ver: '2026-05-28.19' },
-  'visita_rapida.html':        { path: 'visita_rapida.html',    ver: '2026-05-28.4' },
-  'inserimento_rapido.html':   { path: 'inserimento_rapido.html', ver: '2026-05-28.6' },
+  'index.html':                { path: 'index.html',            ver: '2026-05-28.20' },
+  'visita_rapida.html':        { path: 'visita_rapida.html',    ver: '2026-05-28.5' },
+  'inserimento_rapido.html':   { path: 'inserimento_rapido.html', ver: '2026-05-28.7' },
   'todo.html':                 { path: 'todo.html',             ver: '2026-05-28.2' },
   'etichette.html':            { path: 'etichette.html',        ver: '2026-05-28.1' },
   // Core
@@ -38,11 +38,11 @@ const FILE_VERSIONS = {
   // Infrastruttura
   'js/drive-app.js':           { path: 'js/drive-app.js',       ver: '2026-05-28.2' },
   'js/import-export.js':       { path: 'js/import-export.js',   ver: '2026-05-28.2' },
-  'js/versioni.js':            { path: 'js/versioni.js',        ver: '2026-05-28.13' },
+  'js/versioni.js':            { path: 'js/versioni.js',        ver: '2026-05-28.14' },
 };
 
 // Versione "build" complessiva dell'app (la più recente tra tutte)
-const APP_BUILD = '2026-05-28.19';
+const APP_BUILD = '2026-05-28.20';
 
 function mostraVersioniFile() {
   try {
