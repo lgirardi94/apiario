@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- FILE VERSION: 2026-05-28.5 · visita_rapida.html -->
+<!-- FILE VERSION: 2026-05-28.6 · visita_rapida.html -->
 <html lang="it">
 <head>
 <meta charset="UTF-8">
@@ -895,32 +895,35 @@ function isStepValid(s) {
   return true; // step 3 e 4 sempre validi (note opzionali)
 }
 
-function showStep(n) {
-  for(let i=1; i<=4; i++) document.getElementById(`step${i}`).style.display = 'none';
-  document.getElementById(`step${n}`).style.display = 'block';
-  step = n;
-  // Banner: mostra contesto dallo step 2 in poi
+function aggiornaBannerArnia() {
   const banner = document.getElementById('wizArniaBanner');
-  if(n === 2 && selectedArniaIds.length > 0) {
-    document.getElementById('wizArniaBannerText').textContent =
-      selectedArniaIds.length === 1
-        ? (() => { const a=(dbData.arnie||[]).find(x=>x.id===selectedArniaIds[0]); return a?`Arnia #${a.num}${a.nome?' — '+a.nome:''}`:'1 arnia'; })()
-        : `${selectedArniaIds.length} arnie selezionate`;
+  const txt = document.getElementById('wizArniaBannerText');
+  if(!banner || !txt) return;
+  if(step === 2 && selectedArniaIds.length > 0) {
+    txt.textContent = selectedArniaIds.length === 1
+      ? (() => { const a=(dbData.arnie||[]).find(x=>x.id===selectedArniaIds[0]); return a?`Arnia #${a.num}${a.nome?' — '+a.nome:''}`:'1 arnia'; })()
+      : `${selectedArniaIds.length} arnie selezionate`;
     banner.style.display = 'block';
-  } else if(n === 3 && selectedArniaId) {
+  } else if(step === 3 && selectedArniaId) {
     const a = (dbData.arnie||[]).find(x => x.id === selectedArniaId);
     if(a) {
       const prog = selectedArniaIds.length > 1 ? ` (${currentArniaIndex+1}/${selectedArniaIds.length})` : '';
-      document.getElementById('wizArniaBannerText').textContent = `Arnia #${a.num}${a.nome?' — '+a.nome:''}${prog}`;
+      txt.textContent = `Arnia #${a.num}${a.nome?' — '+a.nome:''}${prog}`;
       banner.style.display = 'block';
     }
-  } else if(n === 4) {
-    document.getElementById('wizArniaBannerText').textContent =
-      selectedArniaIds.length > 1 ? `Riepilogo ${selectedArniaIds.length} visite` : 'Riepilogo visita';
+  } else if(step === 4) {
+    txt.textContent = selectedArniaIds.length > 1 ? `Riepilogo ${selectedArniaIds.length} visite` : 'Riepilogo visita';
     banner.style.display = 'block';
   } else {
     banner.style.display = 'none';
   }
+}
+
+function showStep(n) {
+  for(let i=1; i<=4; i++) document.getElementById(`step${i}`).style.display = 'none';
+  document.getElementById(`step${n}`).style.display = 'block';
+  step = n;
+  aggiornaBannerArnia();
   updateWizNav();
   window.scrollTo(0,0);
 }
@@ -951,6 +954,7 @@ function nextStep() {
       currentArniaIndex++;
       selectedArniaId = selectedArniaIds[currentArniaIndex];
       renderStep3();
+      aggiornaBannerArnia();
       window.scrollTo(0, 0);
       updateWizNav();
       return;
@@ -973,6 +977,7 @@ function prevStep() {
     currentArniaIndex--;
     selectedArniaId = selectedArniaIds[currentArniaIndex];
     renderStep3();
+    aggiornaBannerArnia();
     window.scrollTo(0, 0);
     updateWizNav();
     return;

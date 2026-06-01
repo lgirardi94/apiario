@@ -1,4 +1,4 @@
-// ===== FILE VERSION: 2026-05-28.2 · obiettivi.js =====
+// ===== FILE VERSION: 2026-05-28.3 · obiettivi.js =====
 
 const OB_STAGIONI = {
   primavera: { label: 'Primavera', icon: '🌿', mesi: 'Mar–Mag' },
@@ -50,23 +50,27 @@ function renderObiettivi() {
         { id: 'annuali', label: '📆 Annuali', cnt: nAnn },
         { id: 'stagionali', label: '🌿 Stagionali', cnt: nStag },
       ];
-      chipBox.innerHTML = chips.map(c =>
-        `<span class="ob-chip ${_obChip===c.id?'on':''}" onclick="setObChip('${c.id}')">${c.label} <span class="ob-chip-cnt">${c.cnt}</span></span>`
-      ).join('');
+      chipBox.innerHTML = chips.map(c => {
+        const on = _obChip === c.id;
+        const stChip = `display:inline-flex;align-items:center;gap:0.4rem;padding:0.5rem 1.1rem;border-radius:22px;font-size:0.92rem;font-weight:600;cursor:pointer;border:1.5px solid ${on?'var(--amber)':'var(--cream-dark)'};background:${on?'var(--amber-pale)':'white'};color:${on?'var(--brown)':'var(--text-light)'}`;
+        const stCnt = `background:${on?'white':'var(--cream)'};border-radius:10px;padding:0.05rem 0.45rem;font-size:0.76rem`;
+        return `<span style="${stChip}" onclick="setObChip('${c.id}')">${c.label} <span style="${stCnt}">${c.cnt}</span></span>`;
+      }).join('');
     }
 
     // SOTTO-CHIP (anni o stagioni)
     const subBox = document.getElementById('obSubchips');
     if(subBox) {
+      const stSub = (on) => `display:inline-block;padding:0.35rem 0.85rem;border-radius:16px;font-size:0.84rem;cursor:pointer;border:1px solid ${on?'var(--brown)':'var(--cream-dark)'};background:${on?'var(--brown)':'white'};color:${on?'white':'var(--text-light)'}`;
       if(_obChip === 'annuali') {
         const anni = getAnniObiettivi().filter(a => obiettivi.some(o => o.tipo==='annuale' && o.anno===a));
         subBox.style.display = 'flex';
-        subBox.innerHTML = `<span class="ob-subchip ${!_obSubAnno?'on':''}" onclick="setObSubAnno('')">Tutti gli anni</span>` +
-          anni.map(a => `<span class="ob-subchip ${String(_obSubAnno)===String(a)?'on':''}" onclick="setObSubAnno('${a}')">${a}</span>`).join('');
+        subBox.innerHTML = `<span style="${stSub(!_obSubAnno)}" onclick="setObSubAnno('')">Tutti gli anni</span>` +
+          anni.map(a => `<span style="${stSub(String(_obSubAnno)===String(a))}" onclick="setObSubAnno('${a}')">${a}</span>`).join('');
       } else if(_obChip === 'stagionali') {
         subBox.style.display = 'flex';
-        subBox.innerHTML = `<span class="ob-subchip ${!_obSubStagione?'on':''}" onclick="setObSubStagione('')">Tutte</span>` +
-          Object.entries(OB_STAGIONI).map(([k,st]) => `<span class="ob-subchip ${_obSubStagione===k?'on':''}" onclick="setObSubStagione('${k}')">${st.icon} ${st.label}</span>`).join('');
+        subBox.innerHTML = `<span style="${stSub(!_obSubStagione)}" onclick="setObSubStagione('')">Tutte</span>` +
+          Object.entries(OB_STAGIONI).map(([k,st]) => `<span style="${stSub(_obSubStagione===k)}" onclick="setObSubStagione('${k}')">${st.icon} ${st.label}</span>`).join('');
       } else {
         subBox.style.display = 'none';
         subBox.innerHTML = '';

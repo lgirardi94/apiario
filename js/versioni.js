@@ -1,4 +1,4 @@
-// ===== FILE VERSION: 2026-05-28.14 · versioni.js =====
+// ===== FILE VERSION: 2026-05-28.15 · versioni.js =====
 /* ===========================================================
    REGISTRO VERSIONI FILE
    Ogni volta che si modifica un file, aggiornare qui la sua versione
@@ -11,8 +11,8 @@
 // Per ogni file: percorso reale (per ri-scaricarlo) + versione attesa.
 const FILE_VERSIONS = {
   // HTML
-  'index.html':                { path: 'index.html',            ver: '2026-05-28.20' },
-  'visita_rapida.html':        { path: 'visita_rapida.html',    ver: '2026-05-28.5' },
+  'index.html':                { path: 'index.html',            ver: '2026-05-28.21' },
+  'visita_rapida.html':        { path: 'visita_rapida.html',    ver: '2026-05-28.6' },
   'inserimento_rapido.html':   { path: 'inserimento_rapido.html', ver: '2026-05-28.7' },
   'todo.html':                 { path: 'todo.html',             ver: '2026-05-28.2' },
   'etichette.html':            { path: 'etichette.html',        ver: '2026-05-28.1' },
@@ -27,7 +27,7 @@ const FILE_VERSIONS = {
   'js/magazzino.js':           { path: 'js/magazzino.js',       ver: '2026-05-28.4' },
   'js/contabilita.js':         { path: 'js/contabilita.js',     ver: '2026-05-28.2' },
   'js/necessita.js':           { path: 'js/necessita.js',       ver: '2026-05-28.7' },
-  'js/obiettivi.js':           { path: 'js/obiettivi.js',       ver: '2026-05-28.2' },
+  'js/obiettivi.js':           { path: 'js/obiettivi.js',       ver: '2026-05-28.3' },
   'js/todo.js':                { path: 'js/todo.js',            ver: '2026-05-28.1' },
   // Utility / calcolatori
   'js/calcolatori.js':         { path: 'js/calcolatori.js',     ver: '2026-05-28.1' },
@@ -38,11 +38,11 @@ const FILE_VERSIONS = {
   // Infrastruttura
   'js/drive-app.js':           { path: 'js/drive-app.js',       ver: '2026-05-28.2' },
   'js/import-export.js':       { path: 'js/import-export.js',   ver: '2026-05-28.2' },
-  'js/versioni.js':            { path: 'js/versioni.js',        ver: '2026-05-28.14' },
+  'js/versioni.js':            { path: 'js/versioni.js',        ver: '2026-05-28.15' },
 };
 
 // Versione "build" complessiva dell'app (la più recente tra tutte)
-const APP_BUILD = '2026-05-28.20';
+const APP_BUILD = '2026-05-28.21';
 
 function mostraVersioniFile() {
   try {
