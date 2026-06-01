@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- FILE VERSION: 2026-05-28.1 · todo.html -->
+<!-- FILE VERSION: 2026-05-28.2 · todo.html -->
 <html lang="it">
 <head>
 <meta charset="UTF-8">
@@ -292,10 +292,10 @@ function fmtDate(iso) {
   return d.toLocaleDateString('it-IT', { day:'2-digit', month:'2-digit' });
 }
 function statoScad(scad) {
-  if(!scad) return 'nessuna';
+  if(!scad) return 'futuro';   // senza scadenza = "prima o poi" → conta tra i Futuri
   const oggi = new Date(); oggi.setHours(0,0,0,0);
   const d = new Date(scad); d.setHours(0,0,0,0);
-  if(isNaN(d.getTime())) return 'nessuna';
+  if(isNaN(d.getTime())) return 'futuro';
   const diff = Math.round((d - oggi) / 86400000);
   if(diff < 0) return 'scaduto';
   if(diff <= 10) return 'scadenza';   // range 10 giorni (oggi incluso)
@@ -426,13 +426,12 @@ function render() {
 }
 
 function raggruppaScadenza(items) {
-  const map = { scaduto: [], scadenza: [], futuro: [], nessuna: [] };
-  items.forEach(t => { map[statoScad(t.scadenza)].push(t); });
+  const map = { scaduto: [], scadenza: [], futuro: [] };
+  items.forEach(t => { (map[statoScad(t.scadenza)] || map.futuro).push(t); });
   const out = [];
   if(map.scaduto.length) out.push({ label: '🔴 Scaduti', color: '#C0392B', items: ordina(map.scaduto) });
   if(map.scadenza.length) out.push({ label: '🟠 In scadenza (10 giorni)', color: '#9A6B00', items: ordina(map.scadenza) });
   if(map.futuro.length) out.push({ label: '📆 Futuri', color: 'var(--blue)', items: ordina(map.futuro) });
-  if(map.nessuna.length) out.push({ label: '📋 Senza scadenza', color: 'var(--brown)', items: ordina(map.nessuna) });
   return out;
 }
 function raggruppaCategoria(items) {

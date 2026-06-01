@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- FILE VERSION: 2026-05-28.15 · apiario.html (index.html) -->
+<!-- FILE VERSION: 2026-05-28.16 · apiario.html (index.html) -->
 <html lang="it">
 <head>
 <meta charset="UTF-8">
@@ -8,7 +8,7 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐝</text></svg>">
 <link rel="stylesheet" href="style-main.css">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="shared.js?v=20260550"></script>
+<script src="shared.js?v=20260551"></script>
 </head>
 <body>
 
@@ -52,19 +52,24 @@
 </nav>
 
 <!-- BACKUP BAR -->
-<div id="backupBar" style="background:var(--dark);border-bottom:1px solid rgba(200,134,10,0.3);padding:0.55rem 1.2rem;display:flex;align-items:center;gap:0.8rem;flex-wrap:wrap;justify-content:space-between;position:relative;z-index:99">
-  <div style="display:flex;align-items:center;gap:0.8rem">
-    <span id="driveStatus" style="color:rgba(100,220,100,0.8);font-size:0.82rem;font-style:italic;font-family:'Crimson Pro',serif">☁️ Sincronizzato con Google Drive</span>
+<div id="backupBar" style="background:linear-gradient(180deg,#241809,#1A1208);border-bottom:1px solid rgba(200,134,10,0.25);padding:0.6rem 1.2rem;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:0.8rem;position:relative;z-index:99;box-shadow:0 2px 12px rgba(0,0,0,0.25)">
+  <!-- SINISTRA: stato Drive -->
+  <div style="display:flex;align-items:center;gap:0.7rem;min-width:0">
+    <span id="driveStatus" style="color:rgba(120,210,110,0.85);font-size:0.82rem;font-style:italic;font-family:'Crimson Pro',serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">☁️ Sincronizzato</span>
     <button id="btnDriveLogin" onclick="driveLogin()" style="display:none">Accedi</button>
-    <button id="btnDriveLogout" onclick="driveLogoutApp()" style="background:transparent;border:1px solid rgba(200,134,10,0.4);color:rgba(251,245,230,0.6);padding:0.25rem 0.7rem;border-radius:2px;cursor:pointer;font-family:'Crimson Pro',serif;font-size:0.78rem">Disconnetti</button>
+    <button id="btnDriveLogout" onclick="driveLogoutApp()" style="background:transparent;border:1px solid rgba(200,134,10,0.35);color:rgba(251,245,230,0.55);padding:0.3rem 0.75rem;border-radius:20px;cursor:pointer;font-family:'Crimson Pro',serif;font-size:0.78rem;transition:all 0.2s;white-space:nowrap" onmouseover="this.style.background='rgba(200,134,10,0.15)';this.style.color='rgba(251,245,230,0.85)'" onmouseout="this.style.background='transparent';this.style.color='rgba(251,245,230,0.55)'">Disconnetti</button>
   </div>
-  <div style="display:flex;gap:0.6rem;flex-wrap:wrap;align-items:center">
-    <button onclick="exportJSON()" style="background:transparent;border:1px solid rgba(200,134,10,0.3);color:rgba(245,200,66,0.6);padding:0.3rem 0.9rem;border-radius:2px;cursor:pointer;font-family:'Crimson Pro',serif;font-size:0.82rem" onmouseover="this.style.background='rgba(200,134,10,0.15)'" onmouseout="this.style.background='transparent'">⬇ Backup locale</button>
-    <button onclick="mostraBackupDisponibili()" title="Backup automatici settimanali su Drive" style="background:transparent;border:1px solid rgba(200,134,10,0.3);color:rgba(245,200,66,0.6);padding:0.3rem 0.9rem;border-radius:2px;cursor:pointer;font-family:'Crimson Pro',serif;font-size:0.82rem" onmouseover="this.style.background='rgba(200,134,10,0.15)'" onmouseout="this.style.background='transparent'">☁️ Backup auto</button>
-    <button onclick="mostraVersioniFile()" title="Versioni dei file (per controllo allineamento con GitHub)" style="background:transparent;border:1px solid rgba(200,134,10,0.3);color:rgba(245,200,66,0.6);padding:0.3rem 0.9rem;border-radius:2px;cursor:pointer;font-family:'Crimson Pro',serif;font-size:0.82rem" onmouseover="this.style.background='rgba(200,134,10,0.15)'" onmouseout="this.style.background='transparent'">🏷️ Versioni</button>
-    <button onclick="mostraExportReport()" title="Esporta i report disponibili (completo, annuale, trattamenti)" style="background:transparent;border:1px solid rgba(200,134,10,0.3);color:rgba(245,200,66,0.6);padding:0.3rem 0.9rem;border-radius:2px;cursor:pointer;font-family:'Crimson Pro',serif;font-size:0.82rem" onmouseover="this.style.background='rgba(200,134,10,0.15)'" onmouseout="this.style.background='transparent'">📄 Export report</button>
-    <label style="background:transparent;border:1px solid rgba(200,134,10,0.3);color:rgba(245,200,66,0.6);padding:0.3rem 0.9rem;border-radius:2px;cursor:pointer;font-family:'Crimson Pro',serif;font-size:0.82rem" onmouseover="this.style.background='rgba(200,134,10,0.15)'" onmouseout="this.style.background='transparent'">
-      ⬆ Importa JSON
+
+  <!-- CENTRO: Export report (in risalto) -->
+  <button onclick="mostraExportReport()" title="Esporta i report disponibili (completo, annuale, trattamenti)" style="background:linear-gradient(135deg,rgba(232,160,32,0.18),rgba(200,134,10,0.12));border:1px solid rgba(232,160,32,0.5);color:var(--amber-glow);padding:0.4rem 1.3rem;border-radius:22px;cursor:pointer;font-family:'Crimson Pro',serif;font-size:0.88rem;font-weight:600;white-space:nowrap;transition:all 0.2s;box-shadow:0 2px 8px rgba(200,134,10,0.15)" onmouseover="this.style.background='linear-gradient(135deg,rgba(232,160,32,0.3),rgba(200,134,10,0.22))';this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 14px rgba(200,134,10,0.3)'" onmouseout="this.style.background='linear-gradient(135deg,rgba(232,160,32,0.18),rgba(200,134,10,0.12))';this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(200,134,10,0.15)'">📄 Export report</button>
+
+  <!-- DESTRA: backup e utility -->
+  <div style="display:flex;gap:0.45rem;flex-wrap:wrap;align-items:center;justify-content:flex-end">
+    <button onclick="exportJSON()" title="Scarica un backup dei dati in formato JSON" style="background:transparent;border:1px solid rgba(200,134,10,0.28);color:rgba(245,200,66,0.55);padding:0.32rem 0.85rem;border-radius:20px;cursor:pointer;font-family:'Crimson Pro',serif;font-size:0.8rem;transition:all 0.2s;white-space:nowrap" onmouseover="this.style.background='rgba(200,134,10,0.15)';this.style.color='var(--amber-glow)'" onmouseout="this.style.background='transparent';this.style.color='rgba(245,200,66,0.55)'">⬇ Backup</button>
+    <button onclick="mostraBackupDisponibili()" title="Backup automatici settimanali su Drive" style="background:transparent;border:1px solid rgba(200,134,10,0.28);color:rgba(245,200,66,0.55);padding:0.32rem 0.85rem;border-radius:20px;cursor:pointer;font-family:'Crimson Pro',serif;font-size:0.8rem;transition:all 0.2s;white-space:nowrap" onmouseover="this.style.background='rgba(200,134,10,0.15)';this.style.color='var(--amber-glow)'" onmouseout="this.style.background='transparent';this.style.color='rgba(245,200,66,0.55)'">☁️ Auto</button>
+    <button onclick="mostraVersioniFile()" title="Versioni dei file (per controllo allineamento con GitHub)" style="background:transparent;border:1px solid rgba(200,134,10,0.28);color:rgba(245,200,66,0.55);padding:0.32rem 0.85rem;border-radius:20px;cursor:pointer;font-family:'Crimson Pro',serif;font-size:0.8rem;transition:all 0.2s;white-space:nowrap" onmouseover="this.style.background='rgba(200,134,10,0.15)';this.style.color='var(--amber-glow)'" onmouseout="this.style.background='transparent';this.style.color='rgba(245,200,66,0.55)'">🏷️ Versioni</button>
+    <label title="Importa dati da un file JSON" style="background:transparent;border:1px solid rgba(200,134,10,0.28);color:rgba(245,200,66,0.55);padding:0.32rem 0.85rem;border-radius:20px;cursor:pointer;font-family:'Crimson Pro',serif;font-size:0.8rem;transition:all 0.2s;white-space:nowrap" onmouseover="this.style.background='rgba(200,134,10,0.15)';this.style.color='var(--amber-glow)'" onmouseout="this.style.background='transparent';this.style.color='rgba(245,200,66,0.55)'">
+      ⬆ Importa
       <input type="file" accept=".json" onchange="importJSON(event)" style="display:none">
     </label>
   </div>
@@ -2797,23 +2802,23 @@
 </div><!-- fine appContent -->
 
 <!-- ===== JS MODULES — ordine importante! ===== -->
-<script src="js/state.js?v=20260550"></script>
-<script src="js/nav.js?v=20260550"></script>
-<script src="js/import-export.js?v=20260550"></script>
-<script src="js/registro.js?v=20260550"></script>
-<script src="js/arnie.js?v=20260550"></script>
-<script src="js/magazzino.js?v=20260550"></script>
-<script src="js/necessita.js?v=20260550"></script>
-<script src="js/todo.js?v=20260550"></script>
-<script src="js/ricerca.js?v=20260550"></script>
-<script src="js/insights.js?v=20260550"></script>
-<script src="js/versioni.js?v=20260550"></script>
-<script src="js/filtri.js?v=20260550"></script>
-<script src="js/contabilita.js?v=20260550"></script>
-<script src="js/obiettivi.js?v=20260550"></script>
-<script src="js/calcolatori.js?v=20260550"></script>
-<script src="js/report.js?v=20260550"></script>
-<script src="js/home.js?v=20260550"></script>
+<script src="js/state.js?v=20260551"></script>
+<script src="js/nav.js?v=20260551"></script>
+<script src="js/import-export.js?v=20260551"></script>
+<script src="js/registro.js?v=20260551"></script>
+<script src="js/arnie.js?v=20260551"></script>
+<script src="js/magazzino.js?v=20260551"></script>
+<script src="js/necessita.js?v=20260551"></script>
+<script src="js/todo.js?v=20260551"></script>
+<script src="js/ricerca.js?v=20260551"></script>
+<script src="js/insights.js?v=20260551"></script>
+<script src="js/versioni.js?v=20260551"></script>
+<script src="js/filtri.js?v=20260551"></script>
+<script src="js/contabilita.js?v=20260551"></script>
+<script src="js/obiettivi.js?v=20260551"></script>
+<script src="js/calcolatori.js?v=20260551"></script>
+<script src="js/report.js?v=20260551"></script>
+<script src="js/home.js?v=20260551"></script>
 <script src="js/drive-app.js"></script>
 
 </body>
