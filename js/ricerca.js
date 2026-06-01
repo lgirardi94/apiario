@@ -1,3 +1,4 @@
+// ===== FILE VERSION: 2026-05-28.2 · ricerca.js =====
 /* ===========================================================
    RICERCA GLOBALE — cerca in arnie, visite, articoli, ordini
    =========================================================== */
@@ -34,7 +35,7 @@ function runGlobalSearch() {
       return;
     }
 
-    const results = { arnie: [], visite: [], articoli: [], ordini: [] };
+    const results = { arnie: [], visite: [], articoli: [], ordini: [], todo: [], obiettivi: [] };
 
     // === ARNIE ===
     (arnie || []).forEach(a => {
@@ -54,9 +55,9 @@ function runGlobalSearch() {
       if(hay.includes(q)) results.articoli.push(a);
     });
 
-    // === ORDINI (necessità) ===
+    // === ORDINI (necessità) — tutti, inclusi i ricevuti ===
     if(typeof necessita !== 'undefined') {
-      (necessita || []).filter(n => n.stato !== 'ricevuto').forEach(n => {
+      (necessita || []).forEach(n => {
         const art = n.articoloId ? (articoli||[]).find(a => a.id === n.articoloId) : null;
         const desc = art ? art.nome : (n.descrizione || '');
         const hay = `${desc} ${n.fornitore||''} ${n.note||''}`.toLowerCase();
@@ -64,7 +65,25 @@ function runGlobalSearch() {
       });
     }
 
-    const totale = results.arnie.length + results.visite.length + results.articoli.length + results.ordini.length;
+    // === TO-DO (cose da fare) ===
+    if(typeof todos !== 'undefined') {
+      (todos || []).forEach(t => {
+        const clTesto = Array.isArray(t.checklist) ? t.checklist.map(c => c.testo).join(' ') : '';
+        const catLabel = (typeof TODO_CATEGORIE !== 'undefined' ? (TODO_CATEGORIE.find(c => c.id === t.categoria)?.label || '') : '');
+        const hay = `${t.testo||''} ${t.note||''} ${clTesto} ${catLabel}`.toLowerCase();
+        if(hay.includes(q)) results.todo.push(t);
+      });
+    }
+
+    // === OBIETTIVI ===
+    if(typeof obiettivi !== 'undefined') {
+      (obiettivi || []).forEach(o => {
+        const hay = `${o.titolo||''} ${o.descrizione||''} ${o.note||''} ${o.tipo||''}`.toLowerCase();
+        if(hay.includes(q)) results.obiettivi.push(o);
+      });
+    }
+
+    const totale = results.arnie.length + results.visite.length + results.articoli.length + results.ordini.length + results.todo.length + results.obiettivi.length;
 
     if(totale === 0) {
       box.style.display = 'block';
@@ -114,14 +133,43 @@ function runGlobalSearch() {
       });
     }
 
-    // Sezione ORDINI
+    // Sezione ORDINI (inclusi ricevuti)
     if(results.ordini.length > 0) {
-      html += ricercaSezioneHeader('🛒 Da ordinare', results.ordini.length);
+      html += ricercaSezioneHeader('🛒 Ordini', results.ordini.length);
       results.ordini.slice(0, 6).forEach(n => {
+        const statoTxt = n.stato === 'ricevuto' ? '✅ Ricevuto' : (n.stato === 'ordinato' ? '🚚 Ordinato' : '📝 Da ordinare');
         html += `
           <div class="ricerca-item" onclick="ricercaVaiOrdini()" style="padding:0.6rem 1rem;cursor:pointer;border-bottom:1px solid var(--cream)">
             <div style="font-weight:600;color:var(--brown);font-size:0.9rem">${ricercaHighlight(n._desc||'Articolo', origQuery)} <span style="font-weight:400;color:var(--text-light);font-size:0.8rem">· ${n.quantita} ${n.unita||''}</span></div>
-            <div style="font-size:0.8rem;color:var(--text-light)">${n.stato==='ordinato'?'🚚 Ordinato':'📝 Da ordinare'}${n.fornitore?' · '+ricercaHighlight(n.fornitore, origQuery):''}</div>
+            <div style="font-size:0.8rem;color:var(--text-light)">${statoTxt}${n.fornitore?' · '+ricercaHighlight(n.fornitore, origQuery):''}</div>
+          </div>`;
+      });
+    }
+
+    // Sezione TO-DO
+    if(results.todo.length > 0) {
+      html += ricercaSezioneHeader('📋 Da fare', results.todo.length);
+      results.todo.slice(0, 6).forEach(t => {
+        const catLabel = (typeof TODO_CATEGORIE !== 'undefined' ? (TODO_CATEGORIE.find(c => c.id === t.categoria)?.label || '') : '');
+        const fatto = t.stato === 'fatto';
+        const scad = t.scadenza ? ' · 📅 ' + (typeof formatDateTodo === 'function' ? formatDateTodo(t.scadenza) : t.scadenza) : '';
+        html += `
+          <div class="ricerca-item" onclick="ricercaVaiTodo()" style="padding:0.6rem 1rem;cursor:pointer;border-bottom:1px solid var(--cream)">
+            <div style="font-weight:600;color:var(--brown);font-size:0.9rem">${fatto?'✅ ':''}${ricercaHighlight(t.testo||'', origQuery)}</div>
+            <div style="font-size:0.8rem;color:var(--text-light)">${catLabel}${scad}</div>
+          </div>`;
+      });
+    }
+
+    // Sezione OBIETTIVI
+    if(results.obiettivi.length > 0) {
+      html += ricercaSezioneHeader('🎯 Obiettivi', results.obiettivi.length);
+      results.obiettivi.slice(0, 6).forEach(o => {
+        const tipoTxt = o.tipo === 'annuale' ? 'Annuale' : (o.tipo === 'stagionale' ? 'Stagionale' : (o.tipo || ''));
+        html += `
+          <div class="ricerca-item" onclick="ricercaVaiObiettivi()" style="padding:0.6rem 1rem;cursor:pointer;border-bottom:1px solid var(--cream)">
+            <div style="font-weight:600;color:var(--brown);font-size:0.9rem">${ricercaHighlight(o.titolo||'Obiettivo', origQuery)}</div>
+            <div style="font-size:0.8rem;color:var(--text-light)">${tipoTxt}${o.descrizione?' · '+ricercaHighlight(o.descrizione.slice(0,40), origQuery):''}</div>
           </div>`;
       });
     }
@@ -162,6 +210,14 @@ function ricercaVaiOrdini() {
   ricercaChiudi();
   navigateTo('magazzino');
   setTimeout(() => { const b = document.querySelector('.mag-tab[onclick*=necessita]'); if(b) showMagTab('necessita', b); }, 80);
+}
+function ricercaVaiTodo() {
+  ricercaChiudi();
+  navigateTo('todo');
+}
+function ricercaVaiObiettivi() {
+  ricercaChiudi();
+  navigateTo('obiettivi');
 }
 
 // Chiudi i risultati cliccando fuori

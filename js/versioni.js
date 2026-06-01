@@ -1,4 +1,4 @@
-// ===== FILE VERSION: 2026-05-28.6 · versioni.js =====
+// ===== FILE VERSION: 2026-05-28.8 · versioni.js =====
 /* ===========================================================
    REGISTRO VERSIONI FILE
    Ogni volta che si modifica un file, aggiornare qui la sua versione
@@ -11,7 +11,7 @@
 // Per ogni file: percorso reale (per ri-scaricarlo) + versione attesa.
 const FILE_VERSIONS = {
   // HTML
-  'index.html':                { path: 'index.html',            ver: '2026-05-28.12' },
+  'index.html':                { path: 'index.html',            ver: '2026-05-28.14' },
   'visita_rapida.html':        { path: 'visita_rapida.html',    ver: '2026-05-28.2' },
   'inserimento_rapido.html':   { path: 'inserimento_rapido.html', ver: '2026-05-28.4' },
   'etichette.html':            { path: 'etichette.html',        ver: '2026-05-28.1' },
@@ -30,18 +30,18 @@ const FILE_VERSIONS = {
   'js/todo.js':                { path: 'js/todo.js',            ver: '2026-05-28.1' },
   // Utility / calcolatori
   'js/calcolatori.js':         { path: 'js/calcolatori.js',     ver: '2026-05-28.1' },
-  'js/report.js':              { path: 'js/report.js',          ver: '2026-05-28.1' },
+  'js/report.js':              { path: 'js/report.js',          ver: '2026-05-28.2' },
   'js/insights.js':            { path: 'js/insights.js',        ver: '2026-05-28.4' },
-  'js/ricerca.js':             { path: 'js/ricerca.js',         ver: '2026-05-28.1' },
+  'js/ricerca.js':             { path: 'js/ricerca.js',         ver: '2026-05-28.2' },
   'js/filtri.js':              { path: 'js/filtri.js',          ver: '2026-05-28.1' },
   // Infrastruttura
   'js/drive-app.js':           { path: 'js/drive-app.js',       ver: '2026-05-28.2' },
   'js/import-export.js':       { path: 'js/import-export.js',   ver: '2026-05-28.2' },
-  'js/versioni.js':            { path: 'js/versioni.js',        ver: '2026-05-28.6' },
+  'js/versioni.js':            { path: 'js/versioni.js',        ver: '2026-05-28.8' },
 };
 
 // Versione "build" complessiva dell'app (la più recente tra tutte)
-const APP_BUILD = '2026-05-28.12';
+const APP_BUILD = '2026-05-28.14';
 
 function mostraVersioniFile() {
   try {

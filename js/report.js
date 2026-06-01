@@ -1,3 +1,4 @@
+// ===== FILE VERSION: 2026-05-28.2 · report.js =====
 /* ===========================================================
    REPORT PDF — Generazione documenti stampabili
    =========================================================== */
@@ -42,6 +43,19 @@ function generaReportCompleto() {
 
     const oggi = new Date();
     const dataGenStr = oggi.toLocaleDateString('it-IT');
+
+    // ===== CALCOLO ORDINI (necessità) per il report =====
+    // Ricevuti: filtrati per anno (dataOrdine o dataCreazione nell'anno). Da ricevere/da ordinare: stato attuale.
+    const _nomeOrdine = (n) => {
+      const art = (typeof articoli !== 'undefined' && n.articoloId) ? articoli.find(a => a.id === n.articoloId) : null;
+      return art ? art.nome : (n.descrizione || 'Articolo');
+    };
+    const _annoDi = (s) => (s && typeof s === 'string') ? s.slice(0,4) : '';
+    const ordiniTutti = (typeof necessita !== 'undefined') ? (necessita || []) : [];
+    const ordiniRicevuti = ordiniTutti.filter(n => n.stato === 'ricevuto' &&
+      (_annoDi(n.dataOrdine) === String(annoNum) || _annoDi(n.dataCreazione) === String(annoNum)));
+    const ordiniDaRicevere = ordiniTutti.filter(n => n.stato === 'ordinato');
+    const ordiniDaOrdinare = ordiniTutti.filter(n => n.stato === 'da_ordinare');
 
     // Calcoli generali
     const arnieAttive = arnie.filter(a => !a.annoDismissione || a.annoDismissione > annoNum);
@@ -504,6 +518,60 @@ ${Object.entries(articoliPerCategoria).sort().map(([cat, items]) => `
 ` : ''}
 
 <!-- =========================================== -->
+<!-- ORDINI -->
+<!-- =========================================== -->
+${(ordiniRicevuti.length + ordiniDaRicevere.length + ordiniDaOrdinare.length > 0) ? `
+<h2>🛒 Ordini ${annoNum}</h2>
+
+${ordiniRicevuti.length > 0 ? `
+<h3 style="color:#5C3A10;font-size:11pt;margin:0.6rem 0 0.3rem;font-family:Georgia,serif">✅ Ordinati e ricevuti nell'anno (${ordiniRicevuti.length})</h3>
+<table>
+  <thead><tr><th>Articolo</th><th class="right">Quantità</th><th>Fornitore</th><th class="right">Spesa merce</th></tr></thead>
+  <tbody>
+    ${ordiniRicevuti.map(n => `<tr>
+      <td>${_nomeOrdine(n)}</td>
+      <td class="right">${n.quantita} ${n.unita||''}</td>
+      <td>${n.fornitore || '—'}</td>
+      <td class="right">${n.prezzoStimato ? '€ '+parseFloat(n.prezzoStimato).toFixed(2) : '—'}</td>
+    </tr>`).join('')}
+  </tbody>
+</table>
+` : ''}
+
+${ordiniDaRicevere.length > 0 ? `
+<h3 style="color:#5C3A10;font-size:11pt;margin:0.6rem 0 0.3rem;font-family:Georgia,serif">🚚 Ordinati, in attesa di ricezione (${ordiniDaRicevere.length})</h3>
+<table>
+  <thead><tr><th>Articolo</th><th class="right">Quantità</th><th>Fornitore</th></tr></thead>
+  <tbody>
+    ${ordiniDaRicevere.map(n => `<tr>
+      <td>${_nomeOrdine(n)}</td>
+      <td class="right">${n.quantita} ${n.unita||''}</td>
+      <td>${n.fornitore || '—'}</td>
+    </tr>`).join('')}
+  </tbody>
+</table>
+` : ''}
+
+${ordiniDaOrdinare.length > 0 ? `
+<h3 style="color:#5C3A10;font-size:11pt;margin:0.6rem 0 0.3rem;font-family:Georgia,serif">📝 Da ordinare (${ordiniDaOrdinare.length})</h3>
+<table>
+  <thead><tr><th>Articolo</th><th class="right">Quantità</th><th>Fornitore</th><th>Priorità</th></tr></thead>
+  <tbody>
+    ${ordiniDaOrdinare.map(n => {
+      const prio = { urgente:'🔴 Urgente', alta:'🟠 Alta', media:'🟡 Media', bassa:'⚪ Bassa' }[n.priorita] || '—';
+      return `<tr>
+      <td>${_nomeOrdine(n)}</td>
+      <td class="right">${n.quantita} ${n.unita||''}</td>
+      <td>${n.fornitore || '—'}</td>
+      <td>${prio}</td>
+    </tr>`;
+    }).join('')}
+  </tbody>
+</table>
+` : ''}
+` : ''}
+
+<!-- =========================================== -->
 <!-- STATISTICHE GENEALOGIA -->
 <!-- =========================================== -->
 ${(nucleiCreatiAnno.length + sciamiAnno.length + promozioniAnno.length > 0) ? `
@@ -743,5 +811,79 @@ ${trattamenti.length === 0 ? '<p style="color:#8B6F4E;font-style:italic">Nessun 
   } catch(err) {
     console.error('[Report] Errore in generaReportTrattamenti:', err.message);
     alert('Errore durante la generazione del registro. Apri F12 → Console per dettagli.');
+  }
+}
+
+// ===========================================================
+// MODALE EXPORT REPORT — punto unico per tutti i report
+// Per aggiungere un report: aggiungi una voce a REPORT_DISPONIBILI
+// ===========================================================
+const REPORT_DISPONIBILI = [
+  {
+    id: 'completo',
+    icona: '📄',
+    titolo: 'Report completo',
+    descrizione: 'Fotografia generale dell\'apiario: arnie, produzione, trattamenti, magazzino, ordini dell\'anno e bilancio.',
+    azione: () => generaReportCompleto(),
+  },
+  {
+    id: 'annuale',
+    icona: '📊',
+    titolo: 'Report annuale (analisi)',
+    descrizione: 'Bilancio economico e analisi produttive dell\'anno selezionato (costo del miele, ripartizione spese, narrativo).',
+    azione: () => { if(typeof esportaReportAnnuale === 'function') esportaReportAnnuale(); else alert('Report annuale non disponibile.'); },
+  },
+  {
+    id: 'trattamenti',
+    icona: '💊',
+    titolo: 'Registro trattamenti',
+    descrizione: 'Elenco dei trattamenti sanitari per arnia, utile per l\'ispezione veterinaria.',
+    azione: () => generaReportTrattamenti(),
+  },
+];
+
+function mostraExportReport() {
+  try {
+    const old = document.getElementById('exportReportOverlay');
+    if(old) old.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'exportReportOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(26,18,8,0.55);z-index:2000;display:flex;align-items:center;justify-content:center;padding:1rem';
+    overlay.addEventListener('click', e => { if(e.target === overlay) overlay.remove(); });
+
+    const voci = REPORT_DISPONIBILI.map(r => `
+      <button onclick="eseguiReport('${r.id}')" style="display:flex;gap:0.8rem;align-items:flex-start;width:100%;text-align:left;background:white;border:1px solid var(--cream-dark);border-radius:8px;padding:0.9rem 1rem;cursor:pointer;font-family:inherit;margin-bottom:0.6rem;transition:border-color 0.15s" onmouseover="this.style.borderColor='var(--amber)'" onmouseout="this.style.borderColor='var(--cream-dark)'">
+        <span style="font-size:1.6rem;line-height:1">${r.icona}</span>
+        <span style="flex:1">
+          <span style="display:block;font-weight:700;color:var(--brown);font-size:1rem">${r.titolo}</span>
+          <span style="display:block;font-size:0.83rem;color:var(--text-light);margin-top:0.2rem">${r.descrizione}</span>
+        </span>
+        <span style="color:var(--amber);font-size:1.2rem;align-self:center">↓</span>
+      </button>`).join('');
+
+    overlay.innerHTML = `
+      <div style="background:var(--cream);border-radius:10px;padding:1.5rem;width:100%;max-width:520px;max-height:84vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+        <h3 style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--brown);margin:0 0 0.3rem">📄 Esporta report</h3>
+        <p style="font-size:0.85rem;color:var(--text-light);margin:0 0 1.2rem">Scegli il report da generare. Si aprirà la finestra di stampa del browser (puoi salvarlo come PDF).</p>
+        ${voci}
+        <button onclick="document.getElementById('exportReportOverlay').remove()" style="width:100%;margin-top:0.5rem;padding:0.7rem;background:var(--brown);border:none;border-radius:6px;font-weight:700;color:white;cursor:pointer;font-family:inherit">Chiudi</button>
+      </div>`;
+    document.body.appendChild(overlay);
+  } catch(err) {
+    console.error('[Report] Errore in mostraExportReport:', err.message);
+  }
+}
+
+function eseguiReport(id) {
+  try {
+    const r = REPORT_DISPONIBILI.find(x => x.id === id);
+    if(!r) return;
+    const ov = document.getElementById('exportReportOverlay');
+    if(ov) ov.remove();
+    // Piccolo ritardo per chiudere la modale prima di aprire la stampa
+    setTimeout(() => { r.azione(); }, 150);
+  } catch(err) {
+    console.error('[Report] Errore in eseguiReport:', err.message);
   }
 }
