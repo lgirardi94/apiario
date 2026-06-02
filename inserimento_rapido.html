@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- FILE VERSION: 2026-05-28.7 · inserimento_rapido.html -->
+<!-- FILE VERSION: 2026-05-28.8 · inserimento_rapido.html -->
 <html lang="it">
 <head>
 <meta charset="UTF-8">
@@ -497,16 +497,20 @@ function renderIRNecessita() {
     const statoIcon = { da_ordinare: '📝', ordinato: '🚚' };
     const statoLabel = { da_ordinare: 'Da ordinare', ordinato: 'Ordinato' };
 
-    // Barra "Ricevi ordine" per fornitore (se ci sono fornitori con +1 voce)
+    // Barra "Ricevi ordine" per fornitore — solo fornitori con voci ORDINATE
     const perFornitore = {};
-    attive.forEach(n => { if(n.fornitore) { (perFornitore[n.fornitore] = perFornitore[n.fornitore] || []).push(n); } });
+    attive.forEach(n => {
+      if(n.fornitore && n.stato === 'ordinato') {
+        (perFornitore[n.fornitore] = perFornitore[n.fornitore] || []).push(n);
+      }
+    });
     const fornitoriMulti = Object.keys(perFornitore).sort();
     let barraFornitori = '';
     if(fornitoriMulti.length > 0) {
       barraFornitori = `<div style="margin-bottom:0.8rem;display:flex;flex-direction:column;gap:0.4rem">` +
         fornitoriMulti.map(f => `
           <button onclick="apriRicezioneFornitoreIR('${encodeURIComponent(f)}')" style="display:flex;justify-content:space-between;align-items:center;background:var(--amber-pale);border:1px solid var(--cream-dark);border-radius:6px;padding:0.5rem 0.8rem;cursor:pointer;font-family:inherit;font-size:0.85rem;color:var(--brown)">
-            <span>🏪 <strong>${escapeHtmlIR(f)}</strong> · ${perFornitore[f].length} ${perFornitore[f].length===1?'voce':'voci'}</span>
+            <span>🏪 <strong>${escapeHtmlIR(f)}</strong> · ${perFornitore[f].length} ${perFornitore[f].length===1?'ordine':'ordini'} da ricevere</span>
             <span style="background:var(--green);color:white;border-radius:4px;padding:0.15rem 0.5rem;font-size:0.75rem">📦 Ricevi</span>
           </button>`).join('') +
         `</div>`;
@@ -891,8 +895,9 @@ function apriRicezioneFornitoreIR(fornitoreEnc) {
   try {
     const fornitore = decodeURIComponent(fornitoreEnc);
     _ricFornIRCorrente = fornitore;
-    _ricVociFornIR = getIRNecessitaAttive().filter(n => n.fornitore === fornitore);
-    if(_ricVociFornIR.length === 0) { alert('Nessuna voce da ricevere.'); return; }
+    // Solo le voci già ORDINATE di questo fornitore (non quelle ancora da ordinare)
+    _ricVociFornIR = getIRNecessitaAttive().filter(n => n.fornitore === fornitore && n.stato === 'ordinato');
+    if(_ricVociFornIR.length === 0) { alert('Nessun ordine da ricevere per questo fornitore.\n\nLe voci devono essere prima contrassegnate come "ordinate".'); return; }
 
     const old = document.getElementById('ricFornIROverlay');
     if(old) old.remove();

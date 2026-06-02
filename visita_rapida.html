@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- FILE VERSION: 2026-05-28.6 · visita_rapida.html -->
+<!-- FILE VERSION: 2026-05-28.7 · visita_rapida.html -->
 <html lang="it">
 <head>
 <meta charset="UTF-8">
@@ -898,7 +898,8 @@ function isStepValid(s) {
 function aggiornaBannerArnia() {
   const banner = document.getElementById('wizArniaBanner');
   const txt = document.getElementById('wizArniaBannerText');
-  if(!banner || !txt) return;
+  if(!banner || !txt) { console.warn('[Visita] Banner arnia: elemento non trovato'); return; }
+  console.log('[Visita] aggiornaBannerArnia → step:', step, 'selectedArniaId:', selectedArniaId, 'index:', currentArniaIndex, 'di', selectedArniaIds.length);
   if(step === 2 && selectedArniaIds.length > 0) {
     txt.textContent = selectedArniaIds.length === 1
       ? (() => { const a=(dbData.arnie||[]).find(x=>x.id===selectedArniaIds[0]); return a?`Arnia #${a.num}${a.nome?' — '+a.nome:''}`:'1 arnia'; })()
@@ -953,8 +954,8 @@ function nextStep() {
       // Passa alla prossima arnia (resta su step 3)
       currentArniaIndex++;
       selectedArniaId = selectedArniaIds[currentArniaIndex];
-      renderStep3();
       aggiornaBannerArnia();
+      renderStep3();
       window.scrollTo(0, 0);
       updateWizNav();
       return;
