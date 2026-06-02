@@ -1028,23 +1028,22 @@ main {
   display: flex;
   gap: 0.5rem;
   margin-bottom: 1.5rem;
-  border-bottom: 2px solid var(--cream-dark);
   flex-wrap: wrap;
 }
 .mag-tab {
-  background: none;
-  border: none;
-  padding: 0.6rem 1.2rem;
+  background: white;
+  border: 1.5px solid var(--cream-dark);
+  border-radius: 22px;
+  padding: 0.5rem 1.1rem;
   cursor: pointer;
   font-family: 'Crimson Pro', serif;
-  font-size: 1rem;
+  font-size: 0.92rem;
+  font-weight: 600;
   color: var(--text-light);
-  border-bottom: 3px solid transparent;
-  margin-bottom: -2px;
-  transition: all 0.2s;
+  transition: all 0.15s;
 }
-.mag-tab.active { color: var(--amber); border-bottom-color: var(--amber); font-weight: 600; }
-.mag-tab:hover { color: var(--brown); }
+.mag-tab.active { background: var(--amber-pale); border-color: var(--amber); color: var(--brown); }
+.mag-tab:hover { border-color: var(--amber-light); }
 .mag-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -2011,3 +2010,24 @@ main {
   }
   #backupBar > div { justify-content: center !important; }
 }
+
+/* ===== OBIETTIVI — chip e sotto-chip (stile "Da fare") ===== */
+.ob-chip { background: white; border: 1.5px solid var(--cream-dark); border-radius: 22px;
+  padding: 0.5rem 1.1rem; font-size: 0.92rem; cursor: pointer; color: var(--text-light);
+  font-weight: 600; display: inline-flex; align-items: center; gap: 0.4rem; transition: all 0.15s; }
+.ob-chip:hover { border-color: var(--amber-light); }
+.ob-chip.on { background: var(--amber-pale); border-color: var(--amber); color: var(--brown); }
+.ob-chip-cnt { background: var(--cream); border-radius: 10px; padding: 0.05rem 0.45rem; font-size: 0.76rem; }
+.ob-chip.on .ob-chip-cnt { background: white; }
+
+.ob-subchip { background: white; border: 1px solid var(--cream-dark); border-radius: 16px;
+  padding: 0.35rem 0.85rem; font-size: 0.84rem; cursor: pointer; color: var(--text-light); transition: all 0.15s; }
+.ob-subchip:hover { border-color: var(--brown-light); }
+.ob-subchip.on { background: var(--brown); border-color: var(--brown); color: white; }
+
+.ob-sezione-tit { font-family: 'Playfair Display', serif; font-size: 1.25rem; color: var(--brown);
+  margin: 1.5rem 0 0.8rem; padding-bottom: 0.3rem; }
+.ob-group-tit { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.7rem;
+  padding-bottom: 0.4rem; border-bottom: 2px solid var(--cream-dark);
+  font-family: 'Playfair Display', serif; font-size: 1.05rem; color: var(--brown); }
+.ob-group-done { margin-left: auto; font-size: 0.82rem; color: var(--text-light); font-weight: 400; font-family: 'Crimson Pro', serif; }

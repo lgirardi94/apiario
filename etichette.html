@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- FILE VERSION: 2026-05-28.2 · etichette.html -->
 <html lang="it">
 <head>
 <meta charset="UTF-8">
@@ -44,49 +45,52 @@
 
   /* HEADER APP */
   .app-header {
-    background: var(--dark);
+    background: linear-gradient(135deg, var(--dark-mid), var(--dark));
     color: var(--cream);
-    padding: 0.8rem 1.5rem;
+    padding: 1rem 1.5rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-bottom: 2px solid var(--amber);
     position: sticky;
     top: 0;
     z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.25);
   }
-  .app-header-left { display: flex; align-items: center; gap: 0.8rem; }
+  .app-header-left { display: flex; align-items: center; gap: 0.6rem; }
   .app-header h1 {
     font-family: 'Playfair Display', serif;
     font-size: 1.3rem;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--amber-glow);
     margin: 0;
-    letter-spacing: 0.5px;
   }
   .back-link {
-    color: var(--cream);
+    color: rgba(245,200,66,0.75);
     text-decoration: none;
-    font-size: 0.88rem;
-    opacity: 0.8;
-    transition: opacity 0.15s;
+    font-size: 0.82rem;
+    border: 1px solid rgba(200,134,10,0.4);
+    padding: 0.32rem 0.85rem;
+    border-radius: 20px;
+    transition: all 0.15s;
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
+    white-space: nowrap;
   }
-  .back-link:hover { opacity: 1; }
+  .back-link:hover { background: rgba(200,134,10,0.15); color: var(--amber-glow); }
 
   .header-status {
-    display: flex; align-items: center; gap: 0.5rem;
+    display: flex; align-items: center; gap: 0.7rem;
     font-size: 0.8rem;
     color: var(--cream-dark);
   }
   .drive-dot {
-    width: 8px; height: 8px;
+    width: 9px; height: 9px;
     border-radius: 50%;
-    background: #888;
+    background: #8A6D3B;
+    transition: background 0.3s;
   }
-  .drive-dot.connected { background: #4CAF50; }
+  .drive-dot.connected { background: #5D8C44; box-shadow: 0 0 8px rgba(93,140,68,0.6); }
 
   /* LOGIN GATE */
   #loginGate {
@@ -147,28 +151,39 @@
 
   .panel {
     background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 16px;
+    border: 1px solid var(--cream-dark);
+    border-radius: 12px;
+    padding: 1.1rem 1.2rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
   }
   .panel h2 {
-    font-size: 14px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--muted);
-    margin: 0 0 12px 0;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.05rem;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--brown);
+    margin: 0 0 0.9rem 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
   }
   .panel h2 .toggle {
-    font-size: 11px;
-    color: var(--accent);
+    font-size: 0.78rem;
+    color: var(--amber);
     cursor: pointer;
     text-transform: none;
     letter-spacing: 0;
+    background: var(--amber-pale);
+    border: 1px solid var(--cream-dark);
+    padding: 0.3rem 0.7rem;
+    border-radius: 14px;
+    font-weight: 600;
+    transition: all 0.15s;
   }
+  .panel h2 .toggle:hover { border-color: var(--amber); }
 
   /* ====== RIGHE PRODOTTO ====== */
   .row {
@@ -179,55 +194,68 @@
     margin-bottom: 8px;
   }
   .row select, .row input {
-    padding: 7px 6px;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    font-size: 13px;
+    padding: 0.5rem 0.6rem;
+    border: 1.5px solid var(--cream-dark);
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-family: inherit;
     background: white;
+    color: var(--ink);
     min-width: 0;
+    transition: border-color 0.15s;
   }
+  .row select:focus, .row input:focus { outline: none; border-color: var(--amber); }
   .row .del {
     background: none;
     border: none;
-    color: #c44;
+    color: var(--red);
     cursor: pointer;
-    font-size: 18px;
+    font-size: 1.05rem;
     padding: 0;
+    opacity: 0.65;
+    transition: opacity 0.15s;
   }
-  .row .del:hover { color: #900; }
+  .row .del:hover { opacity: 1; }
   .row-header {
     display: grid;
     grid-template-columns: 1fr 90px 90px 60px 28px;
     gap: 6px;
-    font-size: 11px;
+    font-size: 0.7rem;
     color: var(--muted);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
+    font-weight: 700;
     margin-bottom: 6px;
     padding: 0 4px;
   }
 
   button.primary {
-    background: var(--accent);
+    background: linear-gradient(135deg, var(--amber-light), var(--amber));
     color: white;
     border: none;
-    padding: 10px 16px;
-    border-radius: 4px;
+    padding: 0.6rem 1.1rem;
+    border-radius: 8px;
     cursor: pointer;
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 0.9rem;
+    font-family: inherit;
+    font-weight: 700;
+    transition: transform 0.1s, box-shadow 0.15s;
+    box-shadow: 0 2px 8px rgba(200,134,10,0.2);
   }
-  button.primary:hover { background: #a87820; }
+  button.primary:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(200,134,10,0.32); }
   button.secondary {
-    background: white;
-    color: var(--ink);
-    border: 1px solid var(--border);
-    padding: 8px 14px;
-    border-radius: 4px;
+    background: var(--amber-pale);
+    color: var(--brown);
+    border: 1.5px solid var(--amber);
+    padding: 0.55rem 1rem;
+    border-radius: 8px;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 0.88rem;
+    font-family: inherit;
+    font-weight: 600;
+    transition: all 0.15s;
   }
-  button.secondary:hover { background: #f8f5f0; }
+  button.secondary:hover { background: #fbe9c8; }
 
   .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
   .summary {
@@ -399,16 +427,17 @@
 
   /* ====== ANTEPRIMA E STAMPA A4 ====== */
   .preview-wrap {
-    background: #ddd;
-    padding: 20px;
-    border-radius: 8px;
+    background: var(--cream-dark);
+    padding: 24px 20px;
+    border-radius: 12px;
     overflow: auto;
+    border: 1px solid var(--cream-dark);
   }
   .a4 {
     /* dimensioni e padding applicate via JS in base al formato */
     background: white;
     margin: 0 auto;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.22);
     position: relative;
     display: flex;
     flex-wrap: wrap;
@@ -582,11 +611,11 @@
 <!-- HEADER APP -->
 <div class="app-header">
   <div class="app-header-left">
-    <span style="font-size:1.4rem">🐝</span>
+    <span style="font-size:1.5rem">🏷️</span>
     <h1>Generatore etichette</h1>
   </div>
   <div class="header-status">
-    <a href="index.html" class="back-link">← Torna all'apiario</a>
+    <a href="index.html" class="back-link">← Apiario</a>
     <span class="drive-dot" id="driveDot"></span>
   </div>
 </div>
@@ -606,8 +635,7 @@
 <!-- APP CONTENT -->
 <div id="appContent" style="display:none">
 
-<h1 class="title-page" style="padding:1.5rem 1.5rem 0">Generatore etichette miele</h1>
-<div class="sub" style="padding:0 1.5rem">Componi il tuo foglio A4, vedi l'anteprima e stampa (o "Salva come PDF" dalla finestra di stampa). Etichette 50×30 mm, sfondo trasparente.</div>
+<div class="sub" style="padding:1.2rem 1.5rem 0">Componi il tuo foglio A4, vedi l'anteprima e stampa (o "Salva come PDF" dalla finestra di stampa). Etichette 50×30 mm, sfondo trasparente.</div>
 
 <div class="layout">
 
@@ -615,13 +643,13 @@
   <div>
     <!-- FORMATO -->
     <div class="panel">
-      <h2>Formato</h2>
+      <h2>📐 Formato</h2>
       <select id="formatSelector" onchange="changeFormat(this.value)" style="width:100%;padding:8px 10px;font-size:14px;font-family:inherit;border:1px solid var(--border);border-radius:4px;background:var(--panel);color:var(--ink)"></select>
       <div class="summary" id="formatInfo" style="margin-top:8px"></div>
     </div>
 
     <div class="panel">
-      <h2>Cosa stampare</h2>
+      <h2>🏷️ Cosa stampare</h2>
       <div class="row-header">
         <div>Prodotto</div>
         <div>Stile</div>
@@ -650,7 +678,7 @@
 
     <!-- STORICO STAMPE -->
     <div class="panel">
-      <h2>Storico ultime stampe</h2>
+      <h2>🕘 Storico ultime stampe</h2>
       <div id="printHistoryList" style="display:flex;flex-direction:column;gap:8px">
         <div style="color:var(--muted);font-size:13px;font-style:italic">Nessuna stampa effettuata. Quando stamperai un foglio, verrà salvato automaticamente qui (max 5 più recenti).</div>
       </div>
@@ -668,7 +696,7 @@
     </div>
 
     <div class="panel">
-      <h2>Tipi di prodotto</h2>
+      <h2>📦 Tipi di prodotto</h2>
       <div class="types-list" id="typesList"></div>
       <div class="actions">
         <button class="secondary" onclick="addType()">+ Nuovo tipo</button>
@@ -680,8 +708,11 @@
   </div>
 
   <!-- ====== COLONNA DESTRA: ANTEPRIMA ====== -->
-  <div class="preview-wrap" id="previewWrap">
-    <div class="a4" id="a4"></div>
+  <div>
+    <h2 style="font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--brown);margin:0 0 0.7rem;display:flex;align-items:center;gap:0.5rem">👁️ Anteprima foglio A4</h2>
+    <div class="preview-wrap" id="previewWrap">
+      <div class="a4" id="a4"></div>
+    </div>
   </div>
 
 </div>
@@ -2400,25 +2431,52 @@ window.addEventListener('load', () => {
     pageEl.style.height = fmt.pageH + "mm";
     pageEl.style.minHeight = fmt.pageH + "mm";
     pageEl.style.padding = fmt.padY + "mm " + fmt.padX + "mm";
-    // Scaling dinamico per stare nel container: 1mm ≈ 3.78px
-    // Calcoliamo a posteriori dopo l'append all'overflow del preview-wrap
-    setTimeout(() => fitA4ToContainer(pageEl, fmt), 0);
+    // Ricalcolo robusto dopo che il layout è stabile (rAF invece di setTimeout)
+    requestAnimationFrame(() => fitA4ToContainer(pageEl, fmt));
   }
 
   function fitA4ToContainer(pageEl, fmt) {
     const wrap = document.getElementById("previewWrap");
     if (!wrap || !pageEl) return;
-    const availW = wrap.clientWidth - 40; // tolgo padding 20+20
-    const naturalW = fmt.pageW * 3.7795; // mm → px
-    const scale = Math.min(1, availW / naturalW);
-    pageEl.style.transform = scale < 1 ? `scale(${scale})` : "";
-    // Compensa l'altezza visibile dopo lo scale
-    if (scale < 1) {
-      pageEl.style.marginBottom = `${(fmt.pageH * 3.7795 * (scale - 1))}px`;
-    } else {
-      pageEl.style.marginBottom = "";
+    const MM = 3.7795; // mm → px
+    const availW = wrap.clientWidth - 40;   // padding 20+20
+    if (availW <= 0) {
+      // Contenitore non ancora dimensionato (es. tab nascosta): riprova al frame dopo
+      requestAnimationFrame(() => fitA4ToContainer(pageEl, fmt));
+      return;
     }
+    const naturalW = fmt.pageW * MM;
+    const naturalH = fmt.pageH * MM;
+    // Vincolo larghezza
+    const scaleW = availW / naturalW;
+    // Vincolo altezza: usa l'altezza visibile della viewport del preview (se disponibile),
+    // così un A4 verticale non costringe a scroll infiniti su schermi bassi
+    let scale = scaleW;
+    const availH = (window.innerHeight || 800) - wrap.getBoundingClientRect().top - 40;
+    if (availH > 120) {
+      const scaleH = availH / naturalH;
+      scale = Math.min(scaleW, scaleH);
+    }
+    // Non ingrandire mai oltre la dimensione naturale
+    scale = Math.min(1, scale);
+    pageEl.style.transformOrigin = "top center";
+    pageEl.style.transform = scale < 1 ? `scale(${scale})` : "";
+    // Compensa lo spazio lasciato dallo scale (altrimenti resta un vuoto sotto)
+    pageEl.style.marginBottom = scale < 1 ? `${naturalH * (scale - 1)}px` : "";
   }
+
+  // Ricalcola l'adattamento di tutti i fogli al resize della finestra (con debounce)
+  let _fitResizeTimer = null;
+  function _refitAllPages() {
+    let fmt = null;
+    try { fmt = getFormat(currentFormat); } catch(e) { return; }
+    if (!fmt) return;
+    document.querySelectorAll("#previewWrap .a4").forEach(p => fitA4ToContainer(p, fmt));
+  }
+  window.addEventListener("resize", () => {
+    clearTimeout(_fitResizeTimer);
+    _fitResizeTimer = setTimeout(_refitAllPages, 150);
+  });
 
   // Applica dimensioni dinamiche alle etichette in base al formato
   function applyLabelStyle(labelEl, fmt) {
