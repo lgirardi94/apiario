@@ -1,4 +1,4 @@
-// ===== FILE VERSION: 2026-05-28.7 · necessita.js =====
+// ===== FILE VERSION: 2026-05-28.8 · necessita.js =====
 /* ===========================================================
    NECESSITÀ — Lista articoli da ordinare
    =========================================================== */
@@ -124,7 +124,8 @@ function renderNecessita() {
       : '';
 
     container.innerHTML = hintFornitore + groups.map(g => {
-      const ricBtn = g.fornitoreKey
+      const haOrdinati = g.fornitoreKey && g.items.some(n => n.stato === 'ordinato');
+      const ricBtn = haOrdinati
         ? `<button class="btn btn-secondary" style="padding:0.3rem 0.7rem;font-size:0.8rem;white-space:nowrap" onclick="apriRicezioneFornitore('${encodeURIComponent(g.fornitoreKey)}')">📦 Ricevi ordine</button>`
         : '';
       const header = g.label
@@ -585,10 +586,10 @@ function apriRicezioneFornitore(fornitoreEnc) {
     const fornitore = decodeURIComponent(fornitoreEnc);
     _ricFornitoreCorrente = fornitore;
 
-    // Raccogli le voci attive di questo fornitore
+    // Raccogli le voci ORDINATE di questo fornitore (non quelle ancora da ordinare)
     const senzaForn = (fornitore === '(senza fornitore)');
     _ricVociFornitore = getNecessitaAttive().filter(n =>
-      senzaForn ? !n.fornitore : (n.fornitore === fornitore)
+      n.stato === 'ordinato' && (senzaForn ? !n.fornitore : (n.fornitore === fornitore))
     );
 
     if(_ricVociFornitore.length === 0) {
