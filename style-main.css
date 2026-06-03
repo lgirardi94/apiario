@@ -2031,3 +2031,35 @@ main {
   padding-bottom: 0.4rem; border-bottom: 2px solid var(--cream-dark);
   font-family: 'Playfair Display', serif; font-size: 1.05rem; color: var(--brown); }
 .ob-group-done { margin-left: auto; font-size: 0.82rem; color: var(--text-light); font-weight: 400; font-family: 'Crimson Pro', serif; }
+
+/* ===== GENEALOGIA AD ALBERO/GRAFO ===== */
+.gt-legenda { display: flex; flex-wrap: wrap; gap: 1.2rem; margin-bottom: 1rem; font-size: 0.8rem; color: var(--text-light); align-items: center; }
+.gt-leg { display: inline-flex; align-items: center; gap: 0.4rem; }
+.gt-sw { width: 34px; height: 0; border-top-width: 3px; border-top-style: solid; display: inline-block; }
+.gt-sw-reg { border-top-color: #C8860A; }
+.gt-sw-telai { border-top-color: #8B7355; border-top-style: dashed; }
+
+.gt-canvas { /* dimensioni inline */ }
+.gt-card { position: absolute; width: 178px; border-radius: 14px; border: 1.5px solid; background: white; box-shadow: 0 4px 14px rgba(0,0,0,0.1); z-index: 2; }
+.gt-allevata { border-color: #639922; }
+.gt-inserita { border-color: #C8860A; }
+.gt-acquistata { border-color: #4A6FA5; }
+.gt-head { padding: 0.6rem 0.7rem 0.55rem; text-align: center; border-radius: 13px 13px 0 0; }
+.gt-allevata .gt-head { background: #F4F9ED; }
+.gt-inserita .gt-head { background: #FCF4E5; }
+.gt-acquistata .gt-head { background: #EEF3FA; }
+.gt-toprow { display: flex; align-items: center; justify-content: center; gap: 0.35rem; }
+.gt-ico { font-size: 1.1rem; }
+.gt-num { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.2rem; color: var(--brown); }
+.gt-nm { font-size: 0.74rem; color: var(--text); margin-top: 0.1rem; font-weight: 600; }
+.gt-det { font-size: 0.66rem; color: var(--text-light); margin-top: 0.18rem; line-height: 1.3; }
+.gt-kg { display: inline-block; font-weight: 700; font-size: 0.7rem; margin-top: 0.3rem; padding: 0.1rem 0.5rem; border-radius: 10px; background: rgba(0,0,0,0.05); color: var(--text-light); }
+.gt-kg.hi { color: #27500A; background: #E3F0D5; }
+.gt-kg.mid { color: #7a4a08; background: #F5E8D0; }
+.gt-riceve { border-top: 1px dashed var(--cream-dark); padding: 0.4rem 0.55rem; display: flex; flex-direction: column; gap: 0.25rem; background: #FCFAF5; border-radius: 0 0 13px 13px; }
+.gt-rrow { display: flex; align-items: center; gap: 0.35rem; font-size: 0.66rem; }
+.gt-pill { padding: 0.07rem 0.4rem; border-radius: 8px; font-weight: 700; color: white; white-space: nowrap; }
+.gt-pill-reg { background: #C8860A; }
+.gt-pill-telai { background: #8B7355; }
+.gt-from { color: var(--text-light); }
+.gt-hint { margin-top: 0.9rem; background: var(--amber-pale); border-radius: 8px; padding: 0.6rem 0.9rem; font-size: 0.85rem; color: var(--brown); }
