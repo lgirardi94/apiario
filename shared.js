@@ -25,6 +25,7 @@ const CAT_ENTRATA = [
 ];
 const CAT_USCITA = [
   { id: 'farmaci',        label: '💊 Farmaci/sanitari' },
+  { id: 'api',            label: '🐝 Nuclei/Api Regina' },
   { id: 'alimentazione',  label: '🍬 Alimentazione' },
   { id: 'telai_cera',     label: '🪵 Telai e cera' },
   { id: 'arnie',          label: '📦 Arnie e componenti' },
