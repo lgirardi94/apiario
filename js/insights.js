@@ -1,4 +1,4 @@
-// ===== FILE VERSION: 2026-05-28.4 · insights.js =====
+// ===== FILE VERSION: 2026-05-28.5 · insights.js =====
 /* ===========================================================
    INSIGHTS / ANALISI — costo miele, simulatore prezzo,
    heatmap produzione, genealogia regine, report narrativo
@@ -248,118 +248,13 @@ function renderGenealogia(anno) {
   try {
     const container = document.getElementById('analisiGenealogia');
     if(!container) return;
-
-    const arnieAttive = (arnie||[]).filter(a => !a.annoDismissione);
-    if(arnieAttive.length === 0) {
-      container.innerHTML = `<div style="text-align:center;color:var(--text-light);font-style:italic;padding:1rem">Nessuna arnia attiva da mostrare.</div>`;
-      return;
-    }
-
-    // Produzione totale storica per arnia (per valutare le linee)
-    const prodArnia = {};
-    (logBook||[]).forEach(e => {
-      const kg = (e.raccolta||[]).reduce((s,r) => s + (parseFloat(r.qta)||0), 0);
-      prodArnia[e.arniaId] = (prodArnia[e.arniaId]||0) + kg;
-    });
-
-    const nomeArnia = (id) => { const a = arnie.find(x => x.id === id); return a ? '#'+a.num+(a.nome?' '+a.nome:'') : '?'; };
-
-    // Relazioni "figlia di" da regina inserita (reginaArniaSrc)
-    const figlieRegina = {}; // madreId -> [arnie]
-    const conMadreRegina = new Set();
-    arnieAttive.forEach(a => {
-      if(a.reginaOrigine === 'inserita' && a.reginaArniaSrc) {
-        (figlieRegina[a.reginaArniaSrc] = figlieRegina[a.reginaArniaSrc] || []).push(a);
-        conMadreRegina.add(a.id);
-      }
-    });
-
-    // Contributi telai: per ogni arnia, da quali altre arnie ha ricevuto telai
-    const contributiTelai = (a) => {
-      const src = new Set();
-      (a.telainiOrigine || []).forEach(t => { if(t.arniaSrcId) src.add(t.arniaSrcId); });
-      return [...src];
-    };
-
-    const origineInfo = {
-      allevata:   { icon: '🥚', label: 'allevata sul posto', col: '#639922', bg: '#EAF3DE' },
-      inserita:   { icon: '👑', label: 'regina inserita',     col: '#BA7517', bg: '#FAEEDA' },
-      acquistata: { icon: '🛒', label: 'regina acquistata',   col: '#4A6FA5', bg: '#E6EEF7' },
-    };
-
-    const prodBadge = (id) => {
-      const p = prodArnia[id] || 0;
-      if(p <= 0) return '';
-      const colore = p >= 15 ? '#27500A' : (p >= 8 ? '#633806' : 'var(--text-light)');
-      return `<span style="opacity:0.85;color:${colore};font-weight:600">· ${p.toFixed(0)}kg</span>`;
-    };
-
-    // Card di una singola arnia
-    const renderCard = (a, livello) => {
-      const oi = origineInfo[a.reginaOrigine] || origineInfo.allevata;
-      const reg = a.reginaAnno ? (typeof getReginaPallino==='function'? getReginaPallino(a.reginaAnno,9):'') + ' ' + a.reginaAnno : '';
-      // Dettaglio origine
-      let origineTxt = oi.label;
-      if(a.reginaOrigine === 'inserita' && a.reginaArniaSrc) origineTxt += ' da ' + nomeArnia(a.reginaArniaSrc);
-      else if(a.reginaOrigine === 'acquistata' && a.reginaFornitore) origineTxt += ' · ' + insEscape(a.reginaFornitore);
-      // Telai da altre arnie
-      const telai = contributiTelai(a).filter(id => id !== a.id);
-      const telaiTxt = telai.length > 0 ? ` · 🪵 telai da ${telai.map(nomeArnia).join(', ')}` : '';
-
-      return `
-        <div style="margin-left:${livello*1.4}rem;margin-bottom:0.4rem">
-          <div style="display:inline-flex;align-items:center;gap:0.5rem;background:${oi.bg};border:1px solid ${oi.col}40;border-left:3px solid ${oi.col};border-radius:6px;padding:0.4rem 0.8rem;font-size:0.88rem;color:var(--text)">
-            <span title="${oi.label}">${oi.icon}</span>
-            <strong>#${a.num}</strong>${a.nome?' '+insEscape(a.nome):''}
-            ${reg?'<span style="opacity:0.85">· '+reg+'</span>':''}
-            ${prodBadge(a.id)}
-            <span style="font-size:0.76rem;color:var(--text-light)">— ${origineTxt}${telaiTxt}</span>
-          </div>
-        </div>`;
-    };
-
-    // Nodo ricorsivo (per le figlie da regina inserita)
-    const renderNodo = (a, livello, visited) => {
-      if(visited.has(a.id)) return ''; // anti-loop
-      visited.add(a.id);
-      let h = renderCard(a, livello);
-      (figlieRegina[a.id] || [])
-        .sort((x,y)=>(prodArnia[y.id]||0)-(prodArnia[x.id]||0))
-        .forEach(f => { h += renderNodo(f, livello+1, visited); });
-      return h;
-    };
-
-    // Radici = arnie che NON sono figlie-da-regina di un'altra arnia attiva
-    // (include allevate, acquistate, e inserite la cui madre non è più attiva)
-    const radici = arnieAttive.filter(a => !conMadreRegina.has(a.id));
-    const visited = new Set();
-    let html = '';
-    radici.sort((a,b)=>(prodArnia[b.id]||0)-(prodArnia[a.id]||0)).forEach(r => { html += renderNodo(r, 0, visited); });
-
-    // Eventuali arnie non ancora visitate (cicli o casi limite) → mostrale comunque
-    arnieAttive.forEach(a => { if(!visited.has(a.id)) html += renderCard(a, 0); });
-
-    // Legenda
-    html = `<div style="display:flex;flex-wrap:wrap;gap:0.8rem;margin-bottom:0.9rem;font-size:0.78rem;color:var(--text-light)">
-      <span>🥚 allevata sul posto</span>
-      <span>👑 regina inserita</span>
-      <span>🛒 regina acquistata</span>
-      <span>🪵 telai da altre arnie</span>
-    </div>` + html;
-
-    // Suggerimento sulla linea migliore (tra le madri con figlie da regina)
-    let migliore = null, maxProd = 0;
-    Object.keys(figlieRegina).forEach(mid => {
-      const tot = figlieRegina[mid].reduce((s,f)=>s+(prodArnia[f.id]||0),0);
-      if(tot > maxProd) { maxProd = tot; migliore = mid; }
-    });
-    if(migliore && maxProd > 0) {
-      html += `<div style="margin-top:0.8rem;background:var(--amber-pale);border-radius:6px;padding:0.6rem 0.9rem;font-size:0.85rem;color:var(--brown)">💡 La linea di <strong>${nomeArnia(migliore)}</strong> dà le figlie più produttive: usala per allevare nuove regine.</div>`;
-    }
-
-    container.innerHTML = html;
+    container.innerHTML = buildGenealogiaTree(arnie, logBook, { idPrefix: 'genIns' });
+    // disegna le linee dopo che il layout è stabile
+    setTimeout(() => drawGenealogiaTree('genIns'), 80);
   } catch(err) {
     console.error('[Insights] Errore in renderGenealogia:', err.message);
+    const c = document.getElementById('analisiGenealogia');
+    if(c) c.innerHTML = `<div style="color:var(--text-light);font-style:italic;padding:1rem">Impossibile mostrare la genealogia.</div>`;
   }
 }
 
@@ -662,3 +557,296 @@ function esportaReportAnnuale() {
     alert('Errore nella generazione del report: ' + err.message);
   }
 }
+
+// === GENEALOGIA AD ALBERO/GRAFO (riutilizzabile: Insights + Report) ===
+// Costruisce il grafo dalle arnie e lo disegna come albero con linee anti-sovrapposizione.
+// Ritorna una stringa HTML che include il canvas, le card e uno <script> che disegna le linee
+// leggendo i bordi reali delle card (con ridisegno al resize).
+//
+// Parametri:
+//   arnieInput  : array arnie (userà solo le attive)
+//   logBookInput: array registro visite (per kg prodotti)
+//   opts        : { idPrefix: stringa unica per non collidere con altri grafi nella pagina,
+//                   forReport: bool (se true, layout statico senza listener resize) }
+function buildGenealogiaTree(arnieInput, logBookInput, opts) {
+  opts = opts || {};
+  const PFX = opts.idPrefix || 'gen';
+  const arnieAll = (arnieInput || []).filter(a => !a.annoDismissione);
+
+  if (arnieAll.length === 0) {
+    return `<div style="text-align:center;color:var(--text-light);font-style:italic;padding:1rem">Nessuna arnia attiva da mostrare.</div>`;
+  }
+
+  // --- Produzione storica per kg (per evidenziare le linee migliori) ---
+  const prodArnia = {};
+  (logBookInput || []).forEach(e => {
+    const kg = (e.raccolta || []).reduce((s, r) => s + (parseFloat(r.qta) || 0), 0);
+    prodArnia[e.arniaId] = (prodArnia[e.arniaId] || 0) + kg;
+  });
+
+  const byId = {};
+  arnieAll.forEach(a => { byId[a.id] = a; });
+  const nomeArnia = (id) => { const a = byId[id]; return a ? '#' + a.num + (a.nome ? ' ' + a.nome : '') : '?'; };
+
+  // --- Relazioni regina (madre -> figlie) ---
+  const figlieRegina = {};
+  const madreReginaDi = {}; // figliaId -> madreId
+  arnieAll.forEach(a => {
+    if (a.reginaOrigine === 'inserita' && a.reginaArniaSrc && byId[a.reginaArniaSrc]) {
+      (figlieRegina[a.reginaArniaSrc] = figlieRegina[a.reginaArniaSrc] || []).push(a.id);
+      madreReginaDi[a.id] = a.reginaArniaSrc;
+    }
+  });
+
+  // --- Contributi telai: figlia -> [{srcId, count}] (solo da arnie note e diverse da sé) ---
+  const telaiDi = {};
+  arnieAll.forEach(a => {
+    const counts = {};
+    (a.telainiOrigine || []).forEach(t => {
+      if (t.arniaSrcId && t.arniaSrcId !== a.id && byId[t.arniaSrcId]) {
+        counts[t.arniaSrcId] = (counts[t.arniaSrcId] || 0) + 1;
+      }
+    });
+    const list = Object.keys(counts).map(src => ({ srcId: src, count: counts[src] }));
+    if (list.length) telaiDi[a.id] = list;
+  });
+
+  // --- Assegna i LIVELLI (generazioni) tramite la catena regina ---
+  // radice = chi non ha madre-regina attiva. livello = profondità nella catena regina.
+  const livello = {};
+  function calcLivello(id, guard) {
+    if (livello[id] != null) return livello[id];
+    if (guard.has(id)) return 0; // anti-ciclo
+    guard.add(id);
+    const madre = madreReginaDi[id];
+    livello[id] = madre ? calcLivello(madre, guard) + 1 : 0;
+    return livello[id];
+  }
+  arnieAll.forEach(a => calcLivello(a.id, new Set()));
+
+  // raggruppa per livello
+  const perLivello = {};
+  arnieAll.forEach(a => { (perLivello[livello[a.id]] = perLivello[livello[a.id]] || []).push(a); });
+  const livelliOrd = Object.keys(perLivello).map(Number).sort((x, y) => x - y);
+
+  // ordina ogni livello: per kg desc (le più produttive a sinistra)
+  livelliOrd.forEach(L => {
+    perLivello[L].sort((a, b) => (prodArnia[b.id] || 0) - (prodArnia[a.id] || 0));
+  });
+
+  // --- Geometria ---
+  const CARD_W = 178;
+  const GAP_X = 70;      // spazio orizzontale tra card
+  const ROW_H = 230;     // spazio verticale tra inizio generazioni (card + banda linee)
+  const PAD = 24;
+
+  // posizione X di ogni card (per indice nella riga)
+  const colCount = Math.max(...livelliOrd.map(L => perLivello[L].length));
+  const canvasW = PAD * 2 + colCount * CARD_W + (colCount - 1) * GAP_X;
+
+  // mappa id -> {x, y, row, col}
+  const pos = {};
+  livelliOrd.forEach((L, rowIdx) => {
+    const row = perLivello[L];
+    // centra la riga
+    const rowW = row.length * CARD_W + (row.length - 1) * GAP_X;
+    const startX = (canvasW - rowW) / 2;
+    row.forEach((a, colIdx) => {
+      pos[a.id] = {
+        x: startX + colIdx * (CARD_W + GAP_X),
+        y: PAD + rowIdx * ROW_H,
+        row: rowIdx, col: colIdx
+      };
+    });
+  });
+  const canvasH = PAD * 2 + livelliOrd.length * ROW_H;
+
+  // --- Info origine per le card ---
+  const origineInfo = {
+    allevata:   { icon: '🥚', label: 'allevata sul posto', col: '#639922', cls: 'gt-allevata' },
+    inserita:   { icon: '👑', label: 'regina inserita',     col: '#BA7517', cls: 'gt-inserita' },
+    acquistata: { icon: '🛒', label: 'regina acquistata',   col: '#4A6FA5', cls: 'gt-acquistata' },
+  };
+
+  // pallino anno regina (se la funzione globale esiste)
+  const pallino = (anno) => {
+    if (!anno) return '';
+    try { return (typeof getReginaPallino === 'function' ? getReginaPallino(anno, 9) : '') + ' '; }
+    catch (e) { return ''; }
+  };
+
+  const esc = (s) => {
+    if (s == null) return '';
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  };
+
+  // --- HTML delle card (posizionate assolute) ---
+  let cardsHtml = '';
+  arnieAll.forEach(a => {
+    const p = pos[a.id];
+    const oi = origineInfo[a.reginaOrigine] || origineInfo.allevata;
+    const reg = a.reginaAnno ? (pallino(a.reginaAnno) + a.reginaAnno) : '';
+    const kg = prodArnia[a.id] || 0;
+    const kgCls = kg >= 15 ? 'hi' : (kg >= 8 ? 'mid' : '');
+    const kgHtml = kg > 0 ? `<span class="gt-kg ${kgCls}">${kg.toFixed(0)} kg</span>` : '';
+
+    // righe "riceve da"
+    let riceveRows = '';
+    if (madreReginaDi[a.id]) {
+      riceveRows += `<div class="gt-rrow"><span class="gt-pill gt-pill-reg">👑 regina</span><span class="gt-from">da ${esc(nomeArnia(madreReginaDi[a.id]))}</span></div>`;
+    }
+    (telaiDi[a.id] || []).forEach(t => {
+      riceveRows += `<div class="gt-rrow"><span class="gt-pill gt-pill-telai">🪵 ${t.count} ${t.count > 1 ? 'telaini' : 'telaino'}</span><span class="gt-from">da ${esc(nomeArnia(t.srcId))}</span></div>`;
+    });
+    const riceveBlock = riceveRows ? `<div class="gt-riceve">${riceveRows}</div>` : '';
+
+    // dettaglio origine compatto
+    let detOrigine = oi.label;
+    if (a.reginaOrigine === 'acquistata' && a.reginaFornitore) detOrigine = 'acquistata · ' + esc(a.reginaFornitore);
+
+    cardsHtml += `
+      <div class="gt-card ${oi.cls}" id="${PFX}-card-${a.id}" style="left:${p.x}px;top:${p.y}px">
+        <div class="gt-head">
+          <div class="gt-toprow"><span class="gt-ico">${oi.icon}</span><span class="gt-num">#${a.num}</span></div>
+          ${a.nome ? `<div class="gt-nm">${esc(a.nome)}</div>` : ''}
+          <div class="gt-det">${reg ? reg + ' · ' : ''}${detOrigine}</div>
+          ${kgHtml}
+        </div>
+        ${riceveBlock}
+      </div>`;
+  });
+
+  // --- Connessioni (per il JS di disegno) ---
+  // ogni conn: from, to, tipo, label, count
+  const conns = [];
+  arnieAll.forEach(a => {
+    // regina
+    if (madreReginaDi[a.id]) {
+      conns.push({ from: madreReginaDi[a.id], to: a.id, tipo: 'regina', label: '👑 regina' });
+    }
+    // telai
+    (telaiDi[a.id] || []).forEach(t => {
+      conns.push({ from: t.srcId, to: a.id, tipo: 'telai', label: `🪵 ${t.count} ${t.count > 1 ? 'telaini' : 'telaino'}` });
+    });
+  });
+
+  // suggerimento linea migliore
+  let migliore = null, maxProd = 0;
+  Object.keys(figlieRegina).forEach(mid => {
+    const tot = figlieRegina[mid].reduce((s, fid) => s + (prodArnia[fid] || 0), 0);
+    if (tot > maxProd) { maxProd = tot; migliore = mid; }
+  });
+  const suggerimento = (migliore && maxProd > 0)
+    ? `<div class="gt-hint">💡 La linea di <strong>${esc(nomeArnia(migliore))}</strong> dà le figlie più produttive: ottima per allevare nuove regine.</div>`
+    : '';
+
+  // legenda
+  const legenda = `
+    <div class="gt-legenda">
+      <span class="gt-leg"><span class="gt-sw gt-sw-reg"></span> discendenza per <strong>regina</strong></span>
+      <span class="gt-leg"><span class="gt-sw gt-sw-telai"></span> contributo di <strong>solo telaini</strong></span>
+      <span class="gt-leg">🥚 allevata · 👑 inserita · 🛒 acquistata</span>
+    </div>`;
+
+  // Registro dati per il disegno (la funzione di disegno è globale, vedi drawGenealogiaTree)
+  if (!window._gtData) window._gtData = {};
+  window._gtData[PFX] = { conns: conns, forReport: !!opts.forReport };
+
+  // wrapper completo (NESSUNO <script> qui: via innerHTML non verrebbe eseguito;
+  // il disegno lo lancia il chiamante con drawGenealogiaTree(PFX))
+  return `
+    ${legenda}
+    <div style="overflow-x:auto;overflow-y:hidden">
+      <div class="gt-canvas" id="${PFX}-canvas" style="position:relative;width:${canvasW}px;height:${canvasH}px;min-width:100%">
+        <svg id="${PFX}-svg" style="position:absolute;inset:0;width:${canvasW}px;height:${canvasH}px;overflow:visible;pointer-events:none;z-index:1"></svg>
+        ${cardsHtml}
+      </div>
+    </div>
+    ${suggerimento}`;
+}
+
+// === Disegno linee del grafo genealogico (globale, riusato da Insights e Report) ===
+// Legge i bordi reali delle card e traccia le linee con routing anti-sovrapposizione.
+function drawGenealogiaTree(PFX) {
+  try {
+    if (!window._gtData || !window._gtData[PFX]) return;
+    const CONNS = window._gtData[PFX].conns;
+    const canvas = document.getElementById(PFX + '-canvas');
+    const svg = document.getElementById(PFX + '-svg');
+    if (!canvas || !svg) return;
+    const cr = canvas.getBoundingClientRect();
+    if (cr.width === 0) return; // non ancora visibile
+
+    function rectOf(id) { const el = document.getElementById(PFX + '-card-' + id); return el ? el.getBoundingClientRect() : null; }
+
+    // conteggi ancore per lato (per distribuire partenze/arrivi multipli)
+    const outCount = {}, outUsed = {}, inCount = {}, inUsed = {};
+    CONNS.forEach(c => { outCount[c.from] = (outCount[c.from] || 0) + 1; inCount[c.to] = (inCount[c.to] || 0) + 1; });
+
+    // raggruppa per banda (Y bordo basso sorgente) per assegnare corsie distinte
+    const byBand = {};
+    CONNS.forEach(c => {
+      const ra = rectOf(c.from), rb = rectOf(c.to); if (!ra || !rb) return;
+      const key = Math.round(ra.bottom);
+      (byBand[key] = byBand[key] || []).push(c);
+    });
+
+    let paths = '', dots = '', labels = '';
+    Object.keys(byBand).forEach(bandKey => {
+      const list = byBand[bandKey];
+      const maxBottom = Math.max.apply(null, list.map(c => rectOf(c.from).bottom));
+      const minTop = Math.min.apply(null, list.map(c => rectOf(c.to).top));
+      const bandTop = maxBottom - cr.top;
+      const bandBot = minTop - cr.top;
+      const bandH = Math.max(30, bandBot - bandTop);
+      const n = list.length;
+      list.forEach((c, idx) => {
+        const ra = rectOf(c.from), rb = rectOf(c.to); if (!ra || !rb) return;
+        const oUsedIdx = (outUsed[c.from] = (outUsed[c.from] || 0)); outUsed[c.from]++;
+        const iUsedIdx = (inUsed[c.to] = (inUsed[c.to] || 0)); inUsed[c.to]++;
+        const oN = outCount[c.from], iN = inCount[c.to];
+        const oFrac = (oN === 1) ? 0.5 : (0.25 + 0.5 * (oUsedIdx / (oN - 1)));
+        const iFrac = (iN === 1) ? 0.5 : (0.25 + 0.5 * (iUsedIdx / (iN - 1)));
+        const ax = ra.left - cr.left + ra.width * oFrac;
+        const ay = ra.bottom - cr.top;
+        const bx = rb.left - cr.left + rb.width * iFrac;
+        const by = rb.top - cr.top;
+        const col = c.tipo === 'regina' ? '#C8860A' : '#8B7355';
+        const dash = c.tipo === 'telai' ? 'stroke-dasharray="6 4"' : '';
+        const w = c.tipo === 'regina' ? 2.8 : 2.4;
+        let d, lx, ly;
+        if (Math.abs(ax - bx) < 3) {
+          d = 'M ' + ax + ' ' + ay + ' L ' + bx + ' ' + by;
+          lx = ax + 60; ly = (ay + by) / 2;
+        } else {
+          const laneY = bandTop + bandH * ((idx + 1) / (n + 1));
+          d = 'M ' + ax + ' ' + ay + ' L ' + ax + ' ' + laneY + ' L ' + bx + ' ' + laneY + ' L ' + bx + ' ' + by;
+          lx = (ax + bx) / 2; ly = laneY;
+        }
+        paths += '<path d="' + d + '" fill="none" stroke="' + col + '" stroke-width="' + w + '" ' + dash + ' stroke-linejoin="round"/>';
+        paths += '<polygon points="' + bx + ',' + (by + 1) + ' ' + (bx - 5) + ',' + (by - 8) + ' ' + (bx + 5) + ',' + (by - 8) + '" fill="' + col + '"/>';
+        dots += '<circle cx="' + ax + '" cy="' + ay + '" r="5" fill="#8B7355" stroke="white" stroke-width="2"/>';
+        dots += '<circle cx="' + bx + '" cy="' + by + '" r="4" fill="white" stroke="#8B7355" stroke-width="2"/>';
+        const wlbl = c.label.length * 6.2 + 16;
+        labels += '<g transform="translate(' + lx + ',' + ly + ')">'
+          + '<rect x="' + (-wlbl / 2) + '" y="-10" width="' + wlbl + '" height="20" rx="10" fill="' + col + '"/>'
+          + '<text x="0" y="4" text-anchor="middle" fill="white" font-size="10.5" font-weight="600" font-family="Crimson Pro, serif">' + c.label + '</text>'
+          + '</g>';
+      });
+    });
+    svg.innerHTML = paths + dots + labels;
+  } catch (err) {
+    console.error('[Genealogia] Errore in drawGenealogiaTree:', err.message);
+  }
+}
+
+// Ridisegna tutti i grafi presenti al resize della finestra
+window.addEventListener('resize', function () {
+  if (!window._gtData) return;
+  clearTimeout(window._gtResizeT);
+  window._gtResizeT = setTimeout(function () {
+    Object.keys(window._gtData).forEach(function (pfx) {
+      if (!window._gtData[pfx].forReport) drawGenealogiaTree(pfx);
+    });
+  }, 100);
+});
