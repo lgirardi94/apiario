@@ -1,4 +1,4 @@
-// ===== FILE VERSION: 2026-05-28.6 · insights.js =====
+// ===== FILE VERSION: 2026-05-28.7 · insights.js =====
 /* ===========================================================
    INSIGHTS / ANALISI — costo miele, simulatore prezzo,
    heatmap produzione, genealogia regine, report narrativo
@@ -632,15 +632,28 @@ function buildGenealogiaTree(arnieInput, logBookInput, opts) {
     if (list.length) telaiDi[a.id] = list;
   });
 
-  // --- Assegna i LIVELLI (generazioni) tramite la catena regina ---
-  // radice = chi non ha madre-regina attiva. livello = profondità nella catena regina.
+  // --- Assegna i LIVELLI (generazioni) in base alla PROVENIENZA ---
+  // Una figlia generata da arnie esistenti (regina inserita OPPURE telaini ricevuti) sta SOTTO di esse.
+  // livello = (max livello tra tutte le fonti) + 1. Radice (nessuna fonte) = 0.
+  const fontiDi = {};
+  arnieAll.forEach(a => {
+    const set = new Set();
+    if (madreReginaDi[a.id]) set.add(madreReginaDi[a.id]);
+    (telaiDi[a.id] || []).forEach(t => set.add(t.srcId));
+    fontiDi[a.id] = [...set];
+  });
   const livello = {};
   function calcLivello(id, guard) {
-    if (livello[id] != null) return livello[id];
-    if (guard.has(id)) return 0; // anti-ciclo
+    if (livello[id] != null) return livello[id];   // cache (precede l'anti-ciclo)
+    if (guard.has(id)) return 0;                   // anti-ciclo
     guard.add(id);
-    const madre = madreReginaDi[id];
-    livello[id] = madre ? calcLivello(madre, guard) + 1 : 0;
+    const fonti = fontiDi[id] || [];
+    if (fonti.length === 0) { livello[id] = 0; }
+    else {
+      let maxL = 0;
+      fonti.forEach(f => { maxL = Math.max(maxL, calcLivello(f, guard) + 1); });
+      livello[id] = maxL;
+    }
     return livello[id];
   }
   arnieAll.forEach(a => calcLivello(a.id, new Set()));
@@ -908,14 +921,26 @@ function buildGenealogiaSVGStatico(arnieInput, logBookInput) {
       if (list.length) telaiDi[a.id] = list;
     });
 
-    // livelli
+    // livelli — basati sulla PROVENIENZA (regina inserita + telaini): figlia sotto le sue fonti
+    const fontiDi = {};
+    arnieAll.forEach(a => {
+      const set = new Set();
+      if (madreReginaDi[a.id]) set.add(madreReginaDi[a.id]);
+      (telaiDi[a.id] || []).forEach(t => set.add(t.srcId));
+      fontiDi[a.id] = [...set];
+    });
     const livello = {};
     function calcLiv(id, guard) {
       if (livello[id] != null) return livello[id];
       if (guard.has(id)) return 0;
       guard.add(id);
-      const m = madreReginaDi[id];
-      livello[id] = m ? calcLiv(m, guard) + 1 : 0;
+      const fonti = fontiDi[id] || [];
+      if (fonti.length === 0) { livello[id] = 0; }
+      else {
+        let maxL = 0;
+        fonti.forEach(f => { maxL = Math.max(maxL, calcLiv(f, guard) + 1); });
+        livello[id] = maxL;
+      }
       return livello[id];
     }
     arnieAll.forEach(a => calcLiv(a.id, new Set()));
