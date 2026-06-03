@@ -40,6 +40,7 @@ const CAT_USCITA = [
 // ===== CATEGORIE MAGAZZINO (tipo articolo) =====
 // Ogni categoria magazzino mappa a una categoria di spesa contabile (per auto-spesa)
 const CAT_MAGAZZINO = [
+  { id: 'api',            label: '🐝 Nuclei/Api Regina',     catSpesa: 'api' },
   { id: 'farmaci',        label: '💊 Farmaci/sanitari',     catSpesa: 'farmaci' },
   { id: 'alimentazione',  label: '🍬 Alimentazione',         catSpesa: 'alimentazione' },
   { id: 'telai_cera',     label: '🪵 Telai e cera',          catSpesa: 'telai_cera' },
