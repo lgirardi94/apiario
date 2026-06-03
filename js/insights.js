@@ -1,4 +1,4 @@
-// ===== FILE VERSION: 2026-05-28.5 · insights.js =====
+// ===== FILE VERSION: 2026-05-28.6 · insights.js =====
 /* ===========================================================
    INSIGHTS / ANALISI — costo miele, simulatore prezzo,
    heatmap produzione, genealogia regine, report narrativo
@@ -244,6 +244,27 @@ function renderHeatmapProduzione(anno) {
 // ===========================================================
 // 7. GENEALOGIA REGINE — sempre popolata, con origine regina e telai
 // ===========================================================
+// === Modale genealogia ingrandita ===
+function apriGenealogiaModale() {
+  try {
+    const mod = document.getElementById('genealogiaModale');
+    const body = document.getElementById('genealogiaModaleBody');
+    if(!mod || !body) return;
+    body.innerHTML = buildGenealogiaTree(arnie, logBook, { idPrefix: 'genModal' });
+    mod.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    // disegna dopo che la modale è visibile e ha dimensioni
+    setTimeout(() => drawGenealogiaTree('genModal'), 120);
+  } catch(err) {
+    console.error('[Insights] Errore apriGenealogiaModale:', err.message);
+  }
+}
+function chiudiGenealogiaModale() {
+  const mod = document.getElementById('genealogiaModale');
+  if(mod) mod.style.display = 'none';
+  document.body.style.overflow = '';
+}
+
 function renderGenealogia(anno) {
   try {
     const container = document.getElementById('analisiGenealogia');
@@ -850,3 +871,153 @@ window.addEventListener('resize', function () {
     });
   }, 100);
 });
+
+// === GENEALOGIA SVG STATICO (per il report esportato, autosufficiente) ===
+// Calcola posizioni e disegna TUTTO in SVG (card come gruppi, linee anti-sovrapposizione),
+// senza dipendere da getBoundingClientRect. Ritorna una stringa SVG completa.
+function buildGenealogiaSVGStatico(arnieInput, logBookInput) {
+  try {
+    const arnieAll = (arnieInput || []).filter(a => !a.annoDismissione);
+    if (arnieAll.length === 0) {
+      return '<p style="color:#8B6F4E;font-style:italic">Nessuna arnia da mostrare nella genealogia.</p>';
+    }
+
+    const prodArnia = {};
+    (logBookInput || []).forEach(e => {
+      const kg = (e.raccolta || []).reduce((s, r) => s + (parseFloat(r.qta) || 0), 0);
+      prodArnia[e.arniaId] = (prodArnia[e.arniaId] || 0) + kg;
+    });
+
+    const byId = {};
+    arnieAll.forEach(a => { byId[a.id] = a; });
+    const nomeArnia = (id) => { const a = byId[id]; return a ? '#' + a.num + (a.nome ? ' ' + a.nome : '') : '?'; };
+
+    const madreReginaDi = {};
+    arnieAll.forEach(a => {
+      if (a.reginaOrigine === 'inserita' && a.reginaArniaSrc && byId[a.reginaArniaSrc]) {
+        madreReginaDi[a.id] = a.reginaArniaSrc;
+      }
+    });
+    const telaiDi = {};
+    arnieAll.forEach(a => {
+      const counts = {};
+      (a.telainiOrigine || []).forEach(t => {
+        if (t.arniaSrcId && t.arniaSrcId !== a.id && byId[t.arniaSrcId]) counts[t.arniaSrcId] = (counts[t.arniaSrcId] || 0) + 1;
+      });
+      const list = Object.keys(counts).map(src => ({ srcId: src, count: counts[src] }));
+      if (list.length) telaiDi[a.id] = list;
+    });
+
+    // livelli
+    const livello = {};
+    function calcLiv(id, guard) {
+      if (livello[id] != null) return livello[id];
+      if (guard.has(id)) return 0;
+      guard.add(id);
+      const m = madreReginaDi[id];
+      livello[id] = m ? calcLiv(m, guard) + 1 : 0;
+      return livello[id];
+    }
+    arnieAll.forEach(a => calcLiv(a.id, new Set()));
+    const perLivello = {};
+    arnieAll.forEach(a => { (perLivello[livello[a.id]] = perLivello[livello[a.id]] || []).push(a); });
+    const livelliOrd = Object.keys(perLivello).map(Number).sort((x, y) => x - y);
+    livelliOrd.forEach(L => perLivello[L].sort((a, b) => (prodArnia[b.id] || 0) - (prodArnia[a.id] || 0)));
+
+    // geometria
+    const CW = 168, CH = 92, GX = 70, ROWH = 210, PAD = 20;
+    const colCount = Math.max(...livelliOrd.map(L => perLivello[L].length));
+    const W = PAD * 2 + colCount * CW + (colCount - 1) * GX;
+    const pos = {};
+    livelliOrd.forEach((L, rowIdx) => {
+      const row = perLivello[L];
+      const rowW = row.length * CW + (row.length - 1) * GX;
+      const startX = (W - rowW) / 2;
+      row.forEach((a, colIdx) => {
+        pos[a.id] = { x: startX + colIdx * (CW + GX), y: PAD + rowIdx * ROWH };
+      });
+    });
+    const H = PAD * 2 + livelliOrd.length * ROWH;
+
+    const colOf = (a) => a.reginaOrigine === 'inserita' ? '#BA7517' : (a.reginaOrigine === 'acquistata' ? '#4A6FA5' : '#639922');
+    const bgOf = (a) => a.reginaOrigine === 'inserita' ? '#FCF4E5' : (a.reginaOrigine === 'acquistata' ? '#EEF3FA' : '#F4F9ED');
+    const icoOf = (a) => a.reginaOrigine === 'inserita' ? '👑' : (a.reginaOrigine === 'acquistata' ? '🛒' : '🥚');
+    const escX = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+    // connessioni
+    const conns = [];
+    arnieAll.forEach(a => {
+      if (madreReginaDi[a.id]) conns.push({ from: madreReginaDi[a.id], to: a.id, tipo: 'regina', label: '👑 regina' });
+      (telaiDi[a.id] || []).forEach(t => conns.push({ from: t.srcId, to: a.id, tipo: 'telai', label: '🪵 ' + t.count + (t.count > 1 ? ' telaini' : ' telaino') }));
+    });
+
+    // ancore distinte
+    const outCount = {}, outUsed = {}, inCount = {}, inUsed = {};
+    conns.forEach(c => { outCount[c.from] = (outCount[c.from] || 0) + 1; inCount[c.to] = (inCount[c.to] || 0) + 1; });
+
+    // banda per coppia di livelli (per corsie)
+    const byBand = {};
+    conns.forEach(c => {
+      const key = pos[c.from].y;
+      (byBand[key] = byBand[key] || []).push(c);
+    });
+
+    let lines = '';
+    Object.keys(byBand).forEach(bandKey => {
+      const list = byBand[bandKey];
+      const n = list.length;
+      list.forEach((c, idx) => {
+        const pf = pos[c.from], pt = pos[c.to];
+        const oUsedIdx = (outUsed[c.from] = (outUsed[c.from] || 0)); outUsed[c.from]++;
+        const iUsedIdx = (inUsed[c.to] = (inUsed[c.to] || 0)); inUsed[c.to]++;
+        const oN = outCount[c.from], iN = inCount[c.to];
+        const oFrac = (oN === 1) ? 0.5 : (0.25 + 0.5 * (oUsedIdx / (oN - 1)));
+        const iFrac = (iN === 1) ? 0.5 : (0.25 + 0.5 * (iUsedIdx / (iN - 1)));
+        const ax = pf.x + CW * oFrac, ay = pf.y + CH;
+        const bx = pt.x + CW * iFrac, by = pt.y;
+        const col = c.tipo === 'regina' ? '#C8860A' : '#8B7355';
+        const dash = c.tipo === 'telai' ? ' stroke-dasharray="6 4"' : '';
+        const w = c.tipo === 'regina' ? 2.6 : 2.2;
+        const bandTop = ay, bandBot = by, bandH = Math.max(24, bandBot - bandTop);
+        let d, lx, ly;
+        if (Math.abs(ax - bx) < 3) { d = `M ${ax} ${ay} L ${bx} ${by}`; lx = ax + 55; ly = (ay + by) / 2; }
+        else { const laneY = bandTop + bandH * ((idx + 1) / (n + 1)); d = `M ${ax} ${ay} L ${ax} ${laneY} L ${bx} ${laneY} L ${bx} ${by}`; lx = (ax + bx) / 2; ly = laneY; }
+        lines += `<path d="${d}" fill="none" stroke="${col}" stroke-width="${w}"${dash} stroke-linejoin="round"/>`;
+        lines += `<polygon points="${bx},${by + 1} ${bx - 5},${by - 8} ${bx + 5},${by - 8}" fill="${col}"/>`;
+        lines += `<circle cx="${ax}" cy="${ay}" r="4.5" fill="#8B7355" stroke="white" stroke-width="2"/>`;
+        lines += `<circle cx="${bx}" cy="${by}" r="3.8" fill="white" stroke="#8B7355" stroke-width="2"/>`;
+        const wlbl = c.label.length * 6 + 14;
+        lines += `<g transform="translate(${lx},${ly})"><rect x="${-wlbl / 2}" y="-9" width="${wlbl}" height="18" rx="9" fill="${col}"/><text x="0" y="3.5" text-anchor="middle" fill="white" font-size="10" font-weight="600" font-family="Georgia,serif">${c.label}</text></g>`;
+      });
+    });
+
+    // card come gruppi SVG
+    let cards = '';
+    arnieAll.forEach(a => {
+      const p = pos[a.id];
+      const col = colOf(a), bg = bgOf(a);
+      const kg = prodArnia[a.id] || 0;
+      const reg = a.reginaAnno ? a.reginaAnno : '';
+      let sub = a.reginaOrigine === 'inserita' ? 'regina inserita' : (a.reginaOrigine === 'acquistata' ? 'acquistata' : 'allevata');
+      cards += `<g transform="translate(${p.x},${p.y})">
+        <rect x="0" y="0" width="${CW}" height="${CH}" rx="11" fill="${bg}" stroke="${col}" stroke-width="1.5"/>
+        <rect x="0" y="0" width="5" height="${CH}" rx="2" fill="${col}"/>
+        <text x="${CW / 2}" y="24" text-anchor="middle" font-size="15" font-weight="700" fill="#5C3A10" font-family="Georgia,serif">${icoOf(a)} #${escX(a.num)}</text>
+        ${a.nome ? `<text x="${CW / 2}" y="40" text-anchor="middle" font-size="10" fill="#2A1A05" font-family="Georgia,serif">${escX(a.nome)}</text>` : ''}
+        <text x="${CW / 2}" y="${a.nome ? 56 : 42}" text-anchor="middle" font-size="9" fill="#6B4A20" font-family="Georgia,serif">${reg ? reg + ' · ' : ''}${sub}</text>
+        ${kg > 0 ? `<text x="${CW / 2}" y="${a.nome ? 74 : 62}" text-anchor="middle" font-size="10" font-weight="700" fill="#27500A" font-family="Georgia,serif">${kg.toFixed(0)} kg</text>` : ''}
+      </g>`;
+    });
+
+    const legenda = `<div style="display:flex;gap:1.2rem;flex-wrap:wrap;font-size:9pt;color:#6B4A20;margin-bottom:0.6rem">
+      <span>━━ <strong style="color:#C8860A">regina</strong> (uovo/cella)</span>
+      <span>┄┄ <strong style="color:#8B7355">solo telaini</strong></span>
+      <span>🥚 allevata · 👑 inserita · 🛒 acquistata</span>
+    </div>`;
+
+    return legenda + `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;max-width:${W}px" xmlns="http://www.w3.org/2000/svg">${lines}${cards}</svg>`;
+  } catch (err) {
+    console.error('[Genealogia] Errore SVG statico:', err.message);
+    return '<p style="color:#8B6F4E;font-style:italic">Genealogia non disponibile.</p>';
+  }
+}

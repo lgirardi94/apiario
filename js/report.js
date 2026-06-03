@@ -1,4 +1,4 @@
-// ===== FILE VERSION: 2026-05-28.2 · report.js =====
+// ===== FILE VERSION: 2026-05-28.3 · report.js =====
 /* ===========================================================
    REPORT PDF — Generazione documenti stampabili
    =========================================================== */
@@ -682,6 +682,20 @@ ${calendarioMensile.some(c => c.visite > 0 || c.kg > 0) ? `
 
 </body>
 </html>`;
+
+  // Inserisce la genealogia (SVG statico, a tutta larghezza) prima del footer
+  try {
+    if(typeof buildGenealogiaSVGStatico === 'function') {
+      const genSvg = buildGenealogiaSVGStatico(arnie, logBook);
+      const genSection = `
+<h2>👑 Genealogia delle regine</h2>
+<div style="background:#FFFDF8;border:1px solid #E8DDB8;border-radius:6px;padding:1rem;overflow-x:auto">
+  ${genSvg}
+</div>
+`;
+      html = html.replace('<div class="footer">', genSection + '<div class="footer">');
+    }
+  } catch(e) { console.error('[Report] Genealogia non inserita:', e.message); }
 
   // Apri il report in nuova finestra
   const win = window.open('', '_blank', 'width=900,height=700');
