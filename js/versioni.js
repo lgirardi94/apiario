@@ -1,4 +1,4 @@
-// ===== FILE VERSION: 2026-05-28.23 · versioni.js =====
+// ===== FILE VERSION: 2026-06-04.28 · versioni.js =====
 /* ===========================================================
    REGISTRO VERSIONI FILE
    Ogni volta che si modifica un file, aggiornare qui la sua versione
@@ -11,20 +11,23 @@
 // Per ogni file: percorso reale (per ri-scaricarlo) + versione attesa.
 const FILE_VERSIONS = {
   // HTML
-  'index.html':                { path: 'index.html',            ver: '2026-05-28.29' },
-  'visita_rapida.html':        { path: 'visita_rapida.html',    ver: '2026-05-28.7' },
-  'inserimento_rapido.html':   { path: 'inserimento_rapido.html', ver: '2026-05-28.9' },
-  'todo.html':                 { path: 'todo.html',             ver: '2026-05-28.2' },
-  'etichette.html':            { path: 'etichette.html',        ver: '2026-05-28.2' },
+  'index.html':                { path: 'index.html',            ver: '2026-06-04.34' },
+  'visita_rapida.html':        { path: 'visita_rapida.html',    ver: '2026-06-04.9' },
+  'inserimento_rapido.html':   { path: 'inserimento_rapido.html', ver: '2026-06-04.11' },
+  'todo.html':                 { path: 'todo.html',             ver: '2026-06-04.4' },
+  'etichette.html':            { path: 'etichette.html',        ver: '2026-06-04.4' },
   // Core
   'shared.js':                 { path: 'shared.js',             ver: '2026-05-28.2' },
+  'js/storage.js':             { path: 'js/storage.js',         ver: '2026-05-28.1' },
+  'js/backendAdapter.js':      { path: 'js/backendAdapter.js',  ver: '2026-06-04.1' },
+  'js/auth.js':                { path: 'js/auth.js',            ver: '2026-06-04.1' },
   'js/state.js':               { path: 'js/state.js',           ver: '2026-05-28.2' },
   'js/nav.js':                 { path: 'js/nav.js',             ver: '2026-05-28.4' },
   // Sezioni
   'js/home.js':                { path: 'js/home.js',            ver: '2026-05-28.3' },
   'js/arnie.js':               { path: 'js/arnie.js',           ver: '2026-05-28.5' },
   'js/registro.js':            { path: 'js/registro.js',        ver: '2026-05-28.2' },
-  'js/magazzino.js':           { path: 'js/magazzino.js',       ver: '2026-05-28.4' },
+  'js/magazzino.js':           { path: 'js/magazzino.js',       ver: '2026-05-28.5' },
   'js/contabilita.js':         { path: 'js/contabilita.js',     ver: '2026-05-28.2' },
   'js/necessita.js':           { path: 'js/necessita.js',       ver: '2026-05-28.8' },
   'js/obiettivi.js':           { path: 'js/obiettivi.js',       ver: '2026-05-28.3' },
@@ -32,17 +35,17 @@ const FILE_VERSIONS = {
   // Utility / calcolatori
   'js/calcolatori.js':         { path: 'js/calcolatori.js',     ver: '2026-05-28.1' },
   'js/report.js':              { path: 'js/report.js',          ver: '2026-05-28.3' },
-  'js/insights.js':            { path: 'js/insights.js',        ver: '2026-05-28.7' },
+  'js/insights.js':            { path: 'js/insights.js',        ver: '2026-05-28.9' },
   'js/ricerca.js':             { path: 'js/ricerca.js',         ver: '2026-05-28.2' },
-  'js/filtri.js':              { path: 'js/filtri.js',          ver: '2026-05-28.1' },
+  'js/filtri.js':              { path: 'js/filtri.js',          ver: '2026-05-28.2' },
   // Infrastruttura
-  'js/drive-app.js':           { path: 'js/drive-app.js',       ver: '2026-05-28.2' },
+  'js/drive-app.js':           { path: 'js/drive-app.js',       ver: '2026-05-28.3' },
   'js/import-export.js':       { path: 'js/import-export.js',   ver: '2026-05-28.2' },
-  'js/versioni.js':            { path: 'js/versioni.js',        ver: '2026-05-28.23' },
+  'js/versioni.js':            { path: 'js/versioni.js',        ver: '2026-06-04.28' },
 };
 
 // Versione "build" complessiva dell'app (la più recente tra tutte)
-const APP_BUILD = '2026-05-28.29';
+const APP_BUILD = '2026-06-04.34';
 
 function mostraVersioniFile() {
   try {

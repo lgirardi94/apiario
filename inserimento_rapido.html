@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- FILE VERSION: 2026-05-28.8 · inserimento_rapido.html -->
+<!-- FILE VERSION: 2026-06-04.11 · inserimento_rapido.html -->
 <html lang="it">
 <head>
 <meta charset="UTF-8">
@@ -14,7 +14,10 @@
 <link rel="apple-touch-icon" href="icons/inser_192.png">
 <link rel="stylesheet" href="style-mobile.css?v=20260554">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="shared.js?v=20260534"></script>
+<script src="shared.js?v=20260567"></script>
+<script src="js/storage.js?v=20260567"></script>
+<script src="js/backendAdapter.js?v=20260604"></script>
+<script src="js/auth.js?v=20260604"></script>
 </head>
 <body>
 
@@ -395,7 +398,7 @@ window.addEventListener('load', () => {
       async () => {
         showLoadingScreen('🔄 Caricamento dati...');
         try {
-          const { db, mag, cont, nec, settings: s } = await driveLoadAll();
+          const { db, mag, cont, nec, settings: s } = await Storage.carica();
           if(db)   dbData   = db;
           if(mag)  magData  = mag;
           if(cont) contData = cont;
@@ -477,11 +480,18 @@ function getIRNecessitaAttive() {
   return (necData.necessita || []).filter(n => n.stato !== 'ricevuto');
 }
 
+// Etichetta priorità con pallino colorato (per la riga di stato)
+function priIconLabel(p) {
+  const map = {
+    urgente: '🔴 Urgente', alta: '🟠 Alta', media: '🟡 Media', bassa: '⚪ Bassa'
+  };
+  return map[p] || (p || '—');
+}
+
 function renderIRNecessita() {
   try {
     const container = document.getElementById('irNecessitaList');
     if(!container) return;
-
     const attive = getIRNecessitaAttive();
     if(attive.length === 0) {
       container.innerHTML = '<div style="background:rgba(0,0,0,0.03);border-radius:6px;padding:1.5rem;text-align:center;color:var(--text-light);font-style:italic;font-size:0.9rem">🛒 Nessun articolo in lista.<br><span style="font-size:0.85rem">Aggiungi voci da ordinare con il pulsante "+ Aggiungi"</span></div>';
@@ -493,7 +503,6 @@ function renderIRNecessita() {
     const ordinata = [...attive].sort((a,b) => (ordinePrior[a.priorita]||4) - (ordinePrior[b.priorita]||4));
 
     const priColor = { urgente: '#C04B3B', alta: '#E89488', media: '#C8860A', bassa: '#9CA3AF' };
-    const priIcon = { urgente: '🔴', alta: '🟠', media: '🟡', bassa: '⚪' };
     const statoIcon = { da_ordinare: '📝', ordinato: '🚚' };
     const statoLabel = { da_ordinare: 'Da ordinare', ordinato: 'Ordinato' };
 
@@ -534,13 +543,13 @@ function renderIRNecessita() {
           <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.5rem">
             <div style="flex:1;min-width:0">
               <div style="font-weight:600;color:var(--brown);font-size:0.95rem;margin-bottom:0.2rem">
-                ${priIcon[n.priorita]||''} ${escapeHtmlIR(desc)}
+                ${statoIcon[n.stato]||''} ${escapeHtmlIR(desc)}
               </div>
               <div style="font-size:0.85rem;color:var(--text);margin-bottom:0.15rem">
                 <strong>${n.quantita || '?'}</strong> ${escapeHtmlIR(unita)}${n.fornitore ? ' · 🏪 '+escapeHtmlIR(n.fornitore) : ''}${prezzoInfo}${spedInfo}
               </div>
               <div style="font-size:0.78rem;color:var(--text-light)">
-                ${statoIcon[n.stato]||''} ${statoLabel[n.stato]||n.stato}${dataInfo}
+                ${statoLabel[n.stato]||n.stato} · ${priIconLabel(n.priorita)}${dataInfo}
               </div>
               ${n.note ? `<div style="font-size:0.78rem;color:var(--text-light);font-style:italic;margin-top:0.2rem">${escapeHtmlIR(n.note)}</div>` : ''}
             </div>
@@ -1043,9 +1052,9 @@ async function confermaRicezioneFornitoreIR() {
     magData.savedAt = new Date().toISOString();
     contData.savedAt = new Date().toISOString();
     necData.savedAt = new Date().toISOString();
-    await driveWriteFile(FILENAME_MAG, magData);
-    await driveWriteFile(FILENAME_CONT, contData);
-    await driveWriteFile(FILENAME_NEC, necData);
+    await Storage.salvaFile(FILENAME_MAG, magData);
+    await Storage.salvaFile(FILENAME_CONT, contData);
+    await Storage.salvaFile(FILENAME_NEC, necData);
 
     const ov = document.getElementById('ricFornIROverlay');
     if(ov) ov.remove();
@@ -1061,11 +1070,11 @@ async function saveAllToCloudIR() {
   try {
     // Salva necessità, magazzino e contabilità (la ricezione ordini tocca tutti e tre)
     necData.savedAt = new Date().toISOString();
-    await driveWriteFile(FILENAME_NEC, necData);
+    await Storage.salvaFile(FILENAME_NEC, necData);
     magData.savedAt = new Date().toISOString();
-    await driveWriteFile(FILENAME_MAG, magData);
+    await Storage.salvaFile(FILENAME_MAG, magData);
     contData.savedAt = new Date().toISOString();
-    await driveWriteFile(FILENAME_CONT, contData);
+    await Storage.salvaFile(FILENAME_CONT, contData);
   } catch(err) {
     console.error('[Inserimento rapido] Errore salvataggio Drive:', err.message);
     alert('Errore salvataggio su Drive: ' + err.message);
@@ -1170,8 +1179,8 @@ async function salvaVenditaIR() {
     // Salva su Drive
     magData.savedAt = new Date().toISOString();
     contData.savedAt = new Date().toISOString();
-    await driveWriteFile(FILENAME_MAG, magData);
-    await driveWriteFile(FILENAME_CONT, contData);
+    await Storage.salvaFile(FILENAME_MAG, magData);
+    await Storage.salvaFile(FILENAME_CONT, contData);
 
     // Reset form
     document.getElementById('vendIRQuantita').value = '';
@@ -1392,7 +1401,7 @@ async function saveContabilita() {
     if(!contData.movimentiContabili) contData.movimentiContabili = [];
     contData.movimentiContabili.unshift(mov);
     contData.savedAt = new Date().toISOString();
-    await driveWriteFile(FILENAME_CONT, contData);
+    await Storage.salvaFile(FILENAME_CONT, contData);
     document.getElementById('formContSuccessMsg').textContent =
       `${tipoContabile==='entrata'?'+':'−'}€${fmt(mov.importo)} — ${desc}`;
     document.getElementById('formCont').style.display = 'none';
@@ -1601,7 +1610,7 @@ async function doSaveMag() {
     if(!magData.movimentazioni) magData.movimentazioni = [];
     magData.movimentazioni.push(mov);
     magData.savedAt = new Date().toISOString();
-    await driveWriteFile(FILENAME_MAG, magData);
+    await Storage.salvaFile(FILENAME_MAG, magData);
     document.getElementById('formMagSuccessMsg').textContent =
       `${tipoMagazzino==='entrata'?'+':'−'}${qta} ${art?.unita||''} di ${art?.nome||'—'}`;
     document.getElementById('formMag').style.display = 'none';

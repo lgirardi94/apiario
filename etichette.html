@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- FILE VERSION: 2026-05-28.2 · etichette.html -->
+<!-- FILE VERSION: 2026-06-04.4 · etichette.html -->
 <html lang="it">
 <head>
 <meta charset="UTF-8">
@@ -8,7 +8,10 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐝</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:wght@400;600;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="shared.js?v=20260524"></script>
+<script src="shared.js?v=20260567"></script>
+<script src="js/storage.js?v=20260567"></script>
+<script src="js/backendAdapter.js?v=20260604"></script>
+<script src="js/auth.js?v=20260604"></script>
 <style>
   /* ===== THEMING APP ===== */
   :root {
@@ -732,7 +735,7 @@ function driveSaveDebounced() {
 async function saveToDrive() {
   if(!_isAuthorized) return;
   try {
-    await driveWriteFile('apiario_etichette.json', {
+    await Storage.salvaFile('apiario_etichette.json', {
       version: 3,
       savedAt: new Date().toISOString(),
       types, rows, styleConfig, savedConfigs, printHistory, currentFormat, userDefaults
@@ -748,7 +751,7 @@ async function saveToDrive() {
 
 async function loadFromDrive() {
   try {
-    const data = await driveReadFile('apiario_etichette.json');
+    const data = await Storage.leggiFile('apiario_etichette.json');
     if(data) {
       if(data.types) types = data.types;
       if(data.rows) rows = data.rows;
